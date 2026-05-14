@@ -39,8 +39,8 @@ jobs:
         run: npm ci
 
       # Copiar .env
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
+      - name: Ensure env file exists
+        run: ls backend/.env
 
       # Setear DATABASE_URL para tests
       - name: Set DATABASE_URL for tests
