@@ -30,13 +30,13 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
-      - name: Generate Prisma client
-        working-directory: ./backend
-        run: npx prisma generate
-
       - name: Copy .env.example to .env
         working-directory: ./backend
         run: cp .env.example .env
+
+      - name: Generate Prisma client
+        working-directory: ./backend
+        run: npx prisma generate
 
       - name: Start integration test DB
         working-directory: ./backend
