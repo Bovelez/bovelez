@@ -1,0 +1,81 @@
+services:
+  database:
+    image: postgres:alpine
+    container_name: database
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-app}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+    ports:
+      - '5432:5432'
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 1s
+      timeout: 1s
+      retries: 15
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: server
+    restart: always
+    tty: true
+    environment:
+      - DATABASE_URL=${DOCKER_DATABASE_URL:-postgresql://postgres:password@database/app?connect_timeout=600}
+      - PORT=8080
+    env_file:
+      - path: backend/.env
+        required: false
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./backend:/app
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: frontend
+    restart: always
+    tty: true
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-/api}
+      - VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET:-http://backend:8080}
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_started
+
+  integration-test-db:
+    image: postgres:alpine
+    container_name: integration-tests-prisma
+    profiles:
+      - test
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_DB=${POSTGRES_INTEGRATION_DB:-tests}
+      - POSTGRES_USER=${POSTGRES_INTEGRATION_USER:-prisma}
+      - POSTGRES_PASSWORD=${POSTGRES_INTEGRATION_PASSWORD:-prisma}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 1s
+      timeout: 1s
+      retries: 15
+
+volumes:
+  database-data:
