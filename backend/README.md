@@ -50,8 +50,8 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
+# int tests
+$ npm run test:int
 
 # test coverage
 $ npm run test:cov

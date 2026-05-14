@@ -65,9 +65,9 @@ jobs:
       - name: Run Jest Tests
         run: npm run test -- --ci --runInBand
 
-      # Tests E2E
-      - name: Run E2E Tests
-        run: npx dotenv -e .env.test -- jest --config ./test/jest-e2e.json --runInBand
+      # Tests de integración
+      - name: Run Integration Tests
+        run: npx dotenv -e .env.test -- jest --config ./test/jest-int.json --runInBand
 
       # Limpiar contenedores
       - name: Stop docker-compose
