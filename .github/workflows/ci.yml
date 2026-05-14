@@ -38,16 +38,23 @@ jobs:
         working-directory: backend
         run: cp .env.example .env
 
-      # Setear DATABASE_URL para tests
-      - name: Set DATABASE_URL for tests
-        run: echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/app" >> $GITHUB_ENV
+      # Setear variables de entorno para Docker Compose y tests
+      - name: Set env vars for Docker Compose and tests
+        run: |
+          echo "POSTGRES_DB=app" >> $GITHUB_ENV
+          echo "POSTGRES_USER=postgres" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=password" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/app" >> $GITHUB_ENV
 
-      # Levantar contenedores con Docker Compose
+      # Levantar solo los contenedores de base de datos (no el servicio dev)
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: ./backend/docker-compose.yml
           up-flags: -d
+          services: |
+            database
+            integration-test-db
 
 
       # Migraciones
@@ -72,3 +79,6 @@ jobs:
         with:
           compose-file: ./backend/docker-compose.yml
           down-flags: -v
+          services: |
+            database
+            integration-test-db
