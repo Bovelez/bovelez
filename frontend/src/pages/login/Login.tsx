@@ -178,27 +178,6 @@ export default function Login() {
               {isSubmitting ? "Ingresando…" : "Iniciar sesión"}
             </button>
           </form>
-
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-[var(--border)]" />
-            <span className="text-[11px] text-[var(--text-faint)]">
-              o continuar con
-            </span>
-            <div className="flex-1 h-px bg-[var(--border)]" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {["Google", "Apple"].map((p) => (
-              <button
-                key={p}
-                type="button"
-                className="py-2.5 rounded-lg text-sm font-semibold border border-[var(--border)] text-[var(--text)] bg-[var(--surface)]"
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
           <p className="text-center mt-6 text-[13px] text-[var(--text-muted)]">
             ¿No tenés cuenta?{" "}
             <button
