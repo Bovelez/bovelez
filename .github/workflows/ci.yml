@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - master
+
+jobs:
+  run-jest-tests:
+    name: Jest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Copy .env.example to .env
+        working-directory: ./backend
+        run: cp .env.example .env
+
+      - name: Start integration test DB
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: ./backend/docker-compose.yml
+          up-flags: -d integration-test-db
+
+      - name: Run DB migrations
+        working-directory: ./backend
+        run: npm run db:migrate:integration
+
+      - name: Run Jest Tests
+        working-directory: ./backend
+        run: npm run test -- --ci --runInBand
+
+      - name: Run Integration Tests
+        working-directory: ./backend
+        run: npx dotenv -e .env.test -- jest --config ./test/jest-int.json --runInBand
+
+      - name: Stop docker-compose
+        if: always()
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: ./backend/docker-compose.yml
+          down-flags: -v
