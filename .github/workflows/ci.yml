@@ -35,10 +35,8 @@ jobs:
         run: cp .env.example .env
 
       - name: Start integration test DB
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: ./backend/docker-compose.yml
-          up-flags: -d integration-test-db
+        working-directory: ./backend
+        run: docker compose up -d integration-test-db --wait
 
       - name: Run DB migrations
         working-directory: ./backend
@@ -52,9 +50,7 @@ jobs:
         working-directory: ./backend
         run: npx dotenv -e .env.test -- jest --config ./test/jest-int.json --runInBand
 
-      - name: Stop docker-compose
+      - name: Stop integration test DB
         if: always()
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: ./backend/docker-compose.yml
-          down-flags: -v
+        working-directory: ./backend
+        run: docker compose down integration-test-db -v
