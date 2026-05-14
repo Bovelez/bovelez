@@ -50,7 +50,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should return a user with an id', async () => {
+    it('should return a user with an id ', async () => {
       const input: CreateUserInput = {
         name: 'Juan',
         email: 'juan@gmail.com',
