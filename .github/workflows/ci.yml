@@ -1,4 +1,4 @@
-name: Backend CI
+name: Test
 
 on:
   pull_request:
@@ -6,17 +6,11 @@ on:
       - main
       - dev
       - master
-    paths:
-      - 'backend/**'
 
 jobs:
   run-jest-tests:
     name: Jest Tests
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
 
     steps:
       # Checkout del código
@@ -38,14 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Crear .env
-      - name: Create backend .env for CI
-        run: |
-          echo "POSTGRES_DB=app" >> backend/.env
-          echo "POSTGRES_USER=postgres" >> backend/.env
-          echo "POSTGRES_PASSWORD=password" >> backend/.env
-          echo "DOCKER_DATABASE_URL=postgresql://postgres:password@database:5432/app" >> backend/.env
-          echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/app" >> backend/.env
+      # Copiar .env
+      - name: Copy .env.example to .env
+        run: cp backend/.env.example backend/.env
 
       # Setear DATABASE_URL para tests
       - name: Set DATABASE_URL for tests
@@ -55,12 +44,9 @@ jobs:
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: ./backend/docker-compose.yml
+          compose-file: ./docker-compose.yml
           up-flags: -d
 
-      # Generar Prisma Client
-      - name: Prisma Generate
-        run: npx prisma generate
 
       # Migraciones
       - name: Run DB migrations
@@ -70,14 +56,14 @@ jobs:
       - name: Run Jest Tests
         run: npm run test -- --ci --runInBand
 
-      # Tests de integración
-      - name: Run Integration Tests
-        run: npx dotenv -e .env.test -- jest --config ./test/jest-int.json --runInBand
+      # Tests E2E
+      - name: Run E2E Tests
+        run: npx dotenv -e .env.test -- jest --config ./test/jest-e2e.json --runInBand
 
       # Limpiar contenedores
       - name: Stop docker-compose
         if: always()
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: ./backend/docker-compose.yml
+          compose-file: ./docker-compose.yml
           down-flags: -v
