@@ -1,62 +1,138 @@
-name: Test
+name: CI
 
 on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches:
       - main
       - dev
-      - master
     paths:
       - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
-  run-jest-tests:
-    name: Jest Tests
+  changes:
+    name: Detect changes
     runs-on: ubuntu-latest
-
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect changed areas
+        id: filter
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+
+            if [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+              BASE="$(git rev-list --max-parents=0 "$HEAD")"
+            fi
+          fi
+
+          changed_files="$(git diff --name-only "$BASE" "$HEAD")"
+          printf '%s\n' "$changed_files"
+
+          backend=false
+          frontend=false
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^(backend/|docker-compose\.yml|\.github/workflows/ci\.yml$)'; then
+            backend=true
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^(frontend/|docker-compose\.yml|\.github/workflows/ci\.yml$)'; then
+            frontend=true
+          fi
+
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Reconfigure git to use HTTP authentication
-        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
-
       - name: Set up NodeJS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./backend
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
         run: npm ci
 
       - name: Copy .env.example to .env
-        working-directory: ./backend
         run: cp .env.example .env
 
       - name: Generate Prisma client
-        working-directory: ./backend
         run: npx prisma generate
 
       - name: Start integration test DB
-        working-directory: ./backend
-        run: docker compose up -d integration-test-db --wait
+        run: npm run integration:docker:up
 
       - name: Run DB migrations
-        working-directory: ./backend
         run: npm run db:migrate:integration
 
-      - name: Run Jest Tests
-        working-directory: ./backend
+      - name: Run unit tests
         run: npm run test -- --ci --runInBand --passWithNoTests
 
-      - name: Run Integration Tests
-        working-directory: ./backend
+      - name: Run integration tests
         run: npx dotenv -e .env.test -- jest --config ./test/jest-int.json --runInBand
 
       - name: Stop integration test DB
         if: always()
-        working-directory: ./backend
-        run: docker compose down integration-test-db -v
+        run: npm run integration:docker:down
