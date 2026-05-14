@@ -33,7 +33,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Set DATABASE_URL
-        run: echo "DATABASE_URL=postgresql://postgres:password@database:5432/app" >> $GITHUB_ENV
+        run: echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/app" >> $GITHUB_ENV
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
