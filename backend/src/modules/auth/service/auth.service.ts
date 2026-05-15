@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import type { IAuthRepository } from '../repository/auth.repository.interface';
@@ -26,7 +25,7 @@ export class AuthService {
 
   async getUserById(id: string): Promise<UserResponseDto> {
     const user = await this.authRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new UnauthorizedException('Usuario autenticado inválido');
     return this.getUserResponse(user);
   }
   private async isEmailInUse(email: string): Promise<void> {
