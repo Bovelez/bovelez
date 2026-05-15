@@ -1,6 +1,12 @@
 import axios from "axios";
 import { clearToken, getToken } from "../storage/auth/auth.storage";
 
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    skipAuthRedirect?: boolean;
+  }
+}
+
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "/api",
   headers: {
@@ -23,8 +29,9 @@ apiClient.interceptors.response.use(
       const url = error.config?.url || "";
       const isAuthEndpoint =
         url.includes("/auth/login") || url.includes("/auth/register");
+      const skipAuthRedirect = Boolean(error.config?.skipAuthRedirect);
 
-      if (!isAuthEndpoint) {
+      if (!isAuthEndpoint && !skipAuthRedirect) {
         clearToken();
         if (typeof window !== "undefined") {
           window.location.href = "/login";

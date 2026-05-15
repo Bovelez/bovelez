@@ -5,6 +5,7 @@ import { AppModule } from '../../../../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import { register } from '../../../utils/register';
 import { login } from '../../../utils/login';
+import { getHttpServer } from '../../../utils/http-server';
 
 describe('Auth Integration', () => {
   let app: INestApplication;
@@ -24,9 +25,13 @@ describe('Auth Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await app.close();
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.user.deleteMany();
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   it('(POST) /auth/register → should register a new user', async () => {
@@ -43,7 +48,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/register → should fail if email is invalid', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/register')
       .send({
         name: 'Juan',
@@ -59,7 +64,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/register → should fail if email already in use', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/register')
       .send({
         name: 'Juan',
@@ -73,7 +78,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/register → should fail if required fields are missing', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/register')
       .send({
         email: 'nuevo@email.com',
@@ -97,7 +102,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/login → should not login if invalid password', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/login')
       .send({
         email: 'juan@email.com',
@@ -110,7 +115,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/login → should not login if email does not exist', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/login')
       .send({
         email: 'noexiste@email.com',
@@ -123,7 +128,7 @@ describe('Auth Integration', () => {
   });
 
   it('(POST) /auth/login → should not login if email type and password type are invalid', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .post('/auth/login')
       .send({
         email: 'not-an-email',
