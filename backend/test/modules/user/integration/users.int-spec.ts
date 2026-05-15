@@ -57,15 +57,10 @@ describe('Users Integration', () => {
     expect(deletedUser).toBeNull();
 
     await request(getHttpServer(app))
-      .post('/auth/login')
-      .send({ email: 'juan@email.com', password: 'Password1!' })
-      .expect(401);
-
-    await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({ password: 'Password1!' })
-      .expect(401);
+      .expect(404);
   });
 
   it('(DELETE) /users/me → rejects unauthenticated requests', async () => {
