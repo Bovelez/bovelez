@@ -1,9 +1,4 @@
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-};
+import type { User } from "./user.types";
 
 export type LoginCredentials = {
   email: string;
@@ -20,3 +15,5 @@ export type AuthResponse = {
   token: string;
   user: User;
 };
+
+export type { User };

@@ -13,8 +13,6 @@ export class UsersRepository implements IUsersRepository {
 
   async deleteById(id: string): Promise<void> {
     await this.prismaService.$transaction(async (tx) => {
-      // Keep account deletion isolated here so portfolio, transactions and
-      // watchlist cleanup can be added when those models exist.
       await tx.user.delete({ where: { id } });
     });
   }

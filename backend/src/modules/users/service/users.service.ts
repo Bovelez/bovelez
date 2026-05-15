@@ -4,9 +4,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { User } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { DeleteAccountInput } from '../input/delete-account.input';
-import { IUsersRepository } from '../repository/users.repository.interface';
+import type { IUsersRepository } from '../repository/users.repository.interface';
+import type { ValidatedAuthenticatedUser } from '../validator/authenticated-user.validator';
 
 @Injectable()
 export class UsersService {
@@ -16,21 +18,36 @@ export class UsersService {
   ) {}
 
   async deleteOwnAccount(
-    userId: string,
+    authenticatedUser: ValidatedAuthenticatedUser,
     input: DeleteAccountInput,
   ): Promise<void> {
+    const user = await this.findExistingUser(authenticatedUser.id);
+    await this.validateCurrentPassword(input.password, user.password);
+    await this.deleteUser(user.id);
+  }
+
+  private async findExistingUser(userId: string): Promise<User> {
     const user = await this.usersRepository.findById(userId);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Usuario no encontrado');
     }
 
-    const passwordMatches = await argon2.verify(user.password, input.password);
+    return user;
+  }
+
+  private async validateCurrentPassword(
+    plainPassword: string,
+    passwordHash: string,
+  ): Promise<void> {
+    const passwordMatches = await argon2.verify(passwordHash, plainPassword);
 
     if (!passwordMatches) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException('Contraseña incorrecta');
     }
+  }
 
-    await this.usersRepository.deleteById(user.id);
+  private async deleteUser(userId: string): Promise<void> {
+    await this.usersRepository.deleteById(userId);
   }
 }

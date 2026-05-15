@@ -7,42 +7,55 @@ import { UsersService } from '../../../../src/modules/users/service/users.servic
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: IUsersRepository;
+  let findById: jest.MockedFunction<IUsersRepository['findById']>;
+  let deleteById: jest.MockedFunction<IUsersRepository['deleteById']>;
 
   beforeEach(() => {
+    findById = jest.fn();
+    deleteById = jest.fn();
     usersRepository = {
-      findById: jest.fn(),
-      deleteById: jest.fn(),
+      findById,
+      deleteById,
     };
     service = new UsersService(usersRepository);
   });
 
   it('deletes the account when the current password is correct', async () => {
     const user = await buildUser('Password1!');
-    jest.spyOn(usersRepository, 'findById').mockResolvedValue(user);
+    findById.mockResolvedValue(user);
 
-    await service.deleteOwnAccount('user-1', { password: 'Password1!' });
+    await service.deleteOwnAccount(
+      { id: 'user-1' },
+      { password: 'Password1!' },
+    );
 
-    expect(usersRepository.findById).toHaveBeenCalledWith('user-1');
-    expect(usersRepository.deleteById).toHaveBeenCalledWith('user-1');
+    expect(findById).toHaveBeenCalledWith('user-1');
+    expect(deleteById).toHaveBeenCalledWith('user-1');
   });
 
   it('throws UnauthorizedException when the password is incorrect', async () => {
     const user = await buildUser('Password1!');
-    jest.spyOn(usersRepository, 'findById').mockResolvedValue(user);
+    findById.mockResolvedValue(user);
 
     await expect(
-      service.deleteOwnAccount('user-1', { password: 'WrongPassword1!' }),
+      service.deleteOwnAccount(
+        { id: 'user-1' },
+        { password: 'WrongPassword1!' },
+      ),
     ).rejects.toThrow(UnauthorizedException);
-    expect(usersRepository.deleteById).not.toHaveBeenCalled();
+    expect(deleteById).not.toHaveBeenCalled();
   });
 
   it('throws NotFoundException when the authenticated user no longer exists', async () => {
-    jest.spyOn(usersRepository, 'findById').mockResolvedValue(null);
+    findById.mockResolvedValue(null);
 
     await expect(
-      service.deleteOwnAccount('missing-user', { password: 'Password1!' }),
+      service.deleteOwnAccount(
+        { id: 'missing-user' },
+        { password: 'Password1!' },
+      ),
     ).rejects.toThrow(NotFoundException);
-    expect(usersRepository.deleteById).not.toHaveBeenCalled();
+    expect(deleteById).not.toHaveBeenCalled();
   });
 });
 

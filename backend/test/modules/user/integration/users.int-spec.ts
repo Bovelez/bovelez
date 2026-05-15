@@ -5,6 +5,7 @@ import { AppModule } from '../../../../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import { register } from '../../../utils/register';
 import { login } from '../../../utils/login';
+import { getHttpServer } from '../../../utils/http-server';
 
 describe('Users Integration', () => {
   let app: INestApplication;
@@ -32,7 +33,7 @@ describe('Users Integration', () => {
     await prisma.$disconnect();
   });
 
-  it('(DELETE) /user/me → deletes the authenticated account and invalidates the token', async () => {
+  it('(DELETE) /users/me → deletes the authenticated account and invalidates the token', async () => {
     await register(app, {
       name: 'Juan',
       email: 'juan@email.com',
@@ -40,7 +41,7 @@ describe('Users Integration', () => {
     });
     const loginResponse = await login(app, 'juan@email.com', 'Password1!');
 
-    await request(app.getHttpServer())
+    await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({ password: 'Password1!' })
@@ -51,26 +52,26 @@ describe('Users Integration', () => {
     });
     expect(deletedUser).toBeNull();
 
-    await request(app.getHttpServer())
+    await request(getHttpServer(app))
       .post('/auth/login')
       .send({ email: 'juan@email.com', password: 'Password1!' })
       .expect(401);
 
-    await request(app.getHttpServer())
+    await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({ password: 'Password1!' })
       .expect(401);
   });
 
-  it('(DELETE) /user/me → rejects unauthenticated requests', async () => {
-    await request(app.getHttpServer())
+  it('(DELETE) /users/me → rejects unauthenticated requests', async () => {
+    await request(getHttpServer(app))
       .delete('/users/me')
       .send({ password: 'Password1!' })
       .expect(401);
   });
 
-  it('(DELETE) /user/me → rejects an incorrect password without deleting the account', async () => {
+  it('(DELETE) /users/me → rejects an incorrect password without deleting the account', async () => {
     await register(app, {
       name: 'Juan',
       email: 'juan@email.com',
@@ -78,14 +79,14 @@ describe('Users Integration', () => {
     });
     const loginResponse = await login(app, 'juan@email.com', 'Password1!');
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({ password: 'WrongPassword1!' })
       .expect(401);
 
     expect((response.body as { message: string }).message).toBe(
-      'Invalid password',
+      'Contraseña incorrecta',
     );
     const existingUser = await prisma.user.findUnique({
       where: { email: 'juan@email.com' },
@@ -93,7 +94,7 @@ describe('Users Integration', () => {
     expect(existingUser).not.toBeNull();
   });
 
-  it('(DELETE) /user/me → validates password is required', async () => {
+  it('(DELETE) /users/me → validates password is required', async () => {
     await register(app, {
       name: 'Juan',
       email: 'juan@email.com',
@@ -101,7 +102,7 @@ describe('Users Integration', () => {
     });
     const loginResponse = await login(app, 'juan@email.com', 'Password1!');
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({})
@@ -112,7 +113,7 @@ describe('Users Integration', () => {
     );
   });
 
-  it('(DELETE) /user/me → only deletes the authenticated user', async () => {
+  it('(DELETE) /users/me → only deletes the authenticated user', async () => {
     await register(app, {
       name: 'Juan',
       email: 'juan@email.com',
@@ -125,7 +126,7 @@ describe('Users Integration', () => {
     });
     const loginResponse = await login(app, 'juan@email.com', 'Password1!');
 
-    await request(app.getHttpServer())
+    await request(getHttpServer(app))
       .delete('/users/me')
       .set('Authorization', `Bearer ${loginResponse.token}`)
       .send({ password: 'Password1!' })

@@ -4,22 +4,16 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
+import { AuthenticatedUser } from '../../public/decorator/authenticated-user.decorator';
 import { DeleteAccountInput } from '../input/delete-account.input';
 import { UsersService } from '../service/users.service';
+import { AuthenticatedUserValidator } from '../validator/authenticated-user.validator';
+import type { ValidatedAuthenticatedUser } from '../validator/authenticated-user.validator';
 
-type AuthenticatedRequest = Request & {
-  user?: {
-    id?: string;
-  };
-};
-
-@Controller('user')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -27,15 +21,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteMe(
-    @Req() request: AuthenticatedRequest,
+    @AuthenticatedUser(new AuthenticatedUserValidator())
+    authenticatedUser: ValidatedAuthenticatedUser,
     @Body() input: DeleteAccountInput,
   ): Promise<void> {
-    const userId = request.user?.id;
-
-    if (!userId) {
-      throw new UnauthorizedException('User ID not found in request');
-    }
-
-    await this.usersService.deleteOwnAccount(userId, input);
+    await this.usersService.deleteOwnAccount(authenticatedUser, input);
   }
 }
