@@ -28,9 +28,13 @@ describe('Users Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await app.close();
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.user.deleteMany();
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   it('(DELETE) /users/me → deletes the authenticated account and invalidates the token', async () => {

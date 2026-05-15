@@ -25,9 +25,13 @@ describe('Auth Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await app.close();
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.user.deleteMany();
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   it('(POST) /auth/register → should register a new user', async () => {
