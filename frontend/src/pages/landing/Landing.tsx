@@ -1,39 +1,39 @@
 import { useNavigate } from "react-router";
 import { TrendingUp } from "lucide-react";
+import { BrandText } from "../../components/ui/BrandText";
+
+const STATS = [
+  { value: "EDGAR",     label: "SEC Full-Text Search"    },
+  { value: "yfinance",  label: "Precios de cierre batch" },
+  { value: "Real-time", label: "P&L sobre último cierre" },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
 
   return (
     <div
+      data-testid="landing"
       className="min-h-screen bg-[var(--bg-deep)] text-[var(--text)]"
       style={{ fontFamily: "var(--font-body)" }}
     >
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-10 sticky top-0 z-50 h-16 bg-[var(--bg-deep)] border-b border-[var(--border)]">
-        <span
-          className="italic bg-clip-text text-transparent"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: 26,
-            backgroundImage: "var(--gradient-brand)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          VIPJM
-        </span>
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-[var(--text-muted)]">
-        </div>
+      {/* ── Navbar ── */}
+      <nav
+        data-testid="landing-nav"
+        className="flex items-center justify-between px-10 sticky top-0 z-50 h-16 bg-[var(--bg-deep)] border-b border-[var(--border)]"
+      >
+        <BrandText fontSize={26}>VIPJM</BrandText>
+
         <div className="flex items-center gap-3">
           <button
+            data-testid="landing-nav-login"
             onClick={() => navigate("/login")}
             className="px-5 py-2 rounded-lg text-sm font-semibold text-[var(--text)]"
           >
             Ingresar
           </button>
           <button
+            data-testid="landing-nav-register"
             onClick={() => navigate("/register")}
             className="px-5 py-2 rounded-lg text-sm font-semibold text-white"
             style={{ background: "var(--gradient-brand)" }}
@@ -43,17 +43,17 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section
+        data-testid="landing-hero"
         className="relative flex flex-col items-center justify-center text-center px-8 py-32 overflow-hidden"
         style={{ minHeight: "calc(100vh - 64px)" }}
       >
-        {/* Orange ambient glow */}
+        {/* Glows */}
         <div
           className="absolute pointer-events-none rounded-full top-[15%] left-1/2 -translate-x-1/2 w-[520px] h-[520px] opacity-70"
           style={{ background: "var(--glow-orange)", filter: "blur(70px)" }}
         />
-        {/* Smaller secondary halo */}
         <div
           className="absolute pointer-events-none rounded-full bottom-[10%] right-[15%] w-[260px] h-[260px] opacity-40"
           style={{
@@ -63,7 +63,9 @@ export default function Landing() {
         />
 
         <div className="relative">
+          {/* Badge */}
           <div
+            data-testid="landing-badge"
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 border border-[var(--border-strong)]"
             style={{ background: "var(--gradient-brand-soft)" }}
           >
@@ -73,7 +75,9 @@ export default function Landing() {
             </span>
           </div>
 
+          {/* Headline */}
           <h1
+            data-testid="landing-headline"
             className="italic mx-auto mb-6 max-w-[980px]"
             style={{
               fontFamily: "var(--font-display)",
@@ -83,45 +87,25 @@ export default function Landing() {
             }}
           >
             <span className="text-[var(--text)]">Invertí en tu futuro y </span>
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage: "var(--gradient-brand)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              analizá como los mejores
-            </span>
+            <BrandText italic={false}>analizá como los mejores</BrandText>
             <span className="text-[var(--text)]"> en un solo lugar.</span>
           </h1>
 
+          {/* Subtitle */}
           <p className="mx-auto mb-9 max-w-[640px] text-[18px] text-[var(--text-muted)] leading-relaxed">
             Tu portfolio tracker con datos reales de la SEC. Seguimiento de posiciones,
             historial de operaciones y comparación de fundamentals — todo en una plataforma.
           </p>
 
-          <div className="flex justify-center gap-12 mt-10">
-            {[
-              { value: "EDGAR", label: "SEC Full-Text Search" },
-              { value: "yfinance", label: "Precios de cierre batch" },
-              { value: "Real-time", label: "P&L sobre último cierre" },
-            ].map(s => (
+          {/* Stats row */}
+          <div
+            data-testid="landing-stats"
+            className="flex justify-center gap-12 mt-10"
+          >
+            {STATS.map((s) => (
               <div key={s.label} className="text-center">
-                <p
-                  className="italic bg-clip-text text-transparent"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 800,
-                    fontSize: 22,
-                    backgroundImage: "var(--gradient-brand)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  {s.value}
-                </p>
-                <p className="text-[11px] text-[var(--text-faint)]">{s.label}</p>
+                <BrandText fontSize={22}>{s.value}</BrandText>
+                <p className="text-[11px] text-[var(--text-faint)] mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
