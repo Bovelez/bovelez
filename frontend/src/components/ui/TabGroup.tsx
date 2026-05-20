@@ -7,23 +7,10 @@ interface TabGroupProps<T extends string> {
   tabs: Tab<T>[];
   active: T;
   onChange: (key: T) => void;
-  /** Visual style variant. "pill" highlights with gradient, "surface" uses surface-2 */
   variant?: "pill" | "surface";
   "data-testid"?: string;
 }
 
-/**
- * Reusable horizontal tab/button group.
- *
- * Usage:
- * ```tsx
- * <TabGroup
- *   tabs={[{ key: "todo", label: "Todo" }, { key: "acciones", label: "Acciones" }]}
- *   active={tab}
- *   onChange={setTab}
- * />
- * ```
- */
 export function TabGroup<T extends string>({
   tabs,
   active,

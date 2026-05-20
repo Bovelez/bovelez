@@ -8,7 +8,6 @@ import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
 
 export const router = createBrowserRouter([
-  // Landing pública — si ya está logueado, AlreadyLoggedLayout lo redirige a /app
   {
     element: <AlreadyLoggedLayout />,
     children: [
@@ -17,8 +16,6 @@ export const router = createBrowserRouter([
       { path: "/register", element: <Register /> },
     ],
   },
-
-  // Zona autenticada
   {
     path: "/app",
     element: <AuthLayout />,
@@ -28,7 +25,6 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/app/dashboard" replace /> },
           { path: "dashboard", element: <Dashboard /> },
-          // Próximas páginas: portfolio, transactions, watchlist, search, stock/:ticker
         ],
       },
     ],

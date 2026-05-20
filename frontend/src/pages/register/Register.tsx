@@ -5,8 +5,6 @@ import { useRegisterForm } from "../../hooks/auth/forms/useRegisterForm";
 import { AuthPageShell } from "../../components/auth/AuthPageShell";
 import { FormField, inputClass } from "../../components/ui/FormField";
 
-// ─── Left panel content ───────────────────────────────────────────────────────
-
 const FEATURES = [
   "Análisis de métricas SEC en tiempo real",
   "Gestión completa de tu portfolio",
@@ -24,6 +22,7 @@ function RegisterLeftPanel() {
       </div>
 
       <h1
+        data-testid="brand-title"
         className="italic bg-clip-text text-transparent"
         style={{
           fontFamily: "var(--font-display)",
@@ -53,8 +52,6 @@ function RegisterLeftPanel() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function Register() {
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
@@ -79,7 +76,7 @@ export default function Register() {
         {globalError && (
           <div
             role="alert"
-            data-testid="register-error"
+            data-testid="global-error"
             className="mb-4 px-3 py-2 rounded-lg text-[13px] border"
             style={{
               background: "var(--danger-soft)",
@@ -91,16 +88,11 @@ export default function Register() {
           </div>
         )}
 
-        <form
-          data-testid="register-form"
-          onSubmit={handleSubmit}
-          className="space-y-4"
-          noValidate
-        >
+        <form data-testid="register-form" onSubmit={handleSubmit} className="space-y-4" noValidate>
           <FormField label="Nombre completo" htmlFor="name" error={errors.name}>
             <input
               id="name"
-              data-testid="register-name"
+              data-testid="name-input"
               type="text"
               placeholder="Juan Martínez"
               value={values.name}
@@ -113,7 +105,7 @@ export default function Register() {
           <FormField label="Email" htmlFor="email" error={errors.email}>
             <input
               id="email"
-              data-testid="register-email"
+              data-testid="email-input"
               type="email"
               placeholder="juan@email.com"
               value={values.email}
@@ -127,7 +119,7 @@ export default function Register() {
             <div className="relative">
               <input
                 id="password"
-                data-testid="register-password"
+                data-testid="password-input"
                 type={showPass ? "text" : "password"}
                 placeholder="Mínimo 8 caracteres"
                 value={values.password}
@@ -137,6 +129,7 @@ export default function Register() {
               />
               <button
                 type="button"
+                data-testid="toggle-password"
                 onClick={() => setShowPass(!showPass)}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
                 aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
@@ -155,7 +148,7 @@ export default function Register() {
           >
             <input
               id="confirmPassword"
-              data-testid="register-confirm-password"
+              data-testid="confirm-password-input"
               type="password"
               placeholder="Repetir contraseña"
               value={values.confirmPassword}
@@ -167,7 +160,7 @@ export default function Register() {
 
           <button
             type="submit"
-            data-testid="register-submit"
+            data-testid="submit-btn"
             disabled={isSubmitting}
             className="w-full py-3 rounded-lg font-semibold text-white mt-2 text-[13px] disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
@@ -183,7 +176,7 @@ export default function Register() {
           ¿Ya tenés cuenta?{" "}
           <button
             type="button"
-            data-testid="register-goto-login"
+            data-testid="go-to-login"
             onClick={() => navigate("/login")}
             className="font-bold text-[var(--primary)]"
           >

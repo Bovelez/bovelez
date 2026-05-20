@@ -5,8 +5,6 @@ import { useLoginForm } from "../../hooks/auth/forms/useLoginForm";
 import { AuthPageShell } from "../../components/auth/AuthPageShell";
 import { FormField, inputClass } from "../../components/ui/FormField";
 
-// ─── Left panel content ───────────────────────────────────────────────────────
-
 function LoginLeftPanel() {
   return (
     <>
@@ -18,6 +16,7 @@ function LoginLeftPanel() {
       </div>
 
       <h1
+        data-testid="brand-title"
         className="italic bg-clip-text text-transparent leading-none"
         style={{
           fontFamily: "var(--font-display)",
@@ -51,7 +50,15 @@ function LoginLeftPanel() {
   );
 }
 
-function StatRow({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
+function StatRow({
+  label,
+  value,
+  valueClass,
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
   return (
     <div className="flex justify-between items-center">
       <span className="text-xs text-[var(--text-muted)]">{label}</span>
@@ -61,8 +68,6 @@ function StatRow({ label, value, valueClass }: { label: string; value: string; v
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Login() {
   const navigate = useNavigate();
@@ -89,7 +94,7 @@ export default function Login() {
         {globalError && (
           <div
             role="alert"
-            data-testid="login-error"
+            data-testid="global-error"
             className="mb-4 px-3 py-2 rounded-lg text-[13px] border"
             style={{
               background: "var(--danger-soft)",
@@ -101,16 +106,11 @@ export default function Login() {
           </div>
         )}
 
-        <form
-          data-testid="login-form"
-          onSubmit={handleSubmit}
-          className="space-y-4"
-          noValidate
-        >
+        <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-4" noValidate>
           <FormField label="Email" htmlFor="email" error={errors.email}>
             <input
               id="email"
-              data-testid="login-email"
+              data-testid="email-input"
               type="email"
               placeholder="juan@email.com"
               value={values.email}
@@ -124,7 +124,7 @@ export default function Login() {
             <div className="relative">
               <input
                 id="password"
-                data-testid="login-password"
+                data-testid="password-input"
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
                 value={values.password}
@@ -134,6 +134,7 @@ export default function Login() {
               />
               <button
                 type="button"
+                data-testid="toggle-password"
                 onClick={() => setShowPass(!showPass)}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
                 aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
@@ -147,7 +148,7 @@ export default function Login() {
 
           <button
             type="submit"
-            data-testid="login-submit"
+            data-testid="submit-btn"
             disabled={isSubmitting}
             className="w-full py-3 rounded-lg font-semibold text-white text-[13px] disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
@@ -163,7 +164,7 @@ export default function Login() {
           ¿No tenés cuenta?{" "}
           <button
             type="button"
-            data-testid="login-goto-register"
+            data-testid="go-to-register"
             onClick={() => navigate("/register")}
             className="font-bold text-[var(--primary)]"
           >

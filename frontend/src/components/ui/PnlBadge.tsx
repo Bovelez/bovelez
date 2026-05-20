@@ -1,14 +1,11 @@
 interface PnlBadgeProps {
   value: number;
-  /** Format as currency ($) or percentage (%). Default: "currency" */
   format?: "currency" | "percent";
   className?: string;
   "data-testid"?: string;
 }
 
-/**
- * Displays a P&L value styled green (positive) or red (negative).
- */
+
 export function PnlBadge({
   value,
   format = "currency",
@@ -36,7 +33,6 @@ export function PnlBadge({
   );
 }
 
-/** Inline version without background pill — just colored text */
 export function PnlText({
   value,
   format = "currency",

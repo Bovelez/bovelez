@@ -8,11 +8,6 @@ interface BrandTextProps {
   italic?: boolean;
   onClick?: MouseEventHandler<HTMLSpanElement>;
 }
-
-/**
- * Renders text with the brand gradient (orange → pink).
- * Uses font-display (Baloo 2) and font-weight 800 by default.
- */
 export function BrandText({
   children,
   fontSize,

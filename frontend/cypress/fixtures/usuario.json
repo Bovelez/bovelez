@@ -1,0 +1,16 @@
+{
+  "nombre": "Juan Martínez",
+  "email": "juan@email.com",
+  "password": "password123",
+  "emailInvalido": "not-an-email",
+  "passwordCorta": "short",
+  "passwordDistinta": "different456",
+  "authResponse": {
+    "token": "fake-jwt-token",
+    "user": {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Juan Martínez",
+      "email": "juan@email.com"
+    }
+  }
+}

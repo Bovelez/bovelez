@@ -62,7 +62,6 @@ export function AppLayout() {
   const lastPriceUpdate = "—";
 
   const avatar =
-    user?.avatar ||
     (user?.name
       ? user.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase()
       : "U");
