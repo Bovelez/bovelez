@@ -91,7 +91,6 @@ export function AppLayout() {
   };
 
   const avatar =
-    user?.avatar ||
     (user?.name
       ? user.name
           .split(" ")
