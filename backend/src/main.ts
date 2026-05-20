@@ -10,7 +10,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3003);
+  await app.listen(process.env.PORT ?? 8080);
   console.log(process.env.JWT_SECRET);
   console.log(process.env.DATABASE_URL);
 }

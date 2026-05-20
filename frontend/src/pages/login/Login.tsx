@@ -129,12 +129,6 @@ export default function Login() {
                 >
                   Contraseña
                 </label>
-                <button
-                  type="button"
-                  className="text-[11px] text-[var(--primary)]"
-                >
-                  ¿Olvidé mi contraseña?
-                </button>
               </div>
               <div className="relative">
                 <input
@@ -178,6 +172,7 @@ export default function Login() {
               {isSubmitting ? "Ingresando…" : "Iniciar sesión"}
             </button>
           </form>
+
           <p className="text-center mt-6 text-[13px] text-[var(--text-muted)]">
             ¿No tenés cuenta?{" "}
             <button
