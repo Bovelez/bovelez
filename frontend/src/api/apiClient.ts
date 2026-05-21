@@ -8,7 +8,6 @@ declare module "axios" {
 }
 
 const apiClient = axios.create({
-  // Render builds inject VITE_API_URL so the deployed frontend hits the API.
   baseURL: import.meta.env.VITE_API_URL ?? "/api",
   headers: {
     "Content-Type": "application/json",
