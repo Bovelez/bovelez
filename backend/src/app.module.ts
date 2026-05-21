@@ -6,6 +6,8 @@ import { JwtAuthGuard } from './modules/public/guards/jwt-auth.guard';
 import { UsersModule } from './modules/users/users.module';
 import { EdgarModule } from './modules/edgar/edgar.module';
 import { PricesModule } from './modules/prices/prices.module';
+import { EdgarModule } from './modules/edgar/edgar.module';
+import { PortfolioModule } from './modules/portfolio/portfolio.module';
 
 @Module({
   imports: [
@@ -13,8 +15,16 @@ import { PricesModule } from './modules/prices/prices.module';
     AuthModule,
     UsersModule,
     EdgarModule,
+    PortfolioModule,
+    EdgarModule,
     PricesModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
