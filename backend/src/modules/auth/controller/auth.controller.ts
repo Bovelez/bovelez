@@ -3,7 +3,6 @@ import { AuthService } from '../service/auth.service';
 import { Public } from '../decorators/public.decorator';
 import { LoginInput } from '../input/login.input';
 import { LoginDto } from '../dto/login.dto';
-import { UserResponseDto } from '../../public/dto/user-response.dto';
 import { CreateUserInput } from '../input/create-user.input';
 
 @Controller('auth')
@@ -14,7 +13,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async register(
     @Body() createUserInput: CreateUserInput,
-  ): Promise<UserResponseDto> {
+  ): Promise<LoginDto> {
     return this.authService.register(createUserInput);
   }
 

@@ -34,13 +34,15 @@ export class AuthService {
       throw new BadRequestException('Email already in use');
     }
   }
-  async register(createUserInput: CreateUserInput): Promise<UserResponseDto> {
+  async register(createUserInput: CreateUserInput): Promise<LoginDto> {
     await this.isEmailInUse(createUserInput.email);
     createUserInput.password = await this.hashPassword(
       createUserInput.password,
     );
     const user = await this.authRepository.create(createUserInput);
-    return this.getUserResponse(user);
+    const payload = { sub: user.id };
+    const token = this.jwtService.sign(payload);
+    return new LoginDto(token, this.getUserResponse(user));
   }
   private async hashPassword(password: string | undefined): Promise<string> {
     if (!password) throw new BadRequestException('Password is required');
