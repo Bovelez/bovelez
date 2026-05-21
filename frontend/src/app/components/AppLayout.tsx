@@ -14,6 +14,8 @@ import {
   Receipt,
 } from "lucide-react";
 import { useUser, useLogout } from "../../hooks/auth/useAuth";
+import { useDeleteAccount } from "../../hooks/user/useDeleteAccount";
+import { handleError } from "../../hooks/auth/utils/handlerError";
 import { BrandText } from "../../components/ui/BrandText";
 
 const NAV_ITEMS = [
@@ -29,6 +31,7 @@ export function AppLayout() {
   const location  = useLocation();
   const { data: user } = useUser();
   const logout    = useLogout();
+  const deleteAccount = useDeleteAccount();
 
   const [searchQuery,  setSearchQuery]  = useState("");
   const [sidebarOpen,  setSidebarOpen]  = useState(true);
@@ -57,6 +60,23 @@ export function AppLayout() {
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "¿Seguro que querés borrar tu cuenta? Esta acción no se puede deshacer."
+    );
+    if (!confirmed) return;
+
+    const password = window.prompt("Confirmá tu contraseña para borrar la cuenta");
+    if (!password) return;
+
+    try {
+      await deleteAccount.mutateAsync({ password });
+      navigate("/login", { replace: true });
+    } catch (error) {
+      window.alert(handleError(error) ?? "No se pudo borrar la cuenta");
+    }
   };
 
   const lastPriceUpdate = "—";
@@ -216,16 +236,12 @@ export function AppLayout() {
               >
                 <button
                   data-testid="user-menu-delete-account"
-                  onClick={() => {
-                    if (window.confirm("¿Seguro que querés borrar tu cuenta? Esta acción no se puede deshacer.")) {
-                      // TODO: llamar al endpoint DELETE /auth/me
-                      handleLogout();
-                    }
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-rose-400 hover:bg-[var(--surface-2)] transition-colors"
+                  onClick={handleDeleteAccount}
+                  disabled={deleteAccount.isPending}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-rose-400 hover:bg-[var(--surface-2)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={15} />
-                  Borrar cuenta
+                  {deleteAccount.isPending ? "Borrando…" : "Borrar cuenta"}
                 </button>
               </div>
             )}
