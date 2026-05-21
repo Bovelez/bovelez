@@ -21,6 +21,7 @@ import { EDGAR_REPOSITORY } from './repository/edgar.repository.interface';
   controllers: [EdgarController],
   providers: [
     EdgarService,
+    { provide: 'EdgarService', useExisting: EdgarService },
     PrismaService,
     { provide: EDGAR_REPOSITORY, useClass: EdgarRepository },
     { provide: EDGAR_CLIENT, useClass: EdgarClient },
@@ -28,6 +29,6 @@ import { EDGAR_REPOSITORY } from './repository/edgar.repository.interface';
     { provide: EDGAR_FACTS_CLIENT, useClass: EdgarFactsClient },
     { provide: EDGAR_SUBMISSIONS_CLIENT, useClass: EdgarSubmissionsClient },
   ],
-  exports: [EdgarService],
+  exports: [EdgarService, 'EdgarService'],
 })
 export class EdgarModule {}
