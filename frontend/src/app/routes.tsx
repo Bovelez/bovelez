@@ -1,27 +1,34 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import Login from "../pages/login/Login";
 import Register from "../pages/register/Register";
+import Landing from "../pages/landing/Landing";
+import Dashboard from "../pages/dashboard/Dashboard";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/app" replace /> },
   {
     element: <AlreadyLoggedLayout />,
     children: [
+      { path: "/", element: <Landing /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
     ],
   },
-
   {
     path: "/app",
     element: <AuthLayout />,
     children: [
-      { index: true, element: <AppLayout /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <Navigate to="/app/dashboard" replace /> },
+          { path: "dashboard", element: <Dashboard /> },
+        ],
+      },
     ],
   },
 
-  { path: "*", element: <Navigate to="/app" replace /> },
+  { path: "*", element: <Navigate to="/" replace /> },
 ]);
