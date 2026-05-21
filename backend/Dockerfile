@@ -24,9 +24,16 @@ RUN npm run build
 
 FROM node:20-slim as dev
 
-RUN apt-get update -y && apt-get install -y openssl libc6
+RUN apt-get update -y && apt-get install -y \
+    openssl \
+    libc6 \
+    python3 \
+    python3-pip \
+    python3-venv \
+ && rm -rf /var/lib/apt/lists/*
 
-ENV NODE_ENV development
+ENV NODE_ENV=development \
+    PYTHON_BIN=/opt/venv/bin/python
 
 WORKDIR /app
 
