@@ -42,9 +42,10 @@ describe('Auth Integration', () => {
     };
     const response = await register(app, payload);
 
-    expect(response.email).toBe(payload.email);
-    expect(response.name).toBe(payload.name);
-    expect('password' in response).toBe(false);
+    expect(response.token).toBeDefined();
+    expect(response.user.email).toBe(payload.email);
+    expect(response.user.name).toBe(payload.name);
+    expect('password' in response.user).toBe(false);
   });
 
   it('(POST) /auth/register → should fail if email is invalid', async () => {

@@ -50,7 +50,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should return a user with an id ', async () => {
+    it('should return a token and user data', async () => {
       const input: CreateUserInput = {
         name: 'Juan',
         email: 'juan@gmail.com',
@@ -73,11 +73,14 @@ describe('AuthService', () => {
       const result = await authService.register(input);
 
       const createSpy = jest.spyOn(authRepository, 'create');
+      const signSpy = jest.spyOn(jwtService, 'sign');
       await authService.register(input);
 
       expect(createSpy).toHaveBeenCalled();
-      expect(result.id).toBe(mockPrismaUser.id);
-      expect(result).toBeInstanceOf(UserResponseDto);
+      expect(signSpy).toHaveBeenCalledWith({ sub: mockPrismaUser.id });
+      expect(result.token).toBe('mockToken');
+      expect(result.user.id).toBe(mockPrismaUser.id);
+      expect(result.user).toBeInstanceOf(UserResponseDto);
     });
 
     it('should throw BadRequestException if email already exists', async () => {
