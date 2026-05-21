@@ -1,11 +1,18 @@
-import { Position } from '@prisma/client';
-import { UpdatePositionInput } from '../input/update-position.input';
-import { CreatePositionInput } from '../input/create-position.input';
+import { Transaction, TransactionType } from '@prisma/client';
+import { IPosition } from '../input/position.interface';
+
+export type { IPosition };
 
 export interface IPortfolioRepository {
-  create(userId: string, data:CreatePositionInput): Promise<Position>;
-  findById(id: string): Promise<Position | null>;
-  findAllByUser(userId: string): Promise<Position[]>;
-  update(id: string, data: UpdatePositionInput): Promise<Position>;
-  delete(id: string): Promise<void>;
+  createTransaction(
+    userId: string,
+    ticker: string,
+    type: TransactionType,
+    quantity: number,
+    price: number,
+    date: Date,
+  ): Promise<Transaction>;
+
+  getAggregatedPositions(userId: string): Promise<IPosition[]>;
+  getAggregatedPosition(userId: string, ticker: string): Promise<IPosition | null>;
 }

@@ -14,26 +14,31 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  name      String
-  email     String     @unique
-  password  String
-  positions Position[]
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  transactions Transaction[]
 }
 
-model Position {
-  id        String   @id @default(uuid())
+model Transaction {
+  id        String          @id @default(uuid())
   userId    String
   ticker    String
+  type      TransactionType
   quantity  Float
-  buyPrice  Float
-  buyDate   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  price     Float
+  date      DateTime
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, ticker])
+}
+
+enum TransactionType {
+  BUY
+  SELL
 }
 
 model Price {

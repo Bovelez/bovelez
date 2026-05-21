@@ -1,19 +1,16 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Inject,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
-import { Position } from '@prisma/client';
+import { TransactionType } from '@prisma/client';
 import type { IEdgarService } from '../../edgar/service/edgar.service.interface';
+import { PricesService } from '../../prices/service/prices.service';
 import type { IPortfolioRepository } from '../repository/portfolio.repository.interface';
-import { PositionDto } from '../dto/position.dto';
+import { TransactionDto } from '../dto/transaction.dto';
 import { PortfolioDto, PortfolioPositionDto } from '../dto/portfolio.dto';
-import type { CreatePositionInput } from '../input/create-position.input';
-import type { UpdatePositionInput } from '../input/update-position.input';
-
-const MOCK_PRICE = 1;
+import type { BuyPositionInput } from '../input/buy-position.input';
+import type { SellPositionInput } from '../input/sell-position.input';
 
 @Injectable()
 export class PortfolioService {
@@ -22,88 +19,90 @@ export class PortfolioService {
     private readonly portfolioRepository: IPortfolioRepository,
     @Inject('EdgarService')
     private readonly edgarService: IEdgarService,
+    private readonly pricesService: PricesService,
   ) {}
 
-  async addPosition(
-    userId: string,
-    input: CreatePositionInput,
-  ): Promise<PositionDto> {
+  async buy(userId: string, input: BuyPositionInput): Promise<TransactionDto> {
     const valid = await this.edgarService.isValidTicker(input.ticker);
     if (!valid) {
       throw new BadRequestException('Ticker no válido');
     }
 
-    const position = await this.portfolioRepository.create(userId, input);
-    return new PositionDto(position);
+    const priceRecord = await this.pricesService.getPrice(input.ticker);
+    if (!priceRecord) {
+      throw new BadRequestException(
+        `No hay precio registrado para ${input.ticker}. Ejecutá el batch de precios primero.`,
+      );
+    }
+
+    const tx = await this.portfolioRepository.createTransaction(
+      userId,
+      input.ticker,
+      TransactionType.BUY,
+      input.quantity,
+      priceRecord.price,
+      input.date,
+    );
+
+    return new TransactionDto(tx);
+  }
+
+  async sell(userId: string, input: SellPositionInput): Promise<TransactionDto> {
+    const position = await this.portfolioRepository.getAggregatedPosition(
+      userId,
+      input.ticker,
+    );
+
+    if (!position || position.quantity === 0) {
+      throw new BadRequestException(
+        `No tenés posición abierta en ${input.ticker}`,
+      );
+    }
+
+    if (input.quantity > position.quantity) {
+      throw new BadRequestException(
+        `Querés vender ${input.quantity} acciones pero solo tenés ${position.quantity}`,
+      );
+    }
+
+    // Sell at current market price stored in DB
+    const priceRecord = await this.pricesService.getPrice(input.ticker);
+    if (!priceRecord) {
+      throw new BadRequestException(
+        `No hay precio registrado para ${input.ticker}. Ejecutá el batch de precios primero.`,
+      );
+    }
+
+    const tx = await this.portfolioRepository.createTransaction(
+      userId,
+      input.ticker,
+      TransactionType.SELL,
+      input.quantity,
+      priceRecord.price,
+      input.date,
+    );
+
+    return new TransactionDto(tx);
   }
 
   async getPortfolio(userId: string): Promise<PortfolioDto> {
-    const positions = await this.portfolioRepository.findAllByUser(userId);
+    const positions = await this.portfolioRepository.getAggregatedPositions(userId);
 
-    const dtos = positions.map(
-      (position) =>
-        new PortfolioPositionDto({
-          id: position.id,
-          ticker: position.ticker,
-          quantity: position.quantity,
-          buyPrice: position.buyPrice,
-          buyDate: position.buyDate,
-          currentPrice: MOCK_PRICE,
-        }),
+    const lastRun = await this.pricesService.getLastBatchRun();
+
+    const dtos = await Promise.all(
+      positions.map(async (pos) => {
+        const priceRecord = await this.pricesService.getPrice(pos.ticker);
+        return new PortfolioPositionDto({
+          ticker: pos.ticker,
+          quantity: pos.quantity,
+          avgCost: pos.avgCost,
+          currentPrice: priceRecord ? priceRecord.price : null,
+        });
+      }),
     );
 
-    return new PortfolioDto(dtos, null);
+    return new PortfolioDto(dtos, lastRun?.finishedAt ?? null);
   }
 
-  async getPosition(userId: string, id: string): Promise<PositionDto> {
-    const position = await this.requireOwnedPosition(userId, id);
-    return new PositionDto(position);
-  }
-
-  async updatePosition(
-    userId: string,
-    id: string,
-    input: UpdatePositionInput,
-  ): Promise<PositionDto> {
-    await this.requireOwnedPosition(userId, id);
-
-    const updated = await this.portfolioRepository.update(id, input);
-    return new PositionDto(updated);
-  }
-
-  async deletePosition(
-    userId: string,
-    id: string,
-    quantity: number | undefined,
-  ): Promise<void> {
-    const position = await this.requireOwnedPosition(userId, id);
-
-    if (quantity === undefined || quantity >= position.quantity) {
-      if (quantity !== undefined && quantity > position.quantity) {
-        throw new BadRequestException(
-          'No se pueden eliminar más acciones de las disponibles',
-        );
-      }
-      await this.portfolioRepository.delete(id);
-      return;
-    }
-
-    await this.portfolioRepository.update(id, {
-      quantity: position.quantity - quantity,
-    });
-  }
-
-  private async requireOwnedPosition(
-    userId: string,
-    id: string,
-  ): Promise<Position> {
-    const position = await this.portfolioRepository.findById(id);
-    if (!position) {
-      throw new NotFoundException('Posición no encontrada');
-    }
-    if (position.userId !== userId) {
-      throw new ForbiddenException('No tenés acceso a esta posición');
-    }
-    return position;
-  }
 }

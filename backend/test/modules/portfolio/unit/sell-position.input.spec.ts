@@ -1,19 +1,19 @@
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { BuyPositionInput } from '../../../../src/modules/portfolio/input/buy-position.input';
+import { SellPositionInput } from '../../../../src/modules/portfolio/input/sell-position.input';
 
-describe('BuyPositionInput', () => {
+describe('SellPositionInput', () => {
   const basePayload = {
     ticker: 'AAPL',
-    quantity: 10,
+    quantity: 5,
     date: '2025-01-15',
   };
 
   async function validatePayload(
     payload: Record<string, unknown>,
   ): Promise<string[]> {
-    const instance = plainToInstance(BuyPositionInput, payload);
+    const instance = plainToInstance(SellPositionInput, payload);
     const errors = await validate(instance as object);
     return errors.flatMap((e) => Object.values(e.constraints ?? {}));
   }
@@ -36,5 +36,10 @@ describe('BuyPositionInput', () => {
   it('rejects a non-string ticker', async () => {
     const messages = await validatePayload({ ...basePayload, ticker: 123 });
     expect(messages.join(' ')).toMatch(/ticker/i);
+  });
+
+  it('uppercases the ticker', async () => {
+    const instance = plainToInstance(SellPositionInput, { ...basePayload, ticker: 'aapl' });
+    expect(instance.ticker).toBe('AAPL');
   });
 });
