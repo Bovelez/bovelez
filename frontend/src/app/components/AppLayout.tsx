@@ -14,6 +14,8 @@ import {
   Receipt,
 } from "lucide-react";
 import { useUser, useLogout } from "../../hooks/auth/useAuth";
+import { useDeleteAccount } from "../../hooks/user/useDeleteAccount";
+import { handleError } from "../../hooks/auth/utils/handlerError";
 import { BrandText } from "../../components/ui/BrandText";
 
 const NAV_ITEMS = [
@@ -29,10 +31,14 @@ export function AppLayout() {
   const location  = useLocation();
   const { data: user } = useUser();
   const logout    = useLogout();
+  const deleteAccount = useDeleteAccount();
 
   const [searchQuery,  setSearchQuery]  = useState("");
   const [sidebarOpen,  setSidebarOpen]  = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | undefined>();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Close user menu on outside click
@@ -57,6 +63,29 @@ export function AppLayout() {
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteAccount.isPending) return;
+    setDeleteModalOpen(false);
+    setDeletePassword("");
+    setDeleteError(undefined);
+  };
+
+  const handleDeleteAccount = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!deletePassword.trim()) {
+      setDeleteError("Ingresá tu contraseña para confirmar");
+      return;
+    }
+
+    setDeleteError(undefined);
+    try {
+      await deleteAccount.mutateAsync({ password: deletePassword });
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setDeleteError(handleError(error) ?? "No se pudo borrar la cuenta");
+    }
   };
 
   const lastPriceUpdate = "—";
@@ -217,12 +246,11 @@ export function AppLayout() {
                 <button
                   data-testid="user-menu-delete-account"
                   onClick={() => {
-                    if (window.confirm("¿Seguro que querés borrar tu cuenta? Esta acción no se puede deshacer.")) {
-                      // TODO: llamar al endpoint DELETE /auth/me
-                      handleLogout();
-                    }
+                    setUserMenuOpen(false);
+                    setDeleteModalOpen(true);
                   }}
-                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-rose-400 hover:bg-[var(--surface-2)] transition-colors"
+                  disabled={deleteAccount.isPending}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-rose-400 hover:bg-[var(--surface-2)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={15} />
                   Borrar cuenta
@@ -236,6 +264,84 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {deleteModalOpen && (
+        <div
+          data-testid="delete-account-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+        >
+          <div className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+            <div className="border-b border-[var(--border)] px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500/15 text-rose-400">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <h2 id="delete-account-title" className="text-[15px] font-semibold text-[var(--text)]">
+                    Borrar cuenta
+                  </h2>
+                  <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
+                    Esta acción no se puede deshacer.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleDeleteAccount} className="px-5 py-4">
+              <label
+                htmlFor="delete-account-password"
+                className="mb-1.5 block text-[13px] font-semibold text-[var(--text)]"
+              >
+                Confirmá tu contraseña
+              </label>
+              <input
+                id="delete-account-password"
+                data-testid="delete-account-password"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => {
+                  setDeletePassword(e.target.value);
+                  if (deleteError) setDeleteError(undefined);
+                }}
+                autoComplete="current-password"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2.5 text-[13px] text-[var(--text)] outline-none transition-colors focus:border-[var(--primary)]"
+                autoFocus
+              />
+
+              {deleteError && (
+                <p
+                  data-testid="delete-account-error"
+                  className="mt-2 text-[12px] text-rose-400"
+                  role="alert"
+                >
+                  {deleteError}
+                </p>
+              )}
+
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeDeleteModal}
+                  disabled={deleteAccount.isPending}
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-semibold text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] disabled:opacity-60"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleteAccount.isPending}
+                  className="rounded-lg bg-rose-500 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {deleteAccount.isPending ? "Borrando…" : "Borrar cuenta"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
