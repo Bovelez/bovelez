@@ -15,7 +15,6 @@ export const registerSchema = z
     confirmPassword: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres"),
-    terms: z.literal(true, { message: "Debés aceptar los términos" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",

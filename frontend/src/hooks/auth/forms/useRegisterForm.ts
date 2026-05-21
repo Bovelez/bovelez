@@ -12,7 +12,6 @@ export const useRegisterForm = (onSuccess?: () => void) => {
       email: "",
       password: "",
       confirmPassword: "",
-      terms: false as unknown as true,
     },
     onSubmit: async (values) => {
       await register.mutateAsync({
