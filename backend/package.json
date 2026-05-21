@@ -29,6 +29,7 @@
     "prod": "npm run db:apply && npm run start:prod"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -37,6 +38,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.19.3",
     "argon2": "^0.44.0",
+    "axios": "^1.16.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "dotenv-expand": "^13.0.0",

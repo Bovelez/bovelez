@@ -19,3 +19,26 @@ model User {
   email    String @unique
   password String
 }
+
+model EdgarCompany {
+  id        String   @id @default(uuid())
+  cik       String   @unique
+  ticker    String   @unique
+  name      String
+  updatedAt DateTime @updatedAt
+}
+
+model StockPrice {
+  ticker    String   @id
+  price     Float
+  updatedAt DateTime @updatedAt
+}
+
+model PriceBatchRun {
+  id          String    @id @default(uuid())
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  tickerCount Int       @default(0)
+  errorCount  Int       @default(0)
+  errors      Json?
+}
