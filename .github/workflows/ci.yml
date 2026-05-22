@@ -2,20 +2,10 @@ name: CI
 
 on:
   push:
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches:
       - main
       - dev
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/ci.yml'
 
 jobs:
   changes:
@@ -53,11 +43,13 @@ jobs:
           backend=false
           frontend=false
 
-          if printf '%s\n' "$changed_files" | grep -Eq '^(backend/|docker-compose\.yml|\.github/workflows/ci\.yml$)'; then
+          shared_pattern='docker-compose\.yml|package\.json|package-lock\.json|\.github/workflows/'
+
+          if printf '%s\n' "$changed_files" | grep -Eq "^(backend/|$shared_pattern)"; then
             backend=true
           fi
 
-          if printf '%s\n' "$changed_files" | grep -Eq '^(frontend/|docker-compose\.yml|\.github/workflows/ci\.yml$)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq "^(frontend/|$shared_pattern)"; then
             frontend=true
           fi
 
