@@ -36,7 +36,7 @@ describe('PricesService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PricesService,
-        { provide: PRICES_REPOSITORY,    useValue: mockRepository },
+        { provide: PRICES_REPOSITORY, useValue: mockRepository },
         { provide: YAHOO_FINANCE_CLIENT, useValue: mockYahooClient },
       ],
     }).compile();
@@ -52,14 +52,26 @@ describe('PricesService', () => {
         errors: {},
       });
       mockRepository.upsertPrice.mockResolvedValue(undefined);
-      mockRepository.finishBatchRun.mockResolvedValue({ ...mockBatchRun, tickerCount: 2, errorCount: 0 });
+      mockRepository.finishBatchRun.mockResolvedValue({
+        ...mockBatchRun,
+        tickerCount: 2,
+        errorCount: 0,
+      });
 
       const result = await service.runBatch(['AAPL', 'MSFT']);
 
-      expect(mockYahooClient.fetchPrices).toHaveBeenCalledWith(['AAPL', 'MSFT']);
+      expect(mockYahooClient.fetchPrices).toHaveBeenCalledWith([
+        'AAPL',
+        'MSFT',
+      ]);
       expect(mockRepository.upsertPrice).toHaveBeenCalledWith('AAPL', 200.5);
       expect(mockRepository.upsertPrice).toHaveBeenCalledWith('MSFT', 420.0);
-      expect(mockRepository.finishBatchRun).toHaveBeenCalledWith('batch-1', 2, 0, {});
+      expect(mockRepository.finishBatchRun).toHaveBeenCalledWith(
+        'batch-1',
+        2,
+        0,
+        {},
+      );
       expect(result.tickerCount).toBe(2);
       expect(result.errorCount).toBe(0);
       expect(result.prices).toEqual({ AAPL: 200.5, MSFT: 420.0 });
@@ -72,13 +84,22 @@ describe('PricesService', () => {
         errors: { FAKE: 'No data returned' },
       });
       mockRepository.upsertPrice.mockResolvedValue(undefined);
-      mockRepository.finishBatchRun.mockResolvedValue({ ...mockBatchRun, tickerCount: 1, errorCount: 1 });
+      mockRepository.finishBatchRun.mockResolvedValue({
+        ...mockBatchRun,
+        tickerCount: 1,
+        errorCount: 1,
+      });
 
       const result = await service.runBatch(['AAPL', 'FAKE']);
 
       expect(mockRepository.upsertPrice).toHaveBeenCalledTimes(1);
       expect(mockRepository.upsertPrice).toHaveBeenCalledWith('AAPL', 200.5);
-      expect(mockRepository.finishBatchRun).toHaveBeenCalledWith('batch-2', 1, 1, { FAKE: 'No data returned' });
+      expect(mockRepository.finishBatchRun).toHaveBeenCalledWith(
+        'batch-2',
+        1,
+        1,
+        { FAKE: 'No data returned' },
+      );
       expect(result.errorCount).toBe(1);
       expect(result.errors).toEqual({ FAKE: 'No data returned' });
     });
@@ -86,7 +107,11 @@ describe('PricesService', () => {
 
   describe('getPrice', () => {
     it('should return price for a ticker (uppercased)', async () => {
-      const priceRecord = { ticker: 'AAPL', price: 200.5, updatedAt: new Date() };
+      const priceRecord = {
+        ticker: 'AAPL',
+        price: 200.5,
+        updatedAt: new Date(),
+      };
       mockRepository.findPrice.mockResolvedValue(priceRecord);
 
       const result = await service.getPrice('aapl');

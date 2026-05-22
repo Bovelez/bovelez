@@ -59,7 +59,10 @@ export class EdgarSubmissionsClient implements IEdgarSubmissionsClient {
 
       return results;
     } catch {
-      throw new HttpException('EDGAR Submissions unavailable', HttpStatus.BAD_GATEWAY);
+      throw new HttpException(
+        'EDGAR Submissions unavailable',
+        HttpStatus.BAD_GATEWAY,
+      );
     }
   }
 }

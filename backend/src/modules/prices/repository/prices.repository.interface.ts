@@ -18,6 +18,11 @@ export interface IPricesRepository {
   findPrice(ticker: string): Promise<StockPriceRecord | null>;
   findAllPrices(): Promise<StockPriceRecord[]>;
   createBatchRun(): Promise<PriceBatchRunRecord>;
-  finishBatchRun(id: string, tickerCount: number, errorCount: number, errors: Record<string, string>): Promise<PriceBatchRunRecord>;
+  finishBatchRun(
+    id: string,
+    tickerCount: number,
+    errorCount: number,
+    errors: Record<string, string>,
+  ): Promise<PriceBatchRunRecord>;
   findLastBatchRun(): Promise<PriceBatchRunRecord | null>;
 }

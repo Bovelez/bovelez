@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { BuyPositionInput } from '../../../../src/modules/portfolio/input/buy-position.input';
+import { BuyTransactionInput } from '../../../../src/modules/transactions/input/buy-transaction.input';
 
-describe('BuyPositionInput', () => {
+describe('BuyTransactionInput', () => {
   const basePayload = {
     ticker: 'AAPL',
     quantity: 10,
@@ -13,7 +13,7 @@ describe('BuyPositionInput', () => {
   async function validatePayload(
     payload: Record<string, unknown>,
   ): Promise<string[]> {
-    const instance = plainToInstance(BuyPositionInput, payload);
+    const instance = plainToInstance(BuyTransactionInput, payload);
     const errors = await validate(instance as object);
     return errors.flatMap((e) => Object.values(e.constraints ?? {}));
   }

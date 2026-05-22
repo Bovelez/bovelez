@@ -22,9 +22,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body() createUserInput: CreateUserInput,
-  ): Promise<LoginDto> {
+  async register(@Body() createUserInput: CreateUserInput): Promise<LoginDto> {
     return this.authService.register(createUserInput);
   }
 

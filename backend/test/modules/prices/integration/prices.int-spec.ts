@@ -6,7 +6,6 @@ import { PrismaClient } from '@prisma/client';
 import { getHttpServer } from '../../../utils/http-server';
 import { YAHOO_FINANCE_CLIENT } from '../../../../src/modules/prices/interfaces/prices.interface';
 
-
 const mockYahooClient = {
   fetchPrices: jest.fn().mockResolvedValue({
     prices: { AAPL: 200.5, MSFT: 420.0 },
@@ -31,14 +30,14 @@ describe('Prices Integration', () => {
     await app.init();
 
     prisma = new PrismaClient();
-    await (prisma as any).stockPrice.deleteMany();
-    await (prisma as any).priceBatchRun.deleteMany();
+    await prisma.stockPrice.deleteMany();
+    await prisma.priceBatchRun.deleteMany();
   });
 
   afterAll(async () => {
     if (prisma) {
-      await (prisma as any).stockPrice.deleteMany();
-      await (prisma as any).priceBatchRun.deleteMany();
+      await prisma.stockPrice.deleteMany();
+      await prisma.priceBatchRun.deleteMany();
       await prisma.$disconnect();
     }
     if (app) await app.close();
@@ -56,14 +55,18 @@ describe('Prices Integration', () => {
       expect(body.tickerCount).toBe(2);
       expect(body.errorCount).toBe(0);
 
-      const aapl = await (prisma as any).stockPrice.findUnique({ where: { ticker: 'AAPL' } });
-      const msft = await (prisma as any).stockPrice.findUnique({ where: { ticker: 'MSFT' } });
+      const aapl = await prisma.stockPrice.findUnique({
+        where: { ticker: 'AAPL' },
+      });
+      const msft = await prisma.stockPrice.findUnique({
+        where: { ticker: 'MSFT' },
+      });
       expect(aapl).not.toBeNull();
       expect(aapl.price).toBe(200.5);
       expect(msft).not.toBeNull();
       expect(msft.price).toBe(420.0);
 
-      const batchRun = await (prisma as any).priceBatchRun.findUnique({
+      const batchRun = await prisma.priceBatchRun.findUnique({
         where: { id: body.batchId as string },
       });
       expect(batchRun).not.toBeNull();
@@ -83,7 +86,9 @@ describe('Prices Integration', () => {
         .send({ tickers: ['AAPL'] })
         .expect(201);
 
-      const aapl = await (prisma as any).stockPrice.findUnique({ where: { ticker: 'AAPL' } });
+      const aapl = await prisma.stockPrice.findUnique({
+        where: { ticker: 'AAPL' },
+      });
       expect(aapl.price).toBe(999.99);
     });
 
@@ -102,13 +107,17 @@ describe('Prices Integration', () => {
       expect(body.tickerCount).toBe(1);
       expect(body.errorCount).toBe(1);
 
-      const batchRun = await (prisma as any).priceBatchRun.findUnique({
+      const batchRun = await prisma.priceBatchRun.findUnique({
         where: { id: body.batchId as string },
       });
       expect(batchRun.errorCount).toBe(1);
-      expect((batchRun.errors as Record<string, string>).FAKE).toBe('No data returned');
+      expect((batchRun.errors as Record<string, string>).FAKE).toBe(
+        'No data returned',
+      );
 
-      const fake = await (prisma as any).stockPrice.findUnique({ where: { ticker: 'FAKE' } });
+      const fake = await prisma.stockPrice.findUnique({
+        where: { ticker: 'FAKE' },
+      });
       expect(fake).toBeNull();
     });
 
@@ -140,16 +149,18 @@ describe('Prices Integration', () => {
         .get('/prices/MSFT')
         .expect(200);
 
-      const body = response.body as { ticker: string; price: number; updatedAt: string };
+      const body = response.body as {
+        ticker: string;
+        price: number;
+        updatedAt: string;
+      };
       expect(body.ticker).toBe('MSFT');
       expect(body.price).toBe(420.0);
       expect(body.updatedAt).toBeDefined();
     });
 
     it('should return 404 for a ticker not in the database', async () => {
-      await request(getHttpServer(app))
-        .get('/prices/NOTEXISTS')
-        .expect(404);
+      await request(getHttpServer(app)).get('/prices/NOTEXISTS').expect(404);
     });
   });
 
@@ -170,7 +181,7 @@ describe('Prices Integration', () => {
       expect(body.startedAt).toBeDefined();
       expect(body.finishedAt).toBeDefined();
 
-      const dbRecord = await (prisma as any).priceBatchRun.findUnique({
+      const dbRecord = await prisma.priceBatchRun.findUnique({
         where: { id: body.id },
       });
       expect(dbRecord).not.toBeNull();

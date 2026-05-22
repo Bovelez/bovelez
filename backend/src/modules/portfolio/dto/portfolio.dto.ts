@@ -29,7 +29,9 @@ export class PortfolioPositionDto {
       const costBasis = init.avgCost * init.quantity;
       this.pnl = this.currentValue - costBasis;
       this.pnlPercent =
-        costBasis === 0 ? 0 : ((this.currentValue - costBasis) / costBasis) * 100;
+        costBasis === 0
+          ? 0
+          : ((this.currentValue - costBasis) / costBasis) * 100;
     }
   }
 }
@@ -41,7 +43,10 @@ export class PortfolioDto {
 
   constructor(positions: PortfolioPositionDto[], lastPriceUpdate: Date | null) {
     this.positions = positions;
-    this.totalValue = positions.reduce((sum, p) => sum + (p.currentValue ?? 0), 0);
+    this.totalValue = positions.reduce(
+      (sum, p) => sum + (p.currentValue ?? 0),
+      0,
+    );
     this.lastPriceUpdate = lastPriceUpdate;
   }
 }

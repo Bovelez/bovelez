@@ -11,25 +11,26 @@ export class EdgarRepository implements IEdgarRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async upsertCompany(company: IEdgarCompany): Promise<EdgarCompanyRecord> {
-    const client = this.prisma as any;
-    return client.edgarCompany.upsert({
+    return this.prisma.edgarCompany.upsert({
       where: { cik: company.cik },
       update: { ticker: company.ticker.toUpperCase(), name: company.name },
-      create: { cik: company.cik, ticker: company.ticker.toUpperCase(), name: company.name },
-    }) as Promise<EdgarCompanyRecord>;
+      create: {
+        cik: company.cik,
+        ticker: company.ticker.toUpperCase(),
+        name: company.name,
+      },
+    });
   }
 
   async findByTicker(ticker: string): Promise<EdgarCompanyRecord | null> {
-    const client = this.prisma as any;
-    return client.edgarCompany.findUnique({
+    return this.prisma.edgarCompany.findUnique({
       where: { ticker: ticker.toUpperCase() },
-    }) as Promise<EdgarCompanyRecord | null>;
+    });
   }
 
   async findAll(): Promise<EdgarCompanyRecord[]> {
-    const client = this.prisma as any;
-    return client.edgarCompany.findMany({
+    return this.prisma.edgarCompany.findMany({
       orderBy: { ticker: 'asc' },
-    }) as Promise<EdgarCompanyRecord[]>;
+    });
   }
 }

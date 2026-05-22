@@ -49,10 +49,10 @@ describe('EdgarService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EdgarService,
-        { provide: EDGAR_REPOSITORY,       useValue: mockRepository },
-        { provide: EDGAR_CLIENT,           useValue: mockEdgarClient },
-        { provide: EDGAR_SEARCH_CLIENT,    useValue: mockSearchClient },
-        { provide: EDGAR_FACTS_CLIENT,     useValue: mockFactsClient },
+        { provide: EDGAR_REPOSITORY, useValue: mockRepository },
+        { provide: EDGAR_CLIENT, useValue: mockEdgarClient },
+        { provide: EDGAR_SEARCH_CLIENT, useValue: mockSearchClient },
+        { provide: EDGAR_FACTS_CLIENT, useValue: mockFactsClient },
         { provide: EDGAR_SUBMISSIONS_CLIENT, useValue: mockSubmissionsClient },
       ],
     }).compile();
@@ -93,13 +93,19 @@ describe('EdgarService', () => {
     it('should throw NotFoundException when ticker not found', async () => {
       mockRepository.findByTicker.mockResolvedValue(null);
 
-      await expect(service.getCompany('FAKE')).rejects.toThrow(NotFoundException);
+      await expect(service.getCompany('FAKE')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('syncCompany', () => {
     it('should fetch from EDGAR and upsert in repository', async () => {
-      const edgarCompany = { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' };
+      const edgarCompany = {
+        cik: '320193',
+        ticker: 'AAPL',
+        name: 'Apple Inc.',
+      };
       mockEdgarClient.getCompanyByTicker.mockResolvedValue(edgarCompany);
       mockRepository.upsertCompany.mockResolvedValue(mockCompany);
 
@@ -114,7 +120,11 @@ describe('EdgarService', () => {
   describe('getMetrics', () => {
     it('should sync company and return metrics for given quarters', async () => {
       const metrics = { revenues: [], netIncome: [] };
-      const edgarCompany = { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' };
+      const edgarCompany = {
+        cik: '320193',
+        ticker: 'AAPL',
+        name: 'Apple Inc.',
+      };
       mockEdgarClient.getCompanyByTicker.mockResolvedValue(edgarCompany);
       mockRepository.upsertCompany.mockResolvedValue(mockCompany);
       mockFactsClient.getMetrics.mockResolvedValue(metrics);
@@ -130,7 +140,11 @@ describe('EdgarService', () => {
   describe('getFilings', () => {
     it('should sync company and return filings', async () => {
       const filings = [{ type: '10-K', date: '2024-01-01' }];
-      const edgarCompany = { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' };
+      const edgarCompany = {
+        cik: '320193',
+        ticker: 'AAPL',
+        name: 'Apple Inc.',
+      };
       mockEdgarClient.getCompanyByTicker.mockResolvedValue(edgarCompany);
       mockRepository.upsertCompany.mockResolvedValue(mockCompany);
       mockSubmissionsClient.getFilings.mockResolvedValue(filings);

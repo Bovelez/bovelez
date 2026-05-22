@@ -8,7 +8,7 @@ import {
   Min,
 } from 'class-validator';
 
-export class SellPositionInput {
+export class BuyTransactionInput {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)

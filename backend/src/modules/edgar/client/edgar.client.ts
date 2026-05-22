@@ -1,4 +1,9 @@
-import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { IEdgarClient, IEdgarCompany } from '../interfaces/edgar.interface';
@@ -11,7 +16,8 @@ interface SecTickerEntry {
 
 @Injectable()
 export class EdgarClient implements IEdgarClient {
-  private readonly tickersUrl = 'https://www.sec.gov/files/company_tickers.json';
+  private readonly tickersUrl =
+    'https://www.sec.gov/files/company_tickers.json';
   private readonly headers = {
     'User-Agent': 'PortfolioTracker contact@portfolio.com',
   };
