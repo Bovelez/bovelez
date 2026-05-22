@@ -16,6 +16,7 @@ export interface PriceBatchRunRecord {
 export interface IPricesRepository {
   upsertPrice(ticker: string, price: number): Promise<StockPriceRecord>;
   findPrice(ticker: string): Promise<StockPriceRecord | null>;
+  findPricesByTickers(tickers: string[]): Promise<StockPriceRecord[]>;
   findAllPrices(): Promise<StockPriceRecord[]>;
   createBatchRun(): Promise<PriceBatchRunRecord>;
   finishBatchRun(

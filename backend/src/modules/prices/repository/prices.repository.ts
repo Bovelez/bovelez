@@ -22,6 +22,13 @@ export class PricesRepository implements IPricesRepository {
     return this.prisma.stockPrice.findUnique({ where: { ticker } });
   }
 
+  findPricesByTickers(tickers: string[]): Promise<StockPriceRecord[]> {
+    return this.prisma.stockPrice.findMany({
+      where: { ticker: { in: tickers } },
+      orderBy: { ticker: 'asc' },
+    });
+  }
+
   findAllPrices(): Promise<StockPriceRecord[]> {
     return this.prisma.stockPrice.findMany({ orderBy: { ticker: 'asc' } });
   }

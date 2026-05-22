@@ -24,73 +24,29 @@ export class TransactionsService {
     userId: string,
     input: BuyTransactionInput,
   ): Promise<TransactionDto> {
-    const valid = await this.edgarService.isValidTicker(input.ticker);
-    if (!valid) {
-      throw new BadRequestException('Ticker no válido');
-    }
-
-    const priceRecord = await this.pricesService.getPrice(input.ticker);
-    if (!priceRecord) {
-      throw new BadRequestException(
-        `No hay precio registrado para ${input.ticker}. Ejecutá el batch de precios primero.`,
-      );
-    }
-
-    const tx = await this.transactionsRepository.createTransaction(
-      userId,
-      input.ticker,
-      TransactionType.BUY,
-      input.quantity,
-      priceRecord.price,
-      input.date,
-    );
-
-    return new TransactionDto(tx);
+    await this.validateTicker(input.ticker);
+    const price = await this.getLatestPriceOrThrow(input.ticker);
+    const transaction = await this.executeBuyTransaction(userId, input, price);
+    return new TransactionDto(transaction);
   }
 
   async sell(
     userId: string,
     input: SellTransactionInput,
   ): Promise<TransactionDto> {
-    const position = await this.getOpenPosition(userId, input.ticker);
-
-    if (!position) {
-      throw new BadRequestException(
-        `No tenés posición abierta en ${input.ticker}`,
-      );
-    }
-
-    if (input.quantity > position.quantity) {
-      throw new BadRequestException(
-        `Querés vender ${input.quantity} acciones pero solo tenés ${position.quantity}`,
-      );
-    }
-
-    const priceRecord = await this.pricesService.getPrice(input.ticker);
-    if (!priceRecord) {
-      throw new BadRequestException(
-        `No hay precio registrado para ${input.ticker}. Ejecutá el batch de precios primero.`,
-      );
-    }
-
-    const tx = await this.transactionsRepository.createTransaction(
+    const currentQuantity = await this.validatePositionAndGetQuantity(
+      userId,
+      input,
+    );
+    const price = await this.getLatestPriceOrThrow(input.ticker);
+    const transaction = await this.executeSellTransaction(userId, input, price);
+    await this.cleanupEmptyPosition(
       userId,
       input.ticker,
-      TransactionType.SELL,
+      currentQuantity,
       input.quantity,
-      priceRecord.price,
-      input.date,
     );
-
-    const remainingQuantity = position.quantity - input.quantity;
-    if (this.isZeroQuantity(remainingQuantity)) {
-      await this.transactionsRepository.deleteTransactionsByUserAndTicker(
-        userId,
-        input.ticker,
-      );
-    }
-
-    return new TransactionDto(tx);
+    return new TransactionDto(transaction);
   }
 
   async getOpenPositions(userId: string): Promise<IPosition[]> {
@@ -121,7 +77,92 @@ export class TransactionsService {
         userId,
         normalizedTicker,
       );
-    return tickerTransactions.map((tx) => new TransactionDto(tx));
+    return tickerTransactions.map(
+      (transaction) => new TransactionDto(transaction),
+    );
+  }
+
+  private async validateTicker(ticker: string): Promise<void> {
+    const isValid = await this.edgarService.isValidTicker(ticker);
+    if (!isValid) {
+      throw new BadRequestException('Ticker no válido');
+    }
+  }
+
+  private async getLatestPriceOrThrow(ticker: string): Promise<number> {
+    const priceRecord = await this.pricesService.getPrice(ticker);
+    if (!priceRecord) {
+      throw new BadRequestException(
+        `No hay precio registrado para ${ticker}. Ejecutá el batch de precios primero.`,
+      );
+    }
+    return priceRecord.price;
+  }
+
+  private async executeBuyTransaction(
+    userId: string,
+    input: BuyTransactionInput,
+    price: number,
+  ): Promise<Transaction> {
+    return this.transactionsRepository.createTransaction(
+      userId,
+      input.ticker,
+      TransactionType.BUY,
+      input.quantity,
+      price,
+      input.date,
+    );
+  }
+  private async validatePositionAndGetQuantity(
+    userId: string,
+    input: SellTransactionInput,
+  ): Promise<number> {
+    const position = await this.getOpenPosition(userId, input.ticker);
+
+    if (!position) {
+      throw new BadRequestException(
+        `No tenés posición abierta en ${input.ticker}`,
+      );
+    }
+
+    if (input.quantity > position.quantity) {
+      throw new BadRequestException(
+        `Querés vender ${input.quantity} acciones pero solo tenés ${position.quantity}`,
+      );
+    }
+
+    return position.quantity;
+  }
+
+  private async executeSellTransaction(
+    userId: string,
+    input: SellTransactionInput,
+    price: number,
+  ): Promise<Transaction> {
+    return this.transactionsRepository.createTransaction(
+      userId,
+      input.ticker,
+      TransactionType.SELL,
+      input.quantity,
+      price,
+      input.date,
+    );
+  }
+
+  private async cleanupEmptyPosition(
+    userId: string,
+    ticker: string,
+    currentQuantity: number,
+    soldQuantity: number,
+  ): Promise<void> {
+    const remainingQuantity = currentQuantity - soldQuantity;
+
+    if (this.isZeroQuantity(remainingQuantity)) {
+      await this.transactionsRepository.deleteTransactionsByUserAndTicker(
+        userId,
+        ticker,
+      );
+    }
   }
 
   private buildPositionsByTicker(transactions: Transaction[]): IPosition[] {

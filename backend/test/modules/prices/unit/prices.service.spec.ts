@@ -19,6 +19,7 @@ const mockRepository = {
   finishBatchRun: jest.fn(),
   upsertPrice: jest.fn(),
   findPrice: jest.fn(),
+  findPricesByTickers: jest.fn(),
   findAllPrices: jest.fn(),
   findLastBatchRun: jest.fn(),
 };
@@ -126,6 +127,38 @@ describe('PricesService', () => {
       const result = await service.getPrice('FAKE');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getPricesByTickers', () => {
+    it('returns a price map for normalized unique tickers', async () => {
+      mockRepository.findPricesByTickers.mockResolvedValue([
+        { ticker: 'AAPL', price: 200.5, updatedAt: new Date() },
+      ]);
+
+      const result = await service.getPricesByTickers([
+        'aapl',
+        ' AAPL ',
+        'MSFT',
+        '',
+      ]);
+
+      expect(mockRepository.findPricesByTickers.mock.calls[0]).toEqual([
+        ['AAPL', 'MSFT'],
+      ]);
+      expect(result).toEqual(
+        new Map<string, number | null>([
+          ['AAPL', 200.5],
+          ['MSFT', null],
+        ]),
+      );
+    });
+
+    it('returns an empty map when no tickers are provided', async () => {
+      const result = await service.getPricesByTickers([]);
+
+      expect(mockRepository.findPricesByTickers.mock.calls).toHaveLength(0);
+      expect(result).toEqual(new Map());
     });
   });
 

@@ -10,7 +10,7 @@ describe('PortfolioService', () => {
     Pick<TransactionsService, 'getOpenPositions'>
   >;
   let pricesService: jest.Mocked<
-    Pick<PricesService, 'getPrice' | 'getLastBatchRun'>
+    Pick<PricesService, 'getPricesByTickers' | 'getLastBatchRun'>
   >;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('PortfolioService', () => {
     };
 
     pricesService = {
-      getPrice: jest.fn(),
+      getPricesByTickers: jest.fn(),
       getLastBatchRun: jest.fn(),
     };
 
@@ -41,11 +41,9 @@ describe('PortfolioService', () => {
       errorCount: 0,
       errors: null,
     });
-    pricesService.getPrice.mockResolvedValue({
-      ticker: 'AAPL',
-      price: 250,
-      updatedAt: new Date(),
-    });
+    pricesService.getPricesByTickers.mockResolvedValue(
+      new Map([['AAPL', 250]]),
+    );
 
     const portfolio = await service.getPortfolio(USER_ID);
 
@@ -55,6 +53,7 @@ describe('PortfolioService', () => {
     expect(pos.currentPrice).toBe(250);
     expect(pos.pnl).toBe((250 - 200) * 10);
     expect(pos.hasPrice).toBe(true);
+    expect(pricesService.getPricesByTickers.mock.calls[0]).toEqual([['AAPL']]);
   });
 
   it('returns positions with null P&L when no price is stored', async () => {
@@ -62,7 +61,9 @@ describe('PortfolioService', () => {
       { ticker: 'MSFT', quantity: 5, avgCost: 300 },
     ]);
     pricesService.getLastBatchRun.mockResolvedValue(null);
-    pricesService.getPrice.mockResolvedValue(null);
+    pricesService.getPricesByTickers.mockResolvedValue(
+      new Map([['MSFT', null]]),
+    );
 
     const portfolio = await service.getPortfolio(USER_ID);
 
@@ -79,17 +80,12 @@ describe('PortfolioService', () => {
       { ticker: 'MSFT', quantity: 5, avgCost: 300 },
     ]);
     pricesService.getLastBatchRun.mockResolvedValue(null);
-    pricesService.getPrice
-      .mockResolvedValueOnce({
-        ticker: 'AAPL',
-        price: 250,
-        updatedAt: new Date(),
-      })
-      .mockResolvedValueOnce({
-        ticker: 'MSFT',
-        price: 400,
-        updatedAt: new Date(),
-      });
+    pricesService.getPricesByTickers.mockResolvedValue(
+      new Map([
+        ['AAPL', 250],
+        ['MSFT', 400],
+      ]),
+    );
 
     const portfolio = await service.getPortfolio(USER_ID);
 
