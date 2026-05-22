@@ -19,12 +19,12 @@ describe('Edgar Integration', () => {
     await app.init();
 
     prisma = new PrismaClient();
-    await (prisma as any).edgarCompany.deleteMany();
+    await prisma.edgarCompany.deleteMany();
   });
 
   afterAll(async () => {
     if (prisma) {
-      await (prisma as any).edgarCompany.deleteMany();
+      await prisma.edgarCompany.deleteMany();
       await prisma.$disconnect();
     }
     if (app) await app.close();
@@ -56,7 +56,7 @@ describe('Edgar Integration', () => {
         .patch('/edgar/companies/AAPL/sync')
         .expect(200);
 
-      const record = await (prisma as any).edgarCompany.findUnique({
+      const record = await prisma.edgarCompany.findUnique({
         where: { ticker: 'AAPL' },
       });
       expect(record).not.toBeNull();
@@ -66,7 +66,7 @@ describe('Edgar Integration', () => {
     }, 15000);
 
     it('should update the record when syncing the same ticker again', async () => {
-      const before = await (prisma as any).edgarCompany.findUnique({
+      const before = await prisma.edgarCompany.findUnique({
         where: { ticker: 'AAPL' },
       });
 
@@ -74,7 +74,7 @@ describe('Edgar Integration', () => {
         .patch('/edgar/companies/AAPL/sync')
         .expect(200);
 
-      const after = await (prisma as any).edgarCompany.findUnique({
+      const after = await prisma.edgarCompany.findUnique({
         where: { ticker: 'AAPL' },
       });
 
@@ -102,7 +102,11 @@ describe('Edgar Integration', () => {
         .get('/edgar/companies/AAPL')
         .expect(200);
 
-      const body = response.body as { ticker: string; cik: string; name: string };
+      const body = response.body as {
+        ticker: string;
+        cik: string;
+        name: string;
+      };
       expect(body.ticker).toBe('AAPL');
       expect(body.cik).toBeDefined();
       expect(body.name).toBeDefined();

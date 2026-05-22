@@ -1,15 +1,7 @@
-//PortfolioPositionDto exists separately from PositionDto is that P&L 
-// can only be calculated when you have a current price, and fetching prices
-//  for every individual GET /portfolio/positions/:id call would be wasteful.
-//  The split makes it explicit in the type system: if you get a PositionDto, 
-// there's no price data; if you get a PortfolioPositionDto, there is.
-
 export class PortfolioPositionDto {
-  id: string;
   ticker: string;
   quantity: number;
-  buyPrice: number;
-  buyDate: Date;
+  avgCost: number;
   currentPrice: number | null;
   currentValue: number | null;
   pnl: number | null;
@@ -17,18 +9,14 @@ export class PortfolioPositionDto {
   hasPrice: boolean;
 
   constructor(init: {
-    id: string;
     ticker: string;
     quantity: number;
-    buyPrice: number;
-    buyDate: Date;
+    avgCost: number;
     currentPrice: number | null;
   }) {
-    this.id = init.id;
     this.ticker = init.ticker;
     this.quantity = init.quantity;
-    this.buyPrice = init.buyPrice;
-    this.buyDate = init.buyDate;
+    this.avgCost = init.avgCost;
     this.currentPrice = init.currentPrice;
     this.hasPrice = init.currentPrice !== null;
 
@@ -38,10 +26,12 @@ export class PortfolioPositionDto {
       this.pnlPercent = null;
     } else {
       this.currentValue = init.currentPrice * init.quantity;
-      const costBasis = init.buyPrice * init.quantity;
+      const costBasis = init.avgCost * init.quantity;
       this.pnl = this.currentValue - costBasis;
       this.pnlPercent =
-        costBasis === 0 ? 0 : ((this.currentValue - costBasis) / costBasis) * 100;
+        costBasis === 0
+          ? 0
+          : ((this.currentValue - costBasis) / costBasis) * 100;
     }
   }
 }
@@ -51,10 +41,7 @@ export class PortfolioDto {
   totalValue: number;
   lastPriceUpdate: Date | null;
 
-  constructor(
-    positions: PortfolioPositionDto[],
-    lastPriceUpdate: Date | null,
-  ) {
+  constructor(positions: PortfolioPositionDto[], lastPriceUpdate: Date | null) {
     this.positions = positions;
     this.totalValue = positions.reduce(
       (sum, p) => sum + (p.currentValue ?? 0),

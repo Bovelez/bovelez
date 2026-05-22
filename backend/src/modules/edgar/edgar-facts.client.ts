@@ -15,10 +15,13 @@ export class EdgarFactsClient implements IEdgarFactsClient {
   };
 
   private readonly conceptMap = {
-    revenue:          ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax'],
-    netIncome:        ['NetIncomeLoss'],
-    eps:              ['EarningsPerShareBasic'],
-    totalAssets:      ['Assets'],
+    revenue: [
+      'Revenues',
+      'RevenueFromContractWithCustomerExcludingAssessedTax',
+    ],
+    netIncome: ['NetIncomeLoss'],
+    eps: ['EarningsPerShareBasic'],
+    totalAssets: ['Assets'],
     totalLiabilities: ['Liabilities'],
   };
 
@@ -34,21 +37,41 @@ export class EdgarFactsClient implements IEdgarFactsClient {
         ),
       );
       const data = response.data;
-      const usGaap = (data?.['facts'] as Record<string, unknown>)?.['us-gaap'] ?? {};
+      const usGaap =
+        (data?.['facts'] as Record<string, unknown>)?.['us-gaap'] ?? {};
 
       return {
         cik,
         name: (data?.['entityName'] as string) ?? '',
         metrics: {
-          revenue:          this.extractMetric(usGaap, this.conceptMap.revenue, quarters),
-          netIncome:        this.extractMetric(usGaap, this.conceptMap.netIncome, quarters),
-          eps:              this.extractMetric(usGaap, this.conceptMap.eps, quarters),
-          totalAssets:      this.extractMetric(usGaap, this.conceptMap.totalAssets, quarters),
-          totalLiabilities: this.extractMetric(usGaap, this.conceptMap.totalLiabilities, quarters),
+          revenue: this.extractMetric(
+            usGaap,
+            this.conceptMap.revenue,
+            quarters,
+          ),
+          netIncome: this.extractMetric(
+            usGaap,
+            this.conceptMap.netIncome,
+            quarters,
+          ),
+          eps: this.extractMetric(usGaap, this.conceptMap.eps, quarters),
+          totalAssets: this.extractMetric(
+            usGaap,
+            this.conceptMap.totalAssets,
+            quarters,
+          ),
+          totalLiabilities: this.extractMetric(
+            usGaap,
+            this.conceptMap.totalLiabilities,
+            quarters,
+          ),
         },
       };
     } catch {
-      throw new HttpException('EDGAR Facts unavailable', HttpStatus.BAD_GATEWAY);
+      throw new HttpException(
+        'EDGAR Facts unavailable',
+        HttpStatus.BAD_GATEWAY,
+      );
     }
   }
 
@@ -57,15 +80,24 @@ export class EdgarFactsClient implements IEdgarFactsClient {
     concepts: string[],
     quarters: number,
   ): IEdgarMetricPoint[] {
-    const gaap = usGaap as Record<string, { units?: Record<string, unknown[]> }>;
+    const gaap = usGaap as Record<
+      string,
+      { units?: Record<string, unknown[]> }
+    >;
     for (const concept of concepts) {
       const units = gaap?.[concept]?.units;
       if (!units) continue;
 
-      const entries =
-        (units['USD'] ?? units['shares'] ?? units['pure'] ?? []) as {
-          form: string; fp?: string; fy?: number; val: number; filed: string;
-        }[];
+      const entries = (units['USD'] ??
+        units['shares'] ??
+        units['pure'] ??
+        []) as {
+        form: string;
+        fp?: string;
+        fy?: number;
+        val: number;
+        filed: string;
+      }[];
 
       const filtered = entries
         .filter((e) => e.form === '10-Q' || e.form === '10-K')

@@ -7,6 +7,7 @@ import { UsersModule } from './modules/users/users.module';
 import { PricesModule } from './modules/prices/prices.module';
 import { EdgarModule } from './modules/edgar/edgar.module';
 import { PortfolioModule } from './modules/portfolio/portfolio.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -14,8 +15,8 @@ import { PortfolioModule } from './modules/portfolio/portfolio.module';
     AuthModule,
     UsersModule,
     EdgarModule,
+    TransactionsModule,
     PortfolioModule,
-    EdgarModule,
     PricesModule,
   ],
   controllers: [],

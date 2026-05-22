@@ -1,4 +1,11 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { IsArray, IsString, ArrayNotEmpty } from 'class-validator';
 import { PricesService } from '../service/prices.service';
 import { Public } from '../../auth/decorators/public.decorator';
@@ -33,7 +40,8 @@ export class PricesController {
   @Get(':ticker')
   async getOne(@Param('ticker') ticker: string) {
     const price = await this.service.getPrice(ticker);
-    if (!price) throw new NotFoundException(`No price found for ticker ${ticker}`);
+    if (!price)
+      throw new NotFoundException(`No price found for ticker ${ticker}`);
     return price;
   }
 }

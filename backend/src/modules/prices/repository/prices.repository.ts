@@ -1,42 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import type { IPricesRepository, StockPriceRecord, PriceBatchRunRecord } from './prices.repository.interface';
+import type {
+  IPricesRepository,
+  StockPriceRecord,
+  PriceBatchRunRecord,
+} from './prices.repository.interface';
 
 @Injectable()
 export class PricesRepository implements IPricesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private get db(): any {
-    return this.prisma as any;
-  }
-
-  async upsertPrice(ticker: string, price: number): Promise<StockPriceRecord> {
-    return this.db.stockPrice.upsert({
+  upsertPrice(ticker: string, price: number): Promise<StockPriceRecord> {
+    return this.prisma.stockPrice.upsert({
       where: { ticker },
       update: { price },
       create: { ticker, price },
     });
   }
 
-  async findPrice(ticker: string): Promise<StockPriceRecord | null> {
-    return this.db.stockPrice.findUnique({ where: { ticker } });
+  findPrice(ticker: string): Promise<StockPriceRecord | null> {
+    return this.prisma.stockPrice.findUnique({ where: { ticker } });
   }
 
-  async findAllPrices(): Promise<StockPriceRecord[]> {
-    return this.db.stockPrice.findMany({ orderBy: { ticker: 'asc' } });
+  findPricesByTickers(tickers: string[]): Promise<StockPriceRecord[]> {
+    return this.prisma.stockPrice.findMany({
+      where: { ticker: { in: tickers } },
+      orderBy: { ticker: 'asc' },
+    });
   }
 
-  async createBatchRun(): Promise<PriceBatchRunRecord> {
-    return this.db.priceBatchRun.create({ data: {} });
+  findAllPrices(): Promise<StockPriceRecord[]> {
+    return this.prisma.stockPrice.findMany({ orderBy: { ticker: 'asc' } });
   }
 
-  async finishBatchRun(
+  createBatchRun(): Promise<PriceBatchRunRecord> {
+    return this.prisma.priceBatchRun.create({ data: {} });
+  }
+
+  finishBatchRun(
     id: string,
     tickerCount: number,
     errorCount: number,
     errors: Record<string, string>,
   ): Promise<PriceBatchRunRecord> {
-    return this.db.priceBatchRun.update({
+    return this.prisma.priceBatchRun.update({
       where: { id },
       data: {
         finishedAt: new Date(),
@@ -47,8 +54,8 @@ export class PricesRepository implements IPricesRepository {
     });
   }
 
-  async findLastBatchRun(): Promise<PriceBatchRunRecord | null> {
-    return this.db.priceBatchRun.findFirst({
+  findLastBatchRun(): Promise<PriceBatchRunRecord | null> {
+    return this.prisma.priceBatchRun.findFirst({
       orderBy: { startedAt: 'desc' },
     });
   }

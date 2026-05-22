@@ -5,7 +5,10 @@ import { PricesService } from './service/prices.service';
 import { PricesRepository } from './repository/prices.repository';
 import { YahooFinanceClient } from './client/yahoo-finance.client';
 import { PrismaService } from '../database/prisma.service';
-import { YAHOO_FINANCE_CLIENT, PRICES_REPOSITORY } from './interfaces/prices.interface';
+import {
+  YAHOO_FINANCE_CLIENT,
+  PRICES_REPOSITORY,
+} from './interfaces/prices.interface';
 
 @Module({
   imports: [HttpModule],
