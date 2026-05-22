@@ -17,3 +17,20 @@ To override the API URL:
 ```bash
 VITE_API_URL=http://localhost:8080 docker compose up --build frontend
 ```
+
+## Semantic versioning
+
+Releases are automated with `semantic-release` from commits merged into `main`.
+Use Conventional Commits so the CI release job can calculate the next version:
+
+- `fix: ...` creates a patch release, for example `1.2.3` -> `1.2.4`.
+- `feat: ...` creates a minor release, for example `1.2.3` -> `1.3.0`.
+- `feat!: ...`, `fix!: ...`, or a commit body containing `BREAKING CHANGE:` creates a major release, for example `1.2.3` -> `2.0.0`.
+
+The release workflow updates `backend/package.json`, `frontend/package.json`,
+their lockfiles, `CHANGELOG.md`, creates a `vX.Y.Z` tag, and publishes a GitHub
+release. To preview the next version locally, run:
+
+```bash
+npm run release:dry-run
+```
