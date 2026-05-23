@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Database, ShieldCheck } from "lucide-react";
+import { Database, ShieldCheck } from "lucide-react";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
+import { TransactionPanel } from "../../components/transactions/TransactionPanel";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
@@ -93,65 +94,10 @@ export default function Portfolio() {
           onClearSelection={() => setSelectedPrice(null)}
         />
 
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-          <div className="border-b border-[var(--border)] px-5 py-4">
-            <h2 className="text-[17px] text-[var(--text)]">Acción lista</h2>
-            <p className="text-[12px] text-[var(--text-muted)]">
-              Este bloque después se conecta con compra y venta.
-            </p>
-          </div>
-
-          <div className="space-y-4 px-5 py-4">
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] p-4">
-              <p className="text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-                Ticker
-              </p>
-              <p className="mt-1 font-mono text-[24px] font-bold text-[var(--text)]">
-                {selectedPrice?.ticker ?? "—"}
-              </p>
-              <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-                {selectedPrice
-                  ? `Actualizado ${new Date(
-                      selectedPrice.updatedAt,
-                    ).toLocaleString()}`
-                  : "Sin selección"}
-              </p>
-              <p className="mt-3 text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-                Precio actual
-              </p>
-              <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-                {!selectedPrice
-                  ? "Sin precio"
-                  : `$${selectedPrice.price.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}
-              </p>
-              <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                Batch: {lastPriceRunQuery.data?.finishedAt ?? "sin actualizar"}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                disabled={!selectedPrice}
-                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowDownLeft size={15} />
-                Comprar
-              </button>
-              <button
-                type="button"
-                disabled={!selectedPrice}
-                className="flex items-center justify-center gap-2 rounded-lg bg-rose-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowUpRight size={15} />
-                Vender
-              </button>
-            </div>
-          </div>
-        </section>
+        <TransactionPanel
+          selectedPrice={selectedPrice}
+          lastPriceRunFinishedAt={lastPriceRunQuery.data?.finishedAt}
+        />
       </div>
     </div>
   );
