@@ -1,3 +1,5 @@
+import type {StockPrice} from "./prices.types.ts";
+
 export type TransactionType = "BUY" | "SELL";
 
 export type Transaction = {
@@ -14,4 +16,9 @@ export type TransactionInput = {
   ticker: string;
   quantity: number;
   date: string;
+};
+
+export type TransactionPanelProps = {
+  selectedPrice: StockPrice | null;
+  lastPriceRunFinishedAt?: string | null;
 };
