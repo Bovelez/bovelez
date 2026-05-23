@@ -45,6 +45,7 @@ export const EDGAR_FACTS_CLIENT = 'EDGAR_FACTS_CLIENT';
 export const EDGAR_SUBMISSIONS_CLIENT = 'EDGAR_SUBMISSIONS_CLIENT';
 
 export interface IEdgarClient {
+  getCompanies(): Promise<IEdgarCompany[]>;
   getCompanyByTicker(ticker: string): Promise<IEdgarCompany>;
 }
 

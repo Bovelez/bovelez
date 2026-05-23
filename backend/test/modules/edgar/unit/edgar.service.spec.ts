@@ -9,6 +9,7 @@ import {
 } from '../../../../src/modules/edgar/interfaces/edgar.interface';
 import { EDGAR_REPOSITORY } from '../../../../src/modules/edgar/repository/edgar.repository.interface';
 import { QueryMetricsDto } from '../../../../src/modules/edgar/dto/query-metrics.dto';
+import { PricesService } from '../../../../src/modules/prices/service/prices.service';
 
 const mockCompany = {
   id: '1',
@@ -25,6 +26,7 @@ const mockRepository = {
 };
 
 const mockEdgarClient = {
+  getCompanies: jest.fn(),
   getCompanyByTicker: jest.fn(),
 };
 
@@ -38,6 +40,11 @@ const mockFactsClient = {
 
 const mockSubmissionsClient = {
   getFilings: jest.fn(),
+};
+
+const mockPricesService = {
+  getAllPrices: jest.fn(),
+  getPrice: jest.fn(),
 };
 
 describe('EdgarService', () => {
@@ -54,6 +61,7 @@ describe('EdgarService', () => {
         { provide: EDGAR_SEARCH_CLIENT, useValue: mockSearchClient },
         { provide: EDGAR_FACTS_CLIENT, useValue: mockFactsClient },
         { provide: EDGAR_SUBMISSIONS_CLIENT, useValue: mockSubmissionsClient },
+        { provide: PricesService, useValue: mockPricesService },
       ],
     }).compile();
 
@@ -77,6 +85,29 @@ describe('EdgarService', () => {
       const result = await service.searchCompanies('xyznotfound');
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getAllCompanies', () => {
+    it('should return EDGAR companies with registered prices', async () => {
+      mockEdgarClient.getCompanies.mockResolvedValue([
+        { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' },
+        { cik: '789019', ticker: 'MSFT', name: 'Microsoft Corp.' },
+        { cik: '123456', ticker: 'FAKE', name: 'Fake Corp.' },
+      ]);
+      mockPricesService.getAllPrices.mockResolvedValue([
+        { ticker: 'AAPL', price: 200.5, updatedAt: new Date() },
+        { ticker: 'MSFT', price: 420, updatedAt: new Date() },
+      ]);
+
+      const result = await service.getAllCompanies();
+
+      expect(mockEdgarClient.getCompanies).toHaveBeenCalled();
+      expect(mockPricesService.getAllPrices).toHaveBeenCalled();
+      expect(result).toEqual([
+        { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' },
+        { cik: '789019', ticker: 'MSFT', name: 'Microsoft Corp.' },
+      ]);
     });
   });
 
@@ -114,6 +145,52 @@ describe('EdgarService', () => {
       expect(mockEdgarClient.getCompanyByTicker).toHaveBeenCalledWith('AAPL');
       expect(mockRepository.upsertCompany).toHaveBeenCalledWith(edgarCompany);
       expect(result).toEqual(mockCompany);
+    });
+  });
+
+  describe('isValidTicker', () => {
+    it('should return true when ticker exists in repository and has price', async () => {
+      mockPricesService.getPrice.mockResolvedValue({
+        ticker: 'AAPL',
+        price: 200.5,
+        updatedAt: new Date(),
+      });
+      mockRepository.findByTicker.mockResolvedValue(mockCompany);
+
+      const result = await service.isValidTicker('aapl');
+
+      expect(mockPricesService.getPrice).toHaveBeenCalledWith('AAPL');
+      expect(mockRepository.findByTicker).toHaveBeenCalledWith('AAPL');
+      expect(result).toBe(true);
+    });
+
+    it('should return true when ticker exists in EDGAR and has price', async () => {
+      mockPricesService.getPrice.mockResolvedValue({
+        ticker: 'MSFT',
+        price: 420,
+        updatedAt: new Date(),
+      });
+      mockRepository.findByTicker.mockResolvedValue(null);
+      mockEdgarClient.getCompanyByTicker.mockResolvedValue({
+        cik: '789019',
+        ticker: 'MSFT',
+        name: 'Microsoft Corp.',
+      });
+
+      const result = await service.isValidTicker('MSFT');
+
+      expect(mockEdgarClient.getCompanyByTicker).toHaveBeenCalledWith('MSFT');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when ticker has no registered price', async () => {
+      mockPricesService.getPrice.mockResolvedValue(null);
+
+      const result = await service.isValidTicker('FAKE');
+
+      expect(mockRepository.findByTicker).not.toHaveBeenCalled();
+      expect(mockEdgarClient.getCompanyByTicker).not.toHaveBeenCalled();
+      expect(result).toBe(false);
     });
   });
 

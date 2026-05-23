@@ -8,6 +8,7 @@ import { EdgarSearchClient } from './edgar-search.client';
 import { EdgarFactsClient } from './edgar-facts.client';
 import { EdgarSubmissionsClient } from './edgar-submissions.client';
 import { PrismaService } from '../database/prisma.service';
+import { PricesModule } from '../prices/prices.module';
 import {
   EDGAR_CLIENT,
   EDGAR_SEARCH_CLIENT,
@@ -17,7 +18,7 @@ import {
 import { EDGAR_REPOSITORY } from './repository/edgar.repository.interface';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, PricesModule],
   controllers: [EdgarController],
   providers: [
     EdgarService,

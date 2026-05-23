@@ -3,6 +3,7 @@ import Login from "../pages/login/Login";
 import Register from "../pages/register/Register";
 import Landing from "../pages/landing/Landing";
 import Dashboard from "../pages/dashboard/Dashboard";
+import Portfolio from "../pages/portfolio/Portfolio";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/app/dashboard" replace /> },
           { path: "dashboard", element: <Dashboard /> },
+          { path: "portfolio", element: <Portfolio /> },
         ],
       },
     ],
