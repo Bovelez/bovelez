@@ -1,5 +1,5 @@
-import apiClient from "../apiClient";
-import type { Transaction, TransactionInput } from "../../types/transactions.types";
+import apiClient from "./apiClient";
+import type { Transaction, TransactionInput } from "../types/transactions.types";
 
 export async function buyTransaction(
   input: TransactionInput,

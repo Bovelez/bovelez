@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Database, ShieldCheck } from "lucide-react";
+import { ActiveShares } from "../../components/portfolio/ActiveShares";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
 import { TransactionPanel } from "../../components/transactions/TransactionPanel";
+import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
@@ -13,11 +15,13 @@ function errorLabel(error: unknown): string | undefined {
 }
 
 export default function Portfolio() {
+  const portfolioQuery = usePortfolio();
   const pricesQuery = useStockPrices();
   const lastPriceRunQuery = useLastPriceRun();
   const prices = pricesQuery.data ?? [];
   const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
   const marketError = errorLabel(pricesQuery.error);
+  const portfolioError = errorLabel(portfolioQuery.error);
 
   return (
     <div
@@ -97,6 +101,14 @@ export default function Portfolio() {
         <TransactionPanel
           selectedPrice={selectedPrice}
           lastPriceRunFinishedAt={lastPriceRunQuery.data?.finishedAt}
+        />
+      </div>
+
+      <div className="relative mt-5">
+        <ActiveShares
+          portfolio={portfolioQuery.data}
+          isLoading={portfolioQuery.isLoading}
+          errorMessage={portfolioError}
         />
       </div>
     </div>

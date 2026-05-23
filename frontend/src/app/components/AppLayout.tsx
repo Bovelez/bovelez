@@ -14,6 +14,9 @@ import {
   Receipt,
 } from "lucide-react";
 import { useUser, useLogout } from "../../hooks/auth/useAuth";
+import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
+import { useStockPrices } from "../../hooks/prices/useStockPrices";
+import { useUpdateStockPrices } from "../../hooks/prices/useUpdateStockPrices";
 import { useDeleteAccount } from "../../hooks/user/useDeleteAccount";
 import { handleError } from "../../hooks/auth/utils/handlerError";
 import { BrandText } from "../../components/ui/BrandText";
@@ -32,6 +35,9 @@ export function AppLayout() {
   const { data: user } = useUser();
   const logout    = useLogout();
   const deleteAccount = useDeleteAccount();
+  const pricesQuery = useStockPrices();
+  const lastPriceRunQuery = useLastPriceRun();
+  const updateStockPrices = useUpdateStockPrices();
 
   const [searchQuery,  setSearchQuery]  = useState("");
   const [sidebarOpen,  setSidebarOpen]  = useState(true);
@@ -88,7 +94,22 @@ export function AppLayout() {
     }
   };
 
-  const lastPriceUpdate = "—";
+  const priceTickers = (pricesQuery.data ?? []).map((price) => price.ticker);
+  const lastPriceUpdate = lastPriceRunQuery.data?.finishedAt
+    ? new Date(lastPriceRunQuery.data.finishedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
+  const canUpdatePrices =
+    priceTickers.length > 0 &&
+    !pricesQuery.isLoading &&
+    !updateStockPrices.isPending;
+
+  const handleUpdatePrices = () => {
+    if (!canUpdatePrices) return;
+    updateStockPrices.mutate({ tickers: priceTickers });
+  };
 
   const avatar =
     (user?.name
@@ -199,15 +220,29 @@ export function AppLayout() {
           <div className="flex-1" />
 
           {/* Last price update */}
-          <div
+          <button
+            type="button"
             data-testid="header-price-update"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)]"
-            title="Última actualización del proceso batch (Yahoo Finance)"
+            onClick={handleUpdatePrices}
+            disabled={!canUpdatePrices}
+            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 transition-colors hover:bg-[var(--surface-2)] disabled:cursor-not-allowed disabled:opacity-60"
+            title={
+              priceTickers.length === 0
+                ? "No hay tickers cargados para actualizar"
+                : "Actualizar precios desde Yahoo Finance"
+            }
           >
-            <RefreshCw size={13} className="text-emerald-400" />
+            <RefreshCw
+              size={13}
+              className={`text-emerald-400 ${
+                updateStockPrices.isPending ? "animate-spin" : ""
+              }`}
+            />
             <span className="text-[11px] text-[var(--text-muted)]">Precios:</span>
-            <span className="text-[11px] text-[var(--text)] font-mono">{lastPriceUpdate}</span>
-          </div>
+            <span className="font-mono text-[11px] text-[var(--text)]">
+              {updateStockPrices.isPending ? "..." : lastPriceUpdate}
+            </span>
+          </button>
 
           {/* User menu */}
           <div className="relative" ref={userMenuRef}>

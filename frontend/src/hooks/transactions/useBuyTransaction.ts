@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { buyTransaction } from "../../api/transactions/transactions.api";
+import { buyTransaction } from "../../api/transactions.api";
+import { portfolioKeys } from "../portfolio/queryKeys";
 import { transactionKeys } from "./queryKeys";
 import type { TransactionInput } from "../../types/transactions.types";
 
@@ -12,6 +13,7 @@ export function useBuyTransaction() {
       void queryClient.invalidateQueries({
         queryKey: transactionKeys.byTicker(transaction.ticker),
       });
+      void queryClient.invalidateQueries({ queryKey: portfolioKeys.detail() });
     },
   });
 }

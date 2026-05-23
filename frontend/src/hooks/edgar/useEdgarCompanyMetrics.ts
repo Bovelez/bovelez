@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getEdgarCompanyMetrics } from "../../api/edgar/edgar.api";
+import { getEdgarCompanyMetrics } from "../../api/edgar.api";
 import { edgarKeys } from "./queryKeys";
 
 export function useEdgarCompanyMetrics(ticker: string | null, quarters = 4) {

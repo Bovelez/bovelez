@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Search, ShieldCheck, X } from "lucide-react";
-import type { StockPrice } from "../../types/prices.types";
+import type {StockPrice, TickerSelectProps} from "../../types/prices.types";
 
-type TickerSelectProps = {
-  prices: StockPrice[];
-  selectedPrice: StockPrice | null;
-  isLoading: boolean;
-  errorMessage?: string;
-  onSelectPrice: (price: StockPrice) => void;
-  onClearSelection?: () => void;
-};
+
 
 const SUGGESTION_LIMIT = 8;
 

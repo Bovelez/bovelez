@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { searchEdgarCompanies } from "../../api/edgar/edgar.api";
+import { searchEdgarCompanies } from "../../api/edgar.api";
 import { edgarKeys } from "./queryKeys";
 
 export function useEdgarSearch(query: string) {
