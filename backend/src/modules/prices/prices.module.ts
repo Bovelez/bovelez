@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { PricesController } from './controller/prices.controller';
 import { PricesService } from './service/prices.service';
+import { PricesStartupSeeder } from './seed/prices-startup-seeder.service';
 import { PricesRepository } from './repository/prices.repository';
 import { YahooFinanceClient } from './client/yahoo-finance.client';
 import { PrismaService } from '../database/prisma.service';
@@ -16,6 +17,7 @@ import {
   providers: [
     PrismaService,
     PricesService,
+    PricesStartupSeeder,
     { provide: PRICES_REPOSITORY, useClass: PricesRepository },
     { provide: YAHOO_FINANCE_CLIENT, useClass: YahooFinanceClient },
   ],

@@ -33,6 +33,10 @@ export class PricesRepository implements IPricesRepository {
     return this.prisma.stockPrice.findMany({ orderBy: { ticker: 'asc' } });
   }
 
+  countPrices(): Promise<number> {
+    return this.prisma.stockPrice.count();
+  }
+
   createBatchRun(): Promise<PriceBatchRunRecord> {
     return this.prisma.priceBatchRun.create({ data: {} });
   }
