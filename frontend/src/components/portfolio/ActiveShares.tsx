@@ -1,10 +1,15 @@
 import { BarChart3, BriefcaseBusiness, Clock3 } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import type {ActiveSharesProps} from "../../types/portfolio.types";
-import {useTotalPnl} from "../../hooks/portfolio/utils/useTotalPnl.ts";
-import {useTotalPnlPercent} from "../../hooks/portfolio/utils/useTotalPnlPercentage.ts";
-import {useMoney} from "../../hooks/portfolio/utils/useMoney.ts";
-import {useNumberValue} from "../../hooks/portfolio/utils/useNumberValue.ts";
+
+function formatMoney(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatNumber(value: number): string {
+  return value.toLocaleString("en-US", { maximumFractionDigits: 4 });
+}
 
 export function ActiveShares({
   portfolio,
@@ -12,8 +17,8 @@ export function ActiveShares({
   errorMessage,
 }: ActiveSharesProps) {
   const positions = portfolio?.positions ?? [];
-  const pnl = useTotalPnl(positions);
-  const pnlPercent = useTotalPnlPercent(positions);
+  const pnl = portfolio?.totalPnl ?? 0;
+  const pnlPercent = portfolio?.totalPnlPercent ?? 0;
 
   return (
     <section className="group relative overflow-hidden rounded-3xl border border-[var(--border)]/60 bg-gradient-to-b from-[var(--surface)]/80 to-[var(--bg-deep)]/90 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:shadow-emerald-500/5">
@@ -130,16 +135,16 @@ export function ActiveShares({
                     </div>
                   </td>
                   <td className="px-4 py-4 text-right font-mono font-medium text-[var(--text)]">
-                    {useNumberValue(position.quantity)}
+                    {formatNumber(position.quantity)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono text-[var(--text-muted)]">
-                    {useMoney(position.avgCost)}
+                    {formatMoney(position.avgCost)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono text-[var(--text)]">
-                    {useMoney(position.currentPrice)}
+                    {formatMoney(position.currentPrice)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono font-bold text-[var(--text)]">
-                    {useMoney(position.currentValue)}
+                    {formatMoney(position.currentValue)}
                   </td>
                   <td className="px-4 py-4 text-right">
                     {position.pnl === null ? (

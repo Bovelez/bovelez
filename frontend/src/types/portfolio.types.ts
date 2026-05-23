@@ -12,6 +12,9 @@ export type PortfolioPosition = {
 export type Portfolio = {
   positions: PortfolioPosition[];
   totalValue: number;
+  totalInvested: number;
+  totalPnl: number;
+  totalPnlPercent: number;
   lastPriceUpdate: string | null;
 };
 
