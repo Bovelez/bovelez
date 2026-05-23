@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
 import yfinance as yf
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 app = FastAPI()
 
@@ -78,15 +79,20 @@ def health():
     return {"status": "ok"}
 
 
+MAX_WORKERS = 20
+
 @app.post("/prices/fetch", response_model=FetchResponse)
 def fetch_prices(body: FetchRequest):
     prices: dict[str, float] = {}
     errors: dict[str, str] = {}
 
-    for ticker in body.tickers:
-        try:
-            prices[ticker] = get_price(ticker)
-        except Exception as e:
-            errors[ticker] = str(e)
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_ticker = {executor.submit(get_price, ticker): ticker for ticker in body.tickers}
+        for future in as_completed(future_to_ticker):
+            ticker = future_to_ticker[future]
+            try:
+                prices[ticker] = future.result()
+            except Exception as e:
+                errors[ticker] = str(e)
 
     return FetchResponse(prices=prices, errors=errors)

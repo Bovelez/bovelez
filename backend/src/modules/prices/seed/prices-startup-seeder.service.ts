@@ -21,9 +21,14 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
     private readonly configService: ConfigService,
   ) {}
 
-  async onApplicationBootstrap(): Promise<void> {
+  onApplicationBootstrap(): void {
     if (!this.isStartupSeedEnabled()) return;
+    void this.runSeed();
+  }
 
+  private static readonly SEED_CHUNK_SIZE = 50;
+
+  private async runSeed(): Promise<void> {
     try {
       const priceCount = await this.repository.countPrices();
       if (priceCount > 0) {
@@ -35,12 +40,24 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
 
       const tickers = this.getSeedTickers();
       this.logger.log(
-        `StockPrice is empty; fetching prices for ${tickers.length} S&P 500 tickers`,
+        `StockPrice is empty; seeding ${tickers.length} S&P 500 tickers in chunks of ${PricesStartupSeeder.SEED_CHUNK_SIZE}`,
       );
 
-      const result = await this.pricesService.runBatch(tickers);
+      let totalPrices = 0;
+      let totalErrors = 0;
+
+      for (let i = 0; i < tickers.length; i += PricesStartupSeeder.SEED_CHUNK_SIZE) {
+        const chunk = tickers.slice(i, i + PricesStartupSeeder.SEED_CHUNK_SIZE);
+        const result = await this.pricesService.runBatch(chunk);
+        totalPrices += result.tickerCount;
+        totalErrors += result.errorCount;
+        this.logger.log(
+          `Seed progress: ${Math.min(i + PricesStartupSeeder.SEED_CHUNK_SIZE, tickers.length)}/${tickers.length} tickers processed`,
+        );
+      }
+
       this.logger.log(
-        `Startup price seed finished: ${result.tickerCount} prices, ${result.errorCount} errors`,
+        `Startup price seed finished: ${totalPrices} prices, ${totalErrors} errors`,
       );
     } catch (error) {
       this.logger.error(

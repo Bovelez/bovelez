@@ -9,7 +9,7 @@ export class PricesSchedulerService {
 
   constructor(private readonly pricesService: PricesService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_HOUR)
   async updatePrices(): Promise<void> {
     if (process.env.NODE_ENV === 'test') return;
 
