@@ -63,7 +63,7 @@ describe('Edgar Integration', () => {
     if (app) await app.close();
   });
 
-  describe('GET /edgar/search', () => {
+  describe('GET /prices/search', () => {
     it('should return results from EDGAR Full-Text Search API', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/search?q=apple')
@@ -83,7 +83,7 @@ describe('Edgar Integration', () => {
     }, 15000);
   });
 
-  describe('PATCH /edgar/companies/:ticker/sync', () => {
+  describe('PATCH /prices/companies/:ticker/sync', () => {
     it('should fetch company from EDGAR and persist it in the database', async () => {
       await request(getHttpServer(app))
         .patch('/edgar/companies/AAPL/sync')
@@ -116,7 +116,7 @@ describe('Edgar Integration', () => {
     }, 15000);
   });
 
-  describe('GET /edgar/companies', () => {
+  describe('GET /prices/companies', () => {
     beforeEach(async () => {
       await prisma.stockPrice.deleteMany();
       await seedStockPrices(['AAPL', 'MSFT']);
@@ -145,7 +145,7 @@ describe('Edgar Integration', () => {
     });
   });
 
-  describe('GET /edgar/companies/:ticker', () => {
+  describe('GET /prices/companies/:ticker', () => {
     beforeEach(async () => {
       await seedEdgarCompany('AAPL');
     });
@@ -172,7 +172,7 @@ describe('Edgar Integration', () => {
     });
   });
 
-  describe('GET /edgar/companies/:ticker/filings', () => {
+  describe('GET /prices/companies/:ticker/filings', () => {
     it('should return recent 10-K and 10-Q filings from EDGAR', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies/AAPL/filings')
@@ -183,7 +183,7 @@ describe('Edgar Integration', () => {
     }, 30000);
   });
 
-  describe('GET /edgar/companies/:ticker/metrics', () => {
+  describe('GET /prices/companies/:ticker/metrics', () => {
     it('should return financial metrics from EDGAR XBRL API', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies/AAPL/metrics?quarters=4')

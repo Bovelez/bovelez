@@ -1,5 +1,5 @@
 export const edgarKeys = {
-  all: ["edgar"] as const,
+  all: ["prices"] as const,
   companies: () => [...edgarKeys.all, "companies"] as const,
   search: (query: string) => [...edgarKeys.all, "search", query] as const,
   company: (ticker: string) => [...edgarKeys.companies(), ticker] as const,

@@ -1,27 +1,22 @@
 import { useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Database, ShieldCheck } from "lucide-react";
-import { EdgarTickerSelect } from "../../components/edgar/EdgarTickerSelect";
-import { useEdgarCompanies } from "../../hooks/edgar/useEdgarCompanies";
-import { usePricedEdgarCompanies } from "../../hooks/prices/usePricedEdgarCompanies";
+import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
-import type { PricedEdgarCompany } from "../../types/prices.types";
+import { useStockPrices } from "../../hooks/prices/useStockPrices";
+import type { StockPrice } from "../../types/prices.types";
 
 function errorLabel(error: unknown): string | undefined {
   if (!error) return undefined;
   if (error instanceof Error) return error.message;
-  return "No pudimos cargar las empresas de EDGAR.";
+  return "No pudimos cargar los precios.";
 }
 
 export default function Portfolio() {
-  const companiesQuery = useEdgarCompanies();
-  const companies = companiesQuery.data ?? [];
-  const pricedCompaniesQuery = usePricedEdgarCompanies(companies);
+  const pricesQuery = useStockPrices();
   const lastPriceRunQuery = useLastPriceRun();
-  const pricedCompanies = pricedCompaniesQuery.data ?? [];
-  const [selectedCompany, setSelectedCompany] =
-    useState<PricedEdgarCompany | null>(null);
-  const isLoadingMarket = companiesQuery.isLoading || pricedCompaniesQuery.isLoading;
-  const marketError = errorLabel(companiesQuery.error ?? pricedCompaniesQuery.error);
+  const prices = pricesQuery.data ?? [];
+  const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
+  const marketError = errorLabel(pricesQuery.error);
 
   return (
     <div
@@ -43,8 +38,8 @@ export default function Portfolio() {
             Operar acciones
           </h1>
           <p className="mt-2 max-w-2xl text-[13px] text-[var(--text-muted)]">
-            Primer paso: seleccionar una empresa del universo S&amp;P provisto
-            por EDGAR para usarla luego en compra o venta.
+            Primer paso: seleccionar un ticker S&amp;P con precio cargado para
+            usarlo luego en compra o venta.
           </p>
         </div>
       </div>
@@ -58,10 +53,10 @@ export default function Portfolio() {
             Universo
           </p>
           <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-            {companiesQuery.isLoading ? "..." : companies.length.toString()}
+            {pricesQuery.isLoading ? "..." : prices.length.toString()}
           </p>
           <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-            empresas S&amp;P desde EDGAR
+            tickers con precio cargado
           </p>
         </div>
 
@@ -73,31 +68,29 @@ export default function Portfolio() {
             Selección actual
           </p>
           <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-            {selectedCompany?.ticker ?? "—"}
+            {selectedPrice?.ticker ?? "—"}
           </p>
           <p className="mt-1 truncate text-[12px] text-[var(--text-muted)]">
-            {selectedCompany
-              ? `${selectedCompany.name} · ${
-                  selectedCompany.price === null
-                    ? "sin precio"
-                    : `$${selectedCompany.price.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}`
-                }`
+            {selectedPrice
+              ? `$${selectedPrice.price.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} · actualizado ${new Date(
+                  selectedPrice.updatedAt,
+                ).toLocaleDateString()}`
               : "Elegí una empresa para operar"}
           </p>
         </div>
       </div>
 
       <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <EdgarTickerSelect
-          companies={pricedCompanies}
-          selectedCompany={selectedCompany}
-          isLoading={isLoadingMarket}
+        <PriceTickerSelect
+          prices={prices}
+          selectedPrice={selectedPrice}
+          isLoading={pricesQuery.isLoading}
           errorMessage={marketError}
-          onSelectCompany={setSelectedCompany}
-          onClearSelection={() => setSelectedCompany(null)}
+          onSelectPrice={setSelectedPrice}
+          onClearSelection={() => setSelectedPrice(null)}
         />
 
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
@@ -114,18 +107,22 @@ export default function Portfolio() {
                 Ticker
               </p>
               <p className="mt-1 font-mono text-[24px] font-bold text-[var(--text)]">
-                {selectedCompany?.ticker ?? "—"}
+                {selectedPrice?.ticker ?? "—"}
               </p>
               <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-                {selectedCompany?.name ?? "Sin selección"}
+                {selectedPrice
+                  ? `Actualizado ${new Date(
+                      selectedPrice.updatedAt,
+                    ).toLocaleString()}`
+                  : "Sin selección"}
               </p>
               <p className="mt-3 text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
                 Precio actual
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-                {selectedCompany?.price === null || !selectedCompany
+                {!selectedPrice
                   ? "Sin precio"
-                  : `$${selectedCompany.price.toLocaleString("en-US", {
+                  : `$${selectedPrice.price.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}`}
@@ -138,7 +135,7 @@ export default function Portfolio() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                disabled={!selectedCompany}
+                disabled={!selectedPrice}
                 className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ArrowDownLeft size={15} />
@@ -146,7 +143,7 @@ export default function Portfolio() {
               </button>
               <button
                 type="button"
-                disabled={!selectedCompany}
+                disabled={!selectedPrice}
                 className="flex items-center justify-center gap-2 rounded-lg bg-rose-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ArrowUpRight size={15} />
