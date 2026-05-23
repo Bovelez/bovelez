@@ -4,7 +4,7 @@ import { QueryMetricsDto } from '../dto/query-metrics.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 
 @Public()
-@Controller('prices')
+@Controller('edgar')
 export class EdgarController {
   constructor(private readonly service: EdgarService) {}
 
