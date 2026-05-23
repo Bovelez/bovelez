@@ -18,6 +18,7 @@ export interface IPricesRepository {
   findPrice(ticker: string): Promise<StockPriceRecord | null>;
   findPricesByTickers(tickers: string[]): Promise<StockPriceRecord[]>;
   findAllPrices(): Promise<StockPriceRecord[]>;
+  countPrices(): Promise<number>;
   createBatchRun(): Promise<PriceBatchRunRecord>;
   finishBatchRun(
     id: string,

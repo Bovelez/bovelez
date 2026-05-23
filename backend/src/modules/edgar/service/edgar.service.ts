@@ -12,9 +12,11 @@ import {
 } from '../interfaces/edgar.interface';
 import { EDGAR_REPOSITORY } from '../repository/edgar.repository.interface';
 import { QueryMetricsDto } from '../dto/query-metrics.dto';
+import { PricesService } from '../../prices/service/prices.service';
+import type { IEdgarService } from './edgar.service.interface';
 
 @Injectable()
-export class EdgarService {
+export class EdgarService implements IEdgarService {
   constructor(
     @Inject(EDGAR_REPOSITORY)
     private readonly repository: EdgarRepository,
@@ -26,6 +28,7 @@ export class EdgarService {
     private readonly factsClient: IEdgarFactsClient,
     @Inject(EDGAR_SUBMISSIONS_CLIENT)
     private readonly submissionsClient: IEdgarSubmissionsClient,
+    private readonly pricesService: PricesService,
   ) {}
 
   async syncCompany(ticker: string) {
@@ -40,7 +43,15 @@ export class EdgarService {
   }
 
   async getAllCompanies() {
-    return this.repository.findAll();
+    const [companies, prices] = await Promise.all([
+      this.edgarClient.getCompanies(),
+      this.pricesService.getAllPrices(),
+    ]);
+    const tradableTickers = new Set(
+      prices.map((price) => price.ticker.trim().toUpperCase()),
+    );
+
+    return companies.filter((company) => tradableTickers.has(company.ticker));
   }
 
   async searchCompanies(query: string) {
@@ -55,5 +66,21 @@ export class EdgarService {
   async getMetrics(ticker: string, query: QueryMetricsDto) {
     const company = await this.syncCompany(ticker);
     return this.factsClient.getMetrics(company.cik, query.quarters);
+  }
+
+  async isValidTicker(ticker: string): Promise<boolean> {
+    const normalizedTicker = ticker.trim().toUpperCase();
+    const price = await this.pricesService.getPrice(normalizedTicker);
+    if (!price) return false;
+
+    const company = await this.repository.findByTicker(normalizedTicker);
+    if (company) return true;
+
+    try {
+      await this.edgarClient.getCompanyByTicker(normalizedTicker);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

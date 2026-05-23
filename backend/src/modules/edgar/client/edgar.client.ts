@@ -24,22 +24,20 @@ export class EdgarClient implements IEdgarClient {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async getCompanyByTicker(ticker: string): Promise<IEdgarCompany> {
-    let data: Record<string, SecTickerEntry>;
-    try {
-      const response = await firstValueFrom(
-        this.httpService.get<Record<string, SecTickerEntry>>(this.tickersUrl, {
-          headers: this.headers,
-        }),
-      );
-      data = response.data;
-    } catch {
-      throw new HttpException(
-        'EDGAR company lookup unavailable',
-        HttpStatus.BAD_GATEWAY,
-      );
-    }
+  async getCompanies(): Promise<IEdgarCompany[]> {
+    const data = await this.getTickerEntries();
 
+    return Object.values(data)
+      .map((entry) => ({
+        cik: String(entry.cik_str),
+        ticker: entry.ticker.toUpperCase(),
+        name: entry.title,
+      }))
+      .sort((a, b) => a.ticker.localeCompare(b.ticker));
+  }
+
+  async getCompanyByTicker(ticker: string): Promise<IEdgarCompany> {
+    const data = await this.getTickerEntries();
     const upperTicker = ticker.toUpperCase();
     const entry = Object.values(data).find(
       (e) => e.ticker.toUpperCase() === upperTicker,
@@ -54,5 +52,21 @@ export class EdgarClient implements IEdgarClient {
       ticker: entry.ticker.toUpperCase(),
       name: entry.title,
     };
+  }
+
+  private async getTickerEntries(): Promise<Record<string, SecTickerEntry>> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<Record<string, SecTickerEntry>>(this.tickersUrl, {
+          headers: this.headers,
+        }),
+      );
+      return response.data;
+    } catch {
+      throw new HttpException(
+        'EDGAR company lookup unavailable',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
   }
 }

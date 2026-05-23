@@ -4,6 +4,18 @@ import request from 'supertest';
 import { AppModule } from '../../../../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import { getHttpServer } from '../../../utils/http-server';
+import { EDGAR_CLIENT } from '../../../../src/modules/edgar/interfaces/edgar.interface';
+
+const mockEdgarClient = {
+  getCompanies: jest.fn(),
+  getCompanyByTicker: jest.fn(),
+};
+
+const edgarCompanies = [
+  { cik: '320193', ticker: 'AAPL', name: 'Apple Inc.' },
+  { cik: '789019', ticker: 'MSFT', name: 'Microsoft Corp.' },
+  { cik: '1318605', ticker: 'TSLA', name: 'Tesla Inc.' },
+];
 
 describe('Edgar Integration', () => {
   let app: INestApplication;
@@ -12,7 +24,10 @@ describe('Edgar Integration', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(EDGAR_CLIENT)
+      .useValue(mockEdgarClient)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
@@ -20,17 +35,35 @@ describe('Edgar Integration', () => {
 
     prisma = new PrismaClient();
     await prisma.edgarCompany.deleteMany();
+    await prisma.stockPrice.deleteMany();
+    await prisma.priceBatchRun.deleteMany();
+  });
+
+  beforeEach(() => {
+    mockEdgarClient.getCompanies.mockResolvedValue(edgarCompanies);
+    mockEdgarClient.getCompanyByTicker.mockImplementation(
+      async (ticker: string) => {
+        const company = edgarCompanies.find(
+          (item) => item.ticker === ticker.toUpperCase(),
+        );
+
+        if (!company) throw new Error(`Ticker ${ticker} not found`);
+        return company;
+      },
+    );
   });
 
   afterAll(async () => {
     if (prisma) {
       await prisma.edgarCompany.deleteMany();
+      await prisma.stockPrice.deleteMany();
+      await prisma.priceBatchRun.deleteMany();
       await prisma.$disconnect();
     }
     if (app) await app.close();
   });
 
-  describe('GET /edgar/search', () => {
+  describe('GET /prices/search', () => {
     it('should return results from EDGAR Full-Text Search API', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/search?q=apple')
@@ -50,7 +83,7 @@ describe('Edgar Integration', () => {
     }, 15000);
   });
 
-  describe('PATCH /edgar/companies/:ticker/sync', () => {
+  describe('PATCH /prices/companies/:ticker/sync', () => {
     it('should fetch company from EDGAR and persist it in the database', async () => {
       await request(getHttpServer(app))
         .patch('/edgar/companies/AAPL/sync')
@@ -60,9 +93,9 @@ describe('Edgar Integration', () => {
         where: { ticker: 'AAPL' },
       });
       expect(record).not.toBeNull();
-      expect(record.ticker).toBe('AAPL');
-      expect(record.cik).toBeDefined();
-      expect(record.name).toBeDefined();
+      expect(record?.ticker).toBe('AAPL');
+      expect(record?.cik).toBeDefined();
+      expect(record?.name).toBeDefined();
     }, 15000);
 
     it('should update the record when syncing the same ticker again', async () => {
@@ -79,12 +112,17 @@ describe('Edgar Integration', () => {
       });
 
       expect(after).not.toBeNull();
-      expect(after.cik).toBe(before.cik);
+      expect(after?.cik).toBe(before?.cik);
     }, 15000);
   });
 
-  describe('GET /edgar/companies', () => {
-    it('should return all synced companies from the database', async () => {
+  describe('GET /prices/companies', () => {
+    beforeEach(async () => {
+      await prisma.stockPrice.deleteMany();
+      await seedStockPrices(['AAPL', 'MSFT']);
+    });
+
+    it('should return only EDGAR companies with seeded prices', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies')
         .expect(200);
@@ -92,11 +130,26 @@ describe('Edgar Integration', () => {
       const body = response.body as Array<{ ticker: string }>;
       expect(Array.isArray(body)).toBe(true);
       const tickers = body.map((c) => c.ticker);
-      expect(tickers).toContain('AAPL');
+      expect(tickers).toEqual(['AAPL', 'MSFT']);
+      expect(tickers).not.toContain('TSLA');
+    });
+
+    it('should return an empty list when prices have not been seeded', async () => {
+      await prisma.stockPrice.deleteMany();
+
+      const response = await request(getHttpServer(app))
+        .get('/edgar/companies')
+        .expect(200);
+
+      expect(response.body).toEqual([]);
     });
   });
 
-  describe('GET /edgar/companies/:ticker', () => {
+  describe('GET /prices/companies/:ticker', () => {
+    beforeEach(async () => {
+      await seedEdgarCompany('AAPL');
+    });
+
     it('should return a company that was previously synced', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies/AAPL')
@@ -119,7 +172,7 @@ describe('Edgar Integration', () => {
     });
   });
 
-  describe('GET /edgar/companies/:ticker/filings', () => {
+  describe('GET /prices/companies/:ticker/filings', () => {
     it('should return recent 10-K and 10-Q filings from EDGAR', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies/AAPL/filings')
@@ -130,7 +183,7 @@ describe('Edgar Integration', () => {
     }, 30000);
   });
 
-  describe('GET /edgar/companies/:ticker/metrics', () => {
+  describe('GET /prices/companies/:ticker/metrics', () => {
     it('should return financial metrics from EDGAR XBRL API', async () => {
       const response = await request(getHttpServer(app))
         .get('/edgar/companies/AAPL/metrics?quarters=4')
@@ -140,4 +193,24 @@ describe('Edgar Integration', () => {
       expect(body).toBeDefined();
     }, 30000);
   });
+
+  async function seedStockPrices(tickers: string[]): Promise<void> {
+    await prisma.stockPrice.createMany({
+      data: tickers.map((ticker, index) => ({
+        ticker,
+        price: 100 + index,
+      })),
+    });
+  }
+
+  async function seedEdgarCompany(ticker: string): Promise<void> {
+    const company = edgarCompanies.find((item) => item.ticker === ticker);
+    if (!company) throw new Error(`Missing test company ${ticker}`);
+
+    await prisma.edgarCompany.upsert({
+      where: { ticker: company.ticker },
+      update: company,
+      create: company,
+    });
+  }
 });
