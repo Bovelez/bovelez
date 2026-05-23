@@ -28,7 +28,7 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
 
   private static readonly SEED_CHUNK_SIZE = 50;
 
-  private async runSeed(): Promise<void> {
+  async runSeed(): Promise<void> {
     try {
       const priceCount = await this.repository.countPrices();
       if (priceCount > 0) {
