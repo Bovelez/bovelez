@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/public/guards/jwt-auth.guard';
@@ -12,6 +13,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, expandVariables: true }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     EdgarModule,

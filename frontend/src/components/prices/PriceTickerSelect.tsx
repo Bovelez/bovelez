@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Search, ShieldCheck, X } from "lucide-react";
 import type {TickerSelectProps} from "../../types/prices.types";
-import {useMoney} from "../../hooks/portfolio/utils/useMoney.ts";
 import {useGetTickerSuggestions} from "../../hooks/prices/useGetTickerSuggestions.ts";
+
+function formatMoney(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export function PriceTickerSelect({
   prices,
@@ -142,7 +146,7 @@ export function PriceTickerSelect({
                   <span className="flex shrink-0 items-center gap-3">
                     <span className="text-right">
                       <span className="block font-mono text-[14px] font-semibold text-[var(--text)]">
-                        {useMoney(price.price)}
+                        {formatMoney(price.price)}
                       </span>
                     </span>
                     {isSelected && (

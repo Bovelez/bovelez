@@ -17,7 +17,10 @@ import {
   todayInputValue,
   transactionErrorLabel,
 } from "../../hooks/transactions/transaction.utils";
-import {useMoney} from "../../hooks/portfolio/utils/useMoney.ts";
+function formatMoney(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export function TransactionPanel({
   selectedPrice,
@@ -96,7 +99,7 @@ export function TransactionPanel({
                   Cotización Actual
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
-                  {selectedPrice ? useMoney(selectedPrice.price) : "—"}
+                  {selectedPrice ? formatMoney(selectedPrice.price) : "—"}
                 </p>
               </div>
               <p className="text-right text-[10px] text-[var(--text-muted)]">
@@ -236,7 +239,7 @@ export function TransactionPanel({
                     <span className="font-mono text-[13px] font-semibold text-[var(--text)]">
                       {transaction.quantity}{" "}
                       <span className="text-[var(--text-faint)]">@</span>{" "}
-                      {useMoney(transaction.price)}
+                      {formatMoney(transaction.price)}
                     </span>
                   </div>
                 ))}
