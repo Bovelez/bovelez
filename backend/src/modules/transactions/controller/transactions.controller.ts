@@ -40,7 +40,7 @@ export class TransactionsController {
   }
 
   @Get(':ticker')
-  getTickerTransactions(
+  getTickerTransactionsByTicker(
     @AuthenticatedUser(new AuthenticatedUserValidator())
     authenticatedUser: ValidatedAuthenticatedUser,
     @Param('ticker') ticker: string,
@@ -48,6 +48,17 @@ export class TransactionsController {
     return this.transactionsService.getTransactionsByTicker(
       authenticatedUser.id,
       ticker,
+    );
+  }
+
+  @Get()
+  getTickerTransactionsByTickerById(
+    @AuthenticatedUser(new AuthenticatedUserValidator())
+    @AuthenticatedUser(new AuthenticatedUserValidator())
+    authenticatedUser: ValidatedAuthenticatedUser,
+  ): Promise<TransactionDto[]> {
+    return this.transactionsService.getTransactionsByUserId(
+      authenticatedUser.id,
     );
   }
 }

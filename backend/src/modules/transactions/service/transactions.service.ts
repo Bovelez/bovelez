@@ -82,6 +82,18 @@ export class TransactionsService {
     );
   }
 
+  async getTransactionsByUserId(
+    userId: string,
+  ): Promise<TransactionDto[]> {
+    const tickerTransactions =
+      await this.transactionsRepository.getTransactionsByUser(
+        userId,
+      );
+    return tickerTransactions.map(
+      (transaction) => new TransactionDto(transaction),
+    );
+  }
+
   private async validateTicker(ticker: string): Promise<void> {
     const isValid = await this.edgarService.isValidTicker(ticker);
     if (!isValid) {
