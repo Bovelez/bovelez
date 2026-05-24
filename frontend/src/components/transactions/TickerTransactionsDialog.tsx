@@ -62,7 +62,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
               {position && (
                   <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
                     {[
-                      { label: "Tenencia", value: useFormatNumber(position.quantity), color: "text-[var(--text)]" },
+                      { label: "Cantidad", value: useFormatNumber(position.quantity), color: "text-[var(--text)]" },
                       { label: "Costo Prom.", value: useMoney(position.avgCost), color: "text-[var(--text)]" },
                       { label: "Total Operado", value: useMoney(totalTraded), color: "text-orange-400" },
                     ].map(({ label, value, color }) => (
