@@ -1,5 +1,7 @@
-import { BarChart3, BriefcaseBusiness, Clock3 } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, BriefcaseBusiness, Clock3, History } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
+import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
 import type {ActiveSharesProps} from "../../types/portfolio.types";
 
 function formatMoney(value: number | null | undefined): string {
@@ -16,9 +18,15 @@ export function ActiveShares({
   isLoading,
   errorMessage,
 }: ActiveSharesProps) {
+  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const positions = portfolio?.positions ?? [];
   const pnl = portfolio?.totalPnl ?? 0;
   const pnlPercent = portfolio?.totalPnlPercent ?? 0;
+  const selectedPosition = selectedTicker
+    ? positions.find((position) => position.ticker === selectedTicker) ?? null
+    : null;
+
+  const closeTransactionsDialog = () => setSelectedTicker(null);
 
   return (
     <section className="group relative overflow-hidden rounded-3xl border border-[var(--border)]/60 bg-gradient-to-b from-[var(--surface)]/80 to-[var(--bg-deep)]/90 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:shadow-emerald-500/5">
@@ -105,14 +113,24 @@ export function ActiveShares({
                 <th className="px-4 py-4 text-right">Precio Actual</th>
                 <th className="px-4 py-4 text-right">Capital Total</th>
                 <th className="px-4 py-4 text-right">Result ($)</th>
-                <th className="px-6 py-4 text-right">Result (%)</th>
+                <th className="px-4 py-4 text-right">Result (%)</th>
+                <th className="px-6 py-4 text-right">Historial</th>
               </tr>
             </thead>
             <tbody>
               {positions.map((position) => (
                 <tr
                   key={position.ticker}
-                  className="group bg-[var(--surface)]/30 transition-colors duration-200 hover:bg-[var(--surface-2)]/60"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedTicker(position.ticker)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelectedTicker(position.ticker);
+                    }
+                  }}
+                  className="group cursor-pointer bg-[var(--surface)]/30 transition-colors duration-200 hover:bg-[var(--surface-2)]/60 focus-visible:bg-[var(--surface-2)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
                 >
                   <td className="rounded-l-2xl px-6 py-4">
                     <div className="flex items-center gap-4">
@@ -153,7 +171,7 @@ export function ActiveShares({
                       <PnlText value={position.pnl} format="currency" />
                     )}
                   </td>
-                  <td className="rounded-r-2xl px-6 py-4 text-right">
+                  <td className="px-4 py-4 text-right">
                     {position.pnlPercent === null ? (
                       <span className="font-mono text-[var(--text-faint)]">—</span>
                     ) : (
@@ -162,12 +180,24 @@ export function ActiveShares({
                       </div>
                     )}
                   </td>
+                  <td className="rounded-r-2xl px-6 py-4 text-right">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)]/60 bg-[var(--bg-deep)]/60 text-[var(--text-muted)] transition-colors group-hover:border-[var(--primary)]/50 group-hover:text-[var(--primary)]">
+                      <History size={16} strokeWidth={2.2} />
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+      <TickerTransactionsDialog
+        open={Boolean(selectedPosition)}
+        position={selectedPosition}
+        onOpenChange={(open) => {
+          if (!open) closeTransactionsDialog();
+        }}
+      />
     </section>
   );
 }
