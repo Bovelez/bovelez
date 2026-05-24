@@ -2,20 +2,14 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
+import {useMoney} from "../../hooks/transactions/utils/useMoney.ts";
 
-const DEFAULT_DURATION_SECONDS = 42;
-const VISIBLE_TICKERS = 32;
+const DEFAULT_DURATION_SECONDS = 600;
+const VISIBLE_TICKERS = 500;
 
 type StockTickerBarProps = {
   durationSeconds?: number;
 };
-
-function formatPrice(price: number): string {
-  return price.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 function formatChange(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
@@ -42,7 +36,7 @@ function StockTickerItem({ stock }: { stock: StockPrice }) {
         {stock.ticker}
       </span>
       <span className="font-mono text-[12px] text-[var(--text-muted)]">
-        ${formatPrice(stock.price)}
+        ${useMoney(stock.price)}
       </span>
       <span
         className={`inline-flex min-w-[76px] items-center gap-1 font-mono text-[12px] font-semibold ${changeClass}`}

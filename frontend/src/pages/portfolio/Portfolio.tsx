@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ActiveShares } from "../../components/portfolio/ActiveShares";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
-import { StockTickerBar } from "../../components/prices/Stocktickerbar";
+import { StockTickerBar } from "../../components/prices/StockTickerBar";
 import { TransactionPanel } from "../../components/transactions/TransactionPanel";
 import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
