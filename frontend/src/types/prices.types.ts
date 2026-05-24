@@ -1,6 +1,7 @@
 export type StockPrice = {
   ticker: string;
   price: number;
+  dailyChangePercent: number | null;
   updatedAt: string;
 };
 
@@ -24,6 +25,7 @@ export type UpdatePricesResponse = {
   tickerCount: number;
   errorCount: number;
   prices: Record<string, number>;
+  dailyChangePercentages: Record<string, number | null>;
   errors: Record<string, string>;
 };
 

@@ -3,6 +3,7 @@ import { SPY_TICKERS } from '../../../../src/modules/prices/seed/spy-tickers';
 
 const mockRepository = {
   countPrices: jest.fn(),
+  findTickersMissingDailyChangePercent: jest.fn(),
 };
 
 const mockPricesService = {
@@ -23,6 +24,7 @@ describe('PricesStartupSeeder', () => {
     mockConfigService.get.mockImplementation(
       (_key: string, defaultValue?: string) => defaultValue,
     );
+    mockRepository.findTickersMissingDailyChangePercent.mockResolvedValue([]);
 
     seeder = new PricesStartupSeeder(
       mockRepository as never,
@@ -64,10 +66,28 @@ describe('PricesStartupSeeder', () => {
 
   it('skips startup seeding when StockPrice already has records', async () => {
     mockRepository.countPrices.mockResolvedValue(1);
+    mockRepository.findTickersMissingDailyChangePercent.mockResolvedValue([]);
 
     await seeder.runSeed();
 
     expect(mockPricesService.runBatch).not.toHaveBeenCalled();
+  });
+
+  it('refreshes existing prices that are missing daily change percent', async () => {
+    mockRepository.countPrices.mockResolvedValue(2);
+    mockRepository.findTickersMissingDailyChangePercent.mockResolvedValue([
+      'AAPL',
+      'MSFT',
+    ]);
+    mockPricesService.runBatch.mockResolvedValue({
+      tickerCount: 2,
+      errorCount: 0,
+    });
+
+    await seeder.runSeed();
+
+    expect(mockPricesService.runBatch).toHaveBeenCalledTimes(1);
+    expect(mockPricesService.runBatch).toHaveBeenCalledWith(['AAPL', 'MSFT']);
   });
 
   it('skips startup seeding during tests', () => {

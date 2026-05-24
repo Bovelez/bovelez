@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ActiveShares } from "../../components/portfolio/ActiveShares";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
+import { StockTickerBar } from "../../components/prices/Stocktickerbar";
 import { TransactionPanel } from "../../components/transactions/TransactionPanel";
 import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
@@ -65,6 +66,8 @@ export default function Portfolio() {
       </header>
 
       <main className="relative z-10 flex flex-col gap-8">
+        <StockTickerBar />
+
         <ActiveShares
           portfolio={portfolioQuery.data}
           isLoading={portfolioQuery.isLoading}

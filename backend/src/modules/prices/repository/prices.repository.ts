@@ -10,11 +10,15 @@ import type {
 export class PricesRepository implements IPricesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  upsertPrice(ticker: string, price: number): Promise<StockPriceRecord> {
+  upsertPrice(
+    ticker: string,
+    price: number,
+    dailyChangePercent: number | null,
+  ): Promise<StockPriceRecord> {
     return this.prisma.stockPrice.upsert({
       where: { ticker },
-      update: { price },
-      create: { ticker, price },
+      update: { price, dailyChangePercent },
+      create: { ticker, price, dailyChangePercent },
     });
   }
 
@@ -31,6 +35,16 @@ export class PricesRepository implements IPricesRepository {
 
   findAllPrices(): Promise<StockPriceRecord[]> {
     return this.prisma.stockPrice.findMany({ orderBy: { ticker: 'asc' } });
+  }
+
+  async findTickersMissingDailyChangePercent(): Promise<string[]> {
+    const records = await this.prisma.stockPrice.findMany({
+      where: { dailyChangePercent: null },
+      select: { ticker: true },
+      orderBy: { ticker: 'asc' },
+    });
+
+    return records.map((record) => record.ticker);
   }
 
   countPrices(): Promise<number> {
