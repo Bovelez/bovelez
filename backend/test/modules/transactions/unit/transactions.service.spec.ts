@@ -266,6 +266,32 @@ describe('TransactionsService', () => {
     });
   });
 
+  describe('getTransactionsByUserId', () => {
+    it('returns all transactions for the user mapped to DTOs', async () => {
+      transactionsRepository.getTransactionsByUser.mockResolvedValue([
+        buildTransaction({ id: 'tx-1', ticker: 'AAPL' }),
+        buildTransaction({ id: 'tx-2', ticker: 'MSFT', price: 300 }),
+      ]);
+
+      const result = await service.getTransactionsByUserId(USER_ID);
+
+      expect(
+        transactionsRepository.getTransactionsByUser.mock.calls[0],
+      ).toEqual([USER_ID]);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ id: 'tx-1', ticker: 'AAPL' });
+      expect(result[1]).toMatchObject({ id: 'tx-2', ticker: 'MSFT' });
+    });
+
+    it('returns an empty array when the user has no transactions', async () => {
+      transactionsRepository.getTransactionsByUser.mockResolvedValue([]);
+
+      const result = await service.getTransactionsByUserId(USER_ID);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getTransactionsByTicker', () => {
     it('returns ticker transactions scoped to the user and normalizes ticker casing', async () => {
       transactionsRepository.getTransactionsByUserAndTicker.mockResolvedValue([

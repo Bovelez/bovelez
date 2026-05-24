@@ -255,6 +255,72 @@ describe('Transactions Integration', () => {
     });
   });
 
+  describe('GET /transactions', () => {
+    it('returns all transactions for the authenticated user across all tickers', async () => {
+      await seedTransaction({
+        ticker: 'AAPL',
+        quantity: 10,
+        price: AAPL_PRICE,
+        date: '2025-01-15',
+      });
+      await seedTransaction({
+        ticker: 'MSFT',
+        quantity: 5,
+        price: MSFT_PRICE,
+        date: '2025-01-16',
+      });
+
+      const response = await request(getHttpServer(app))
+        .get('/transactions')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const body = response.body as { ticker: string; quantity: number }[];
+      expect(body).toHaveLength(2);
+      const tickers = body.map((t) => t.ticker);
+      expect(tickers).toContain('AAPL');
+      expect(tickers).toContain('MSFT');
+    });
+
+    it('does not expose another user transactions', async () => {
+      await register(app, {
+        name: 'Ana',
+        email: 'ana@email.com',
+        password: 'Password1!',
+      });
+      const ana = await prisma.user.findUniqueOrThrow({
+        where: { email: 'ana@email.com' },
+      });
+      await seedTransaction({
+        userId: ana.id,
+        ticker: 'AAPL',
+        quantity: 3,
+        price: AAPL_PRICE,
+        date: '2025-01-15',
+      });
+
+      const response = await request(getHttpServer(app))
+        .get('/transactions')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toEqual([]);
+    });
+
+    it('returns an empty array when the user has no transactions', async () => {
+      const response = await request(getHttpServer(app))
+        .get('/transactions')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toEqual([]);
+    });
+
+    it('returns 401 without authentication', async () => {
+      await request(getHttpServer(app)).get('/transactions').expect(401);
+    });
+  });
+
   describe('GET /transactions/:ticker', () => {
     it('returns only the authenticated user transactions for the requested ticker', async () => {
       await seedTransaction({
