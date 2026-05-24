@@ -1,196 +1,215 @@
 import { useState } from "react";
-import { BarChart3, BriefcaseBusiness, Clock3, History } from "lucide-react";
+import { ArrowUpRight, BarChart3, BriefcaseBusiness, Clock3, History, TrendingUp, TrendingDown } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
-import type {ActiveSharesProps} from "../../types/portfolio.types";
-import {useFormatNumber} from "../../hooks/transactions/utils/useFormatNumber.ts";
-import {useMoney} from "../../hooks/transactions/utils/useMoney.ts";
+import type { ActiveSharesProps } from "../../types/portfolio.types";
+import { useFormatNumber } from "../../hooks/transactions/utils/useFormatNumber.ts";
+import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
 
-export function ActiveShares({
-  portfolio,
-  isLoading,
-  errorMessage,
-}: ActiveSharesProps) {
+export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveSharesProps) {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const positions = portfolio?.positions ?? [];
   const pnl = portfolio?.totalPnl ?? 0;
   const pnlPercent = portfolio?.totalPnlPercent ?? 0;
   const selectedPosition = selectedTicker
-    ? positions.find((position) => position.ticker === selectedTicker) ?? null
-    : null;
-
-  const closeTransactionsDialog = () => setSelectedTicker(null);
+      ? positions.find((p) => p.ticker === selectedTicker) ?? null
+      : null;
+  const tableHeaders = [
+    { label: "Ticker", className: "text-center" },
+    { label: "Cantidad", className: "text-center" },
+    { label: "Costo Promedio", className: "text-center" },
+    { label: "Precio Actual", className: "text-center" },
+    { label: "Costos totales", className: "text-center" },
+    { label: "PNL", className: "text-center" },
+    { label: "PNL%", className: "text-center" },
+    { label: "Acciones", className: "text-center" },
+  ];
 
   return (
-    <section className="group relative overflow-hidden rounded-3xl border border-[var(--border)]/60 bg-gradient-to-b from-[var(--surface)]/80 to-[var(--bg-deep)]/90 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:shadow-emerald-500/5">
-      <div className="flex flex-col gap-6 border-b border-[var(--border)]/40 bg-[var(--surface-2)]/20 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30">
-            <BriefcaseBusiness size={24} strokeWidth={1.5} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--text)]">
-              Tus Activos
-            </h2>
-            <p className="mt-0.5 text-sm text-[var(--text-muted)]">
-              Resumen de posiciones e histórico de ganancias en vivo.
-            </p>
-          </div>
-        </div>
+      <section className="overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl">
 
-        <div className="flex flex-wrap gap-3">
-          <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--surface)]/50 px-4 py-3 shadow-inner backdrop-blur-md">
-            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-faint)]">
-              <BarChart3 size={14} className="text-indigo-400" />
-              Resultado Neto
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <PnlBadge value={pnl} format="currency" />
-              <PnlBadge value={pnlPercent} format="percent" />
+        {/* Header */}
+        <div className="flex flex-col gap-5 border-b border-white/[0.05] bg-[var(--surface-2)]/30 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <BriefcaseBusiness size={22} strokeWidth={1.8} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-[17px] font-black tracking-tight text-[var(--text)]">Tus Activos</h2>
+              <p className="mt-0.5 text-xs font-semibold text-white/85">
+                Posiciones activas · rendimiento en tiempo real
+              </p>
             </div>
           </div>
-          <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--surface)]/50 px-4 py-3 shadow-inner backdrop-blur-md">
-            <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-faint)]">
-              <Clock3 size={14} className="text-blue-400" />
-              Última Cotización
-            </p>
-            <p className="mt-2 flex h-[26px] items-center text-[13px] font-medium text-[var(--text)]">
-              {portfolio?.lastPriceUpdate
-                ? new Date(portfolio.lastPriceUpdate).toLocaleTimeString()
-                : "Sin actualizar"}
-            </p>
+
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-[var(--bg-deep)]/60 px-4 py-2.5">
+              <BarChart3 size={15} className="shrink-0 text-indigo-400" />
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-orange-100/80">Resultado Neto</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <PnlBadge value={pnl} format="currency" />
+                  <PnlBadge value={pnlPercent} format="percent" />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-[var(--bg-deep)]/60 px-4 py-2.5">
+              <Clock3 size={15} className="shrink-0 text-blue-400" />
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-blue-100/80">Última Cotización</p>
+                <p className="mt-1 text-[13px] font-semibold text-[var(--text)]">
+                  {portfolio?.lastPriceUpdate
+                      ? new Date(portfolio.lastPriceUpdate).toLocaleTimeString()
+                      : "Sin actualizar"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {isLoading && (
-        <div className="flex flex-col items-center gap-3 px-8 py-16 text-sm font-medium text-[var(--text-muted)]">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent"></div>
-          Sincronizando posiciones...
-        </div>
-      )}
+        {/* Loading */}
+        {isLoading && (
+            <div className="flex flex-col items-center gap-3 px-8 py-16 text-sm font-semibold text-[var(--text-muted)]">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+              Sincronizando posiciones…
+            </div>
+        )}
 
-      {!isLoading && errorMessage && (
-        <div className="m-6 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-6 py-4 text-sm text-rose-300">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-500/20 text-rose-400">
-            !
-          </span>
-          {errorMessage}
-        </div>
-      )}
+        {/* Error */}
+        {!isLoading && errorMessage && (
+            <div className="m-6 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.08] px-5 py-4 text-sm text-rose-300">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-xs font-black text-rose-400">!</span>
+              {errorMessage}
+            </div>
+        )}
 
-      {!isLoading && !errorMessage && positions.length === 0 && (
-        <div className="flex flex-col items-center gap-4 px-8 py-20 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-2)] text-[var(--text-muted)]">
-            <BriefcaseBusiness size={28} opacity={0.5} />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text)]">
-              Aún no tienes activos
-            </h3>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
-              Realiza tu primera compra en la terminal de operaciones para empezar.
-            </p>
-          </div>
-        </div>
-      )}
+        {/* Empty */}
+        {!isLoading && !errorMessage && positions.length === 0 && (
+            <div className="flex flex-col items-center gap-4 px-8 py-20 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-2)] text-[var(--text-muted)]">
+                <BriefcaseBusiness size={28} opacity={0.4} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[var(--text)]">Sin posiciones abiertas</h3>
+                <p className="mt-1 text-sm font-semibold text-white/80">
+                  Usá el terminal de operaciones para realizar tu primera compra.
+                </p>
+              </div>
+            </div>
+        )}
 
-      {!isLoading && !errorMessage && positions.length > 0 && (
-        <div className="overflow-x-auto p-2">
-          <table className="w-full border-separate border-spacing-y-1 text-sm">
-            <thead>
-              <tr className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-faint)]">
-                <th className="px-6 py-4 text-left">Activo</th>
-                <th className="px-4 py-4 text-right">Tenencia</th>
-                <th className="px-4 py-4 text-right">Costo Prom</th>
-                <th className="px-4 py-4 text-right">Precio Actual</th>
-                <th className="px-4 py-4 text-right">Capital Total</th>
-                <th className="px-4 py-4 text-right">Result ($)</th>
-                <th className="px-4 py-4 text-right">Result (%)</th>
-                <th className="px-6 py-4 text-right">Historial</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positions.map((position) => (
-                <tr
-                  key={position.ticker}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedTicker(position.ticker)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setSelectedTicker(position.ticker);
-                    }
-                  }}
-                  className="group cursor-pointer bg-[var(--surface)]/30 transition-colors duration-200 hover:bg-[var(--surface-2)]/60 focus-visible:bg-[var(--surface-2)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
-                >
-                  <td className="rounded-l-2xl px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-gray-700 to-gray-900 font-mono text-[11px] font-bold tracking-widest text-white shadow-md">
-                        {position.ticker.slice(0, 3)}
-                      </div>
-                      <div>
-                        <p className="font-mono text-[14px] font-bold text-[var(--text)] transition-colors group-hover:text-[var(--primary)]">
-                          {position.ticker}
-                        </p>
-                        <p className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              position.hasPrice ? "bg-emerald-500" : "bg-rose-500"
-                            }`}
-                          ></span>
-                          {position.hasPrice ? "Activo" : "Sin ref."}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-right font-mono font-medium text-[var(--text)]">
-                    {useFormatNumber(position.quantity)}
-                  </td>
-                  <td className="px-4 py-4 text-right font-mono text-[var(--text-muted)]">
-                    {useMoney(position.avgCost)}
-                  </td>
-                  <td className="px-4 py-4 text-right font-mono text-[var(--text)]">
-                    {useMoney(position.currentPrice)}
-                  </td>
-                  <td className="px-4 py-4 text-right font-mono font-bold text-[var(--text)]">
-                    {useMoney(position.currentValue)}
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    {position.pnl === null ? (
-                      <span className="font-mono text-[var(--text-faint)]">—</span>
-                    ) : (
-                      <PnlText value={position.pnl} format="currency" />
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    {position.pnlPercent === null ? (
-                      <span className="font-mono text-[var(--text-faint)]">—</span>
-                    ) : (
-                      <div className="inline-flex rounded-lg bg-[var(--bg-deep)] px-2.5 py-1.5 shadow-inner">
-                        <PnlText value={position.pnlPercent} format="percent" />
-                      </div>
-                    )}
-                  </td>
-                  <td className="rounded-r-2xl px-6 py-4 text-right">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)]/60 bg-[var(--bg-deep)]/60 text-[var(--text-muted)] transition-colors group-hover:border-[var(--primary)]/50 group-hover:text-[var(--primary)]">
-                      <History size={16} strokeWidth={2.2} />
-                    </span>
-                  </td>
+        {/* Table */}
+        {!isLoading && !errorMessage && positions.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full border-separate border-spacing-0 text-sm">
+                <thead>
+                <tr className="border-b border-white/[0.04]">
+                  {tableHeaders.map(({ label, className }, i) => (
+                      <th
+                          key={i}
+                          className={`px-5 py-3.5 text-[9px] font-black uppercase tracking-[0.18em] text-orange-100/85 ${className}`}
+                      >
+                        {label}
+                      </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      <TickerTransactionsDialog
-        open={Boolean(selectedPosition)}
-        position={selectedPosition}
-        onOpenChange={(open) => {
-          if (!open) closeTransactionsDialog();
-        }}
-      />
-    </section>
+                </thead>
+                <tbody>
+                {positions.map((position) => {
+                  const isPositive = (position.pnl ?? 0) >= 0;
+                  const totalCost = position.avgCost * position.quantity;
+                  return (
+                      <tr
+                          key={position.ticker}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setSelectedTicker(position.ticker)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedTicker(position.ticker);
+                            }
+                          }}
+                          className="group cursor-pointer border-b border-white/[0.03] transition-colors duration-150 last:border-0 hover:bg-white/[0.03] focus-visible:bg-white/[0.03] focus-visible:outline-none"
+                      >
+                        {/* Ticker cell */}
+                        <td className="px-5 py-4 text-center">
+                          <div className="inline-flex items-center gap-3.5 text-left">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-[var(--surface-2)] to-[var(--bg-deep)] font-mono text-[11px] font-black tracking-wider text-[var(--text)]">
+                              {position.ticker.slice(0, 3)}
+                            </div>
+                            <div>
+                              <p className="font-mono text-[14px] font-black text-[var(--text)] transition-colors group-hover:text-orange-400">
+                                {position.ticker}
+                              </p>
+                              <div className="mt-0.5 flex items-center gap-1">
+                                <span className={`h-1.5 w-1.5 rounded-full ${position.hasPrice ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                <span className="text-[10px] font-semibold text-white/75">
+                              {position.hasPrice ? "Activo" : "Sin ref."}
+                            </span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
+                          {useFormatNumber(position.quantity)}
+                        </td>
+                        <td className="px-5 py-4 text-center font-mono text-[13px] font-semibold text-white/85">
+                          {useMoney(position.avgCost)}
+                        </td>
+                        <td className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
+                          {useMoney(position.currentPrice)}
+                        </td>
+                        <td className="px-5 py-4 text-center font-mono text-[14px] font-black text-[var(--text)]">
+                          {useMoney(totalCost)}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          {position.pnl === null ? (
+                              <span className="font-mono font-semibold text-white/70">—</span>
+                          ) : (
+                              <PnlText value={position.pnl} format="currency" />
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          {position.pnlPercent === null ? (
+                              <span className="font-mono font-semibold text-white/70">—</span>
+                          ) : (
+                              <span
+                                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 font-mono text-[12px] font-bold"
+                                  style={{
+                                    background: isPositive ? "rgba(52,211,153,0.08)" : "rgba(251,113,133,0.08)",
+                                  }}
+                              >
+                          {isPositive
+                              ? <TrendingUp size={11} className="text-emerald-400" />
+                              : <TrendingDown size={11} className="text-rose-400" />}
+                                <PnlText value={position.pnlPercent} format="percent" />
+                        </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <div className="inline-flex items-center justify-center gap-2">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] bg-[var(--bg-deep)]/60 text-[var(--text-faint)] transition-all group-hover:border-orange-500/30 group-hover:text-orange-400">
+                              <History size={14} strokeWidth={2.2} />
+                            </span>
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-400/20 bg-rose-500/[0.08] text-rose-200 transition-all group-hover:border-rose-400/40 group-hover:text-rose-100">
+                              <ArrowUpRight size={14} strokeWidth={2.2} />
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                  );
+                })}
+                </tbody>
+              </table>
+            </div>
+        )}
+
+        <TickerTransactionsDialog
+            open={Boolean(selectedPosition)}
+            position={selectedPosition}
+            onOpenChange={(open) => { if (!open) setSelectedTicker(null); }}
+        />
+      </section>
   );
 }
