@@ -1,5 +1,5 @@
-import type { StockPrice } from "../../types/prices.types";
-import type { TransactionInput } from "../../types/transactions.types";
+import type { StockPrice } from "../../../types/prices.types";
+import type {Transaction, TransactionInput} from "../../../types/transactions.types";
 
 export function transactionErrorLabel(error: unknown): string | undefined {
   if (!error) return undefined;
@@ -20,7 +20,15 @@ export function transactionErrorLabel(error: unknown): string | undefined {
 }
 
 export function todayInputValue(): string {
-  return new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function isTransactionDateAllowed(date: string): boolean {
+  return date === todayInputValue();
 }
 
 export function buildTransactionInput({
@@ -62,7 +70,21 @@ export function canSubmitTransaction({
     Boolean(selectedPrice) &&
     Number.isFinite(parsedQuantity) &&
     parsedQuantity > 0 &&
-    Boolean(date) &&
+    isTransactionDateAllowed(date) &&
     !isSubmitting
   );
+}
+
+export function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export function byLatestTransaction(a: Transaction, b: Transaction): number {
+  const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
+  if (dateDiff !== 0) return dateDiff;
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 }

@@ -1,4 +1,5 @@
 import type {StockPrice} from "./prices.types.ts";
+import type {PortfolioPosition} from "./portfolio.types.ts";
 
 export type TransactionType = "BUY" | "SELL";
 
@@ -21,4 +22,10 @@ export type TransactionInput = {
 export type TransactionPanelProps = {
   selectedPrice: StockPrice | null;
   lastPriceRunFinishedAt?: string | null;
+};
+
+export type TickerTransactionsDialogProps = {
+  open: boolean;
+  position: PortfolioPosition | null;
+  onOpenChange: (open: boolean) => void;
 };

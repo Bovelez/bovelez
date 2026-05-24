@@ -3,15 +3,8 @@ import { BarChart3, BriefcaseBusiness, Clock3, History } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
 import type {ActiveSharesProps} from "../../types/portfolio.types";
-
-function formatMoney(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatNumber(value: number): string {
-  return value.toLocaleString("en-US", { maximumFractionDigits: 4 });
-}
+import {useFormatNumber} from "../../hooks/transactions/utils/useFormatNumber.ts";
+import {useMoney} from "../../hooks/transactions/utils/useMoney.ts";
 
 export function ActiveShares({
   portfolio,
@@ -153,16 +146,16 @@ export function ActiveShares({
                     </div>
                   </td>
                   <td className="px-4 py-4 text-right font-mono font-medium text-[var(--text)]">
-                    {formatNumber(position.quantity)}
+                    {useFormatNumber(position.quantity)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono text-[var(--text-muted)]">
-                    {formatMoney(position.avgCost)}
+                    {useMoney(position.avgCost)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono text-[var(--text)]">
-                    {formatMoney(position.currentPrice)}
+                    {useMoney(position.currentPrice)}
                   </td>
                   <td className="px-4 py-4 text-right font-mono font-bold text-[var(--text)]">
-                    {formatMoney(position.currentValue)}
+                    {useMoney(position.currentValue)}
                   </td>
                   <td className="px-4 py-4 text-right">
                     {position.pnl === null ? (

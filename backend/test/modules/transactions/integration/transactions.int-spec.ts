@@ -25,6 +25,22 @@ const mockEdgarService = {
   getMetrics: jest.fn(),
 };
 
+function todayInputValue(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function yesterdayInputValue(): string {
+  const yesterday = new Date();
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  return yesterday.toISOString().slice(0, 10);
+}
+
+function tomorrowInputValue(): string {
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return tomorrow.toISOString().slice(0, 10);
+}
+
 describe('Transactions Integration', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
@@ -117,7 +133,7 @@ describe('Transactions Integration', () => {
       const response = await request(getHttpServer(app))
         .post('/transactions/buy')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'AAPL', quantity: 10, date: '2025-01-15' })
+        .send({ ticker: 'AAPL', quantity: 10, date: todayInputValue() })
         .expect(201);
 
       const body = response.body as Record<string, unknown>;
@@ -139,7 +155,7 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/buy')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'FAKE', quantity: 10, date: '2025-01-15' })
+        .send({ ticker: 'FAKE', quantity: 10, date: todayInputValue() })
         .expect(400);
 
       expect(await prisma.transaction.count()).toBe(0);
@@ -149,7 +165,27 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/buy')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'NVDA', quantity: 5, date: '2025-01-15' })
+        .send({ ticker: 'NVDA', quantity: 5, date: todayInputValue() })
+        .expect(400);
+
+      expect(await prisma.transaction.count()).toBe(0);
+    });
+
+    it('returns 400 when buying before today', async () => {
+      await request(getHttpServer(app))
+        .post('/transactions/buy')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ticker: 'AAPL', quantity: 1, date: yesterdayInputValue() })
+        .expect(400);
+
+      expect(await prisma.transaction.count()).toBe(0);
+    });
+
+    it('returns 400 when buying after today', async () => {
+      await request(getHttpServer(app))
+        .post('/transactions/buy')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ticker: 'AAPL', quantity: 1, date: tomorrowInputValue() })
         .expect(400);
 
       expect(await prisma.transaction.count()).toBe(0);
@@ -170,7 +206,7 @@ describe('Transactions Integration', () => {
     it('returns 401 without authentication', async () => {
       await request(getHttpServer(app))
         .post('/transactions/buy')
-        .send({ ticker: 'AAPL', quantity: 10, date: '2025-01-15' })
+        .send({ ticker: 'AAPL', quantity: 10, date: todayInputValue() })
         .expect(401);
     });
   });
@@ -189,7 +225,7 @@ describe('Transactions Integration', () => {
       const response = await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'AAPL', quantity: 4, date: '2025-06-01' })
+        .send({ ticker: 'AAPL', quantity: 4, date: todayInputValue() })
         .expect(201);
 
       const body = response.body as Record<string, unknown>;
@@ -208,7 +244,7 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'AAPL', quantity: 11, date: '2025-06-01' })
+        .send({ ticker: 'AAPL', quantity: 11, date: todayInputValue() })
         .expect(400);
 
       expect(await prisma.transaction.count({ where: { userId } })).toBe(1);
@@ -218,8 +254,28 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'MSFT', quantity: 1, date: '2025-06-01' })
+        .send({ ticker: 'MSFT', quantity: 1, date: todayInputValue() })
         .expect(400);
+    });
+
+    it('returns 400 when selling before today', async () => {
+      await request(getHttpServer(app))
+        .post('/transactions/sell')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ticker: 'AAPL', quantity: 1, date: yesterdayInputValue() })
+        .expect(400);
+
+      expect(await prisma.transaction.count({ where: { userId } })).toBe(1);
+    });
+
+    it('returns 400 when selling after today', async () => {
+      await request(getHttpServer(app))
+        .post('/transactions/sell')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ticker: 'AAPL', quantity: 1, date: tomorrowInputValue() })
+        .expect(400);
+
+      expect(await prisma.transaction.count({ where: { userId } })).toBe(1);
     });
 
     it('returns 400 when the sell ticker has no stored price', async () => {
@@ -228,7 +284,7 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'AAPL', quantity: 1, date: '2025-06-01' })
+        .send({ ticker: 'AAPL', quantity: 1, date: todayInputValue() })
         .expect(400);
 
       expect(await prisma.transaction.count({ where: { userId } })).toBe(1);
@@ -238,7 +294,7 @@ describe('Transactions Integration', () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ticker: 'AAPL', quantity: 10, date: '2025-06-01' })
+        .send({ ticker: 'AAPL', quantity: 10, date: todayInputValue() })
         .expect(201);
 
       const transactions = await prisma.transaction.findMany({
@@ -250,7 +306,7 @@ describe('Transactions Integration', () => {
     it('returns 401 without authentication', async () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
-        .send({ ticker: 'AAPL', quantity: 1, date: '2025-06-01' })
+        .send({ ticker: 'AAPL', quantity: 1, date: todayInputValue() })
         .expect(401);
     });
   });

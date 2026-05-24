@@ -6,12 +6,7 @@ import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
-
-function errorLabel(error: unknown): string | undefined {
-  if (!error) return undefined;
-  if (error instanceof Error) return error.message;
-  return "No pudimos cargar los precios.";
-}
+import {useErrorLabel} from "../../hooks/portfolio/utils/useErrorLabel.ts";
 
 export default function Portfolio() {
   const portfolioQuery = usePortfolio();
@@ -19,8 +14,8 @@ export default function Portfolio() {
   const lastPriceRunQuery = useLastPriceRun();
   const prices = pricesQuery.data ?? [];
   const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
-  const marketError = errorLabel(pricesQuery.error);
-  const portfolioError = errorLabel(portfolioQuery.error);
+  const marketError = useErrorLabel(pricesQuery.error);
+  const portfolioError = useErrorLabel(portfolioQuery.error);
 
   return (
     <div

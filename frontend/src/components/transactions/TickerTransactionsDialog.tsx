@@ -9,37 +9,10 @@ import {
   X,
 } from "lucide-react";
 import { useTickerTransactions } from "../../hooks/transactions/useTickerTransactions";
-import type { PortfolioPosition } from "../../types/portfolio.types";
-import type { Transaction } from "../../types/transactions.types";
-
-type TickerTransactionsDialogProps = {
-  open: boolean;
-  position: PortfolioPosition | null;
-  onOpenChange: (open: boolean) => void;
-};
-
-function formatMoney(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "-";
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatNumber(value: number): string {
-  return value.toLocaleString("en-US", { maximumFractionDigits: 4 });
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function byLatestTransaction(a: Transaction, b: Transaction): number {
-  const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
-  if (dateDiff !== 0) return dateDiff;
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-}
+import type {TickerTransactionsDialogProps} from "../../types/transactions.types";
+import {useMoney} from "../../hooks/transactions/utils/useMoney.ts";
+import {useFormatNumber} from "../../hooks/transactions/utils/useFormatNumber.ts";
+import {byLatestTransaction, formatDate} from "../../hooks/transactions/utils/transaction.utils.ts";
 
 export function TickerTransactionsDialog({
   open,
@@ -99,7 +72,7 @@ export function TickerTransactionsDialog({
                     Tenencia
                   </p>
                   <p className="mt-1 font-mono text-lg font-bold text-[var(--text)]">
-                    {formatNumber(position.quantity)}
+                    {useFormatNumber(position.quantity)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--bg-deep)]/50 px-4 py-3 shadow-inner">
@@ -107,7 +80,7 @@ export function TickerTransactionsDialog({
                     Costo Prom.
                   </p>
                   <p className="mt-1 font-mono text-lg font-bold text-[var(--text)]">
-                    {formatMoney(position.avgCost)}
+                    {useMoney(position.avgCost)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--bg-deep)]/50 px-4 py-3 shadow-inner">
@@ -115,7 +88,7 @@ export function TickerTransactionsDialog({
                     Operado
                   </p>
                   <p className="mt-1 font-mono text-lg font-bold text-[var(--text)]">
-                    {formatMoney(totalTraded)}
+                    {useMoney(totalTraded)}
                   </p>
                 </div>
               </div>
@@ -176,7 +149,7 @@ export function TickerTransactionsDialog({
                           </span>
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-[var(--text)]">
-                              {isBuy ? "Compra" : "Venta"} de {formatNumber(transaction.quantity)} acciones
+                              {isBuy ? "Compra" : "Venta"} de {useFormatNumber(transaction.quantity)} acciones
                             </p>
                             <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
                               <CalendarDays size={13} />
@@ -191,7 +164,7 @@ export function TickerTransactionsDialog({
                               Precio
                             </p>
                             <p className="mt-1 font-mono text-sm font-bold text-[var(--text)]">
-                              {formatMoney(transaction.price)}
+                              {useMoney(transaction.price)}
                             </p>
                           </div>
                           <div>
@@ -199,7 +172,7 @@ export function TickerTransactionsDialog({
                               Total
                             </p>
                             <p className="mt-1 font-mono text-sm font-bold text-[var(--text)]">
-                              {formatMoney(transaction.quantity * transaction.price)}
+                              {useMoney(transaction.quantity * transaction.price)}
                             </p>
                           </div>
                         </div>

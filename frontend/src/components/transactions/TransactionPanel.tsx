@@ -16,11 +16,8 @@ import {
   canSubmitTransaction,
   todayInputValue,
   transactionErrorLabel,
-} from "../../hooks/transactions/transaction.utils";
-function formatMoney(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+} from "../../hooks/transactions/utils/transaction.utils";
+import {useMoney} from "../../hooks/transactions/utils/useMoney.ts";
 
 export function TransactionPanel({
   selectedPrice,
@@ -99,7 +96,7 @@ export function TransactionPanel({
                   Cotización Actual
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-emerald-400">
-                  {selectedPrice ? formatMoney(selectedPrice.price) : "—"}
+                  {selectedPrice ? useMoney(selectedPrice.price) : "—"}
                 </p>
               </div>
               <p className="text-right text-[10px] text-[var(--text-muted)]">
@@ -136,6 +133,8 @@ export function TransactionPanel({
             </span>
             <input
               type="date"
+              min={todayInputValue()}
+              max={todayInputValue()}
               value={date}
               onChange={(event) => setDate(event.target.value)}
               className="w-full rounded-xl border border-[var(--border)]/80 bg-[var(--bg-deep)]/80 px-4 py-3 font-mono text-[14px] font-medium text-[var(--text)] shadow-inner outline-none transition-all focus:border-blue-400/60 focus:bg-[var(--bg-deep)] focus:ring-2 focus:ring-blue-400/20"
@@ -239,7 +238,7 @@ export function TransactionPanel({
                     <span className="font-mono text-[13px] font-semibold text-[var(--text)]">
                       {transaction.quantity}{" "}
                       <span className="text-[var(--text-faint)]">@</span>{" "}
-                      {formatMoney(transaction.price)}
+                      {useMoney(transaction.price)}
                     </span>
                   </div>
                 ))}
