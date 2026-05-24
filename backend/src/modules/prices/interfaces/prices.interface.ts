@@ -1,5 +1,6 @@
 export interface IFetchPricesResult {
   prices: Record<string, number>;
+  dailyChangePercentages?: Record<string, number | null>;
   errors: Record<string, string>;
 }
 

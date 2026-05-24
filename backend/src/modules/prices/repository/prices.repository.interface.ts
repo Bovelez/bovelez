@@ -1,6 +1,7 @@
 export interface StockPriceRecord {
   ticker: string;
   price: number;
+  dailyChangePercent: number | null;
   updatedAt: Date;
 }
 
@@ -14,10 +15,15 @@ export interface PriceBatchRunRecord {
 }
 
 export interface IPricesRepository {
-  upsertPrice(ticker: string, price: number): Promise<StockPriceRecord>;
+  upsertPrice(
+    ticker: string,
+    price: number,
+    dailyChangePercent: number | null,
+  ): Promise<StockPriceRecord>;
   findPrice(ticker: string): Promise<StockPriceRecord | null>;
   findPricesByTickers(tickers: string[]): Promise<StockPriceRecord[]>;
   findAllPrices(): Promise<StockPriceRecord[]>;
+  findTickersMissingDailyChangePercent(): Promise<string[]>;
   countPrices(): Promise<number>;
   createBatchRun(): Promise<PriceBatchRunRecord>;
   finishBatchRun(

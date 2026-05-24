@@ -18,10 +18,18 @@ export class PricesService {
 
   async runBatch(tickers: string[]) {
     const run = await this.repository.createBatchRun();
-    const { prices, errors } = await this.yahooClient.fetchPrices(tickers);
+    const {
+      prices,
+      dailyChangePercentages = {},
+      errors,
+    } = await this.yahooClient.fetchPrices(tickers);
 
     for (const [ticker, price] of Object.entries(prices)) {
-      await this.repository.upsertPrice(ticker, price);
+      await this.repository.upsertPrice(
+        ticker,
+        price,
+        dailyChangePercentages[ticker] ?? null,
+      );
     }
 
     const finished = await this.repository.finishBatchRun(
@@ -38,6 +46,7 @@ export class PricesService {
       tickerCount: finished.tickerCount,
       errorCount: finished.errorCount,
       prices,
+      dailyChangePercentages,
       errors,
     };
   }

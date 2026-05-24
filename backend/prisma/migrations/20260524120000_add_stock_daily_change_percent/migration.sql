@@ -1,0 +1,1 @@
+ALTER TABLE "StockPrice" ADD COLUMN "dailyChangePercent" DOUBLE PRECISION;
