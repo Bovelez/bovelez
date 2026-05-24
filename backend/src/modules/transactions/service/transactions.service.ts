@@ -24,6 +24,7 @@ export class TransactionsService {
     userId: string,
     input: BuyTransactionInput,
   ): Promise<TransactionDto> {
+    this.validateTransactionDate(input.date);
     await this.validateTicker(input.ticker);
     const price = await this.getLatestPriceOrThrow(input.ticker);
     const transaction = await this.executeBuyTransaction(userId, input, price);
@@ -34,6 +35,7 @@ export class TransactionsService {
     userId: string,
     input: SellTransactionInput,
   ): Promise<TransactionDto> {
+    this.validateTransactionDate(input.date);
     const currentQuantity = await this.validatePositionAndGetQuantity(
       userId,
       input,
@@ -86,6 +88,14 @@ export class TransactionsService {
     const isValid = await this.edgarService.isValidTicker(ticker);
     if (!isValid) {
       throw new BadRequestException('Ticker no válido');
+    }
+  }
+
+  private validateTransactionDate(date: Date): void {
+    if (this.getUniversalDateOnlyTime(date) !== this.getUniversalDateOnlyTime(new Date())) {
+      throw new BadRequestException(
+        'Solo podés registrar operaciones con fecha de hoy',
+      );
     }
   }
 
@@ -233,5 +243,13 @@ export class TransactionsService {
 
   private isZeroQuantity(quantity: number): boolean {
     return Math.abs(quantity) < TransactionsService.ZERO_QUANTITY_THRESHOLD;
+  }
+
+  private getUniversalDateOnlyTime(date: Date): number {
+    return Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+    );
   }
 }
