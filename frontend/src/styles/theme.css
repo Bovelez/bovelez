@@ -168,3 +168,7 @@
   ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 }
+
+html, body {
+  overflow: hidden;
+}

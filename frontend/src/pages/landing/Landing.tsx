@@ -14,13 +14,13 @@ export default function Landing() {
   return (
     <div
       data-testid="landing"
-      className="min-h-screen bg-[var(--bg-deep)] text-[var(--text)]"
+      className="h-screen bg-[var(--bg-deep)] text-[var(--text)]"
       style={{ fontFamily: "var(--font-body)" }}
     >
       {/* ── Navbar ── */}
       <nav
         data-testid="landing-nav"
-        className="flex items-center justify-between px-10 sticky top-0 z-50 h-16 bg-[var(--bg-deep)] border-b border-[var(--border)]"
+        className="flex items-center justify-between px-10 sticky top-0 z-50 h-16 bg-[var(--bg-deep)] border-b border-[var(--border)] overscroll-none"
       >
         <BrandText fontSize={26}>VIPJM</BrandText>
 
@@ -28,14 +28,14 @@ export default function Landing() {
           <button
             data-testid="landing-nav-login"
             onClick={() => navigate("/login")}
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-[var(--text)]"
+            className="px-5 py-2 rounded-lg text-sm font-semibold text-[var(--text)] cursor-pointer"
           >
             Ingresar
           </button>
           <button
             data-testid="landing-nav-register"
             onClick={() => navigate("/register")}
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-white"
+            className="px-5 py-2 rounded-lg text-sm font-semibold text-white cursor-pointer"
             style={{ background: "var(--gradient-brand)" }}
           >
             Registrarme
@@ -46,7 +46,7 @@ export default function Landing() {
       {/* ── Hero ── */}
       <section
         data-testid="landing-hero"
-        className="relative flex flex-col items-center justify-center text-center px-8 py-32 overflow-hidden"
+        className="relative flex flex-col items-center justify-center text-center px-8 py-32 overflow-hidden overscroll-none"
         style={{ minHeight: "calc(100vh - 64px)" }}
       >
         {/* Glows */}
