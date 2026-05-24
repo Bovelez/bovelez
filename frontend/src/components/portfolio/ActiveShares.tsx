@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart3, BriefcaseBusiness, Clock3, History, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowUpRight, BarChart3, BriefcaseBusiness, Clock3, History, TrendingUp, TrendingDown } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
 import type { ActiveSharesProps } from "../../types/portfolio.types";
@@ -22,7 +22,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
     { label: "Costos totales", className: "text-center" },
     { label: "PNL", className: "text-center" },
     { label: "PNL%", className: "text-center" },
-    { label: "", className: "text-center" },
+    { label: "Acciones", className: "text-center" },
   ];
 
   return (
@@ -188,9 +188,14 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                           )}
                         </td>
                         <td className="px-5 py-4 text-center">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] bg-[var(--bg-deep)]/60 text-[var(--text-faint)] transition-all group-hover:border-orange-500/30 group-hover:text-orange-400">
-                        <History size={14} strokeWidth={2.2} />
-                      </span>
+                          <div className="inline-flex items-center justify-center gap-2">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.07] bg-[var(--bg-deep)]/60 text-[var(--text-faint)] transition-all group-hover:border-orange-500/30 group-hover:text-orange-400">
+                              <History size={14} strokeWidth={2.2} />
+                            </span>
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-400/20 bg-rose-500/[0.08] text-rose-200 transition-all group-hover:border-rose-400/40 group-hover:text-rose-100">
+                              <ArrowUpRight size={14} strokeWidth={2.2} />
+                            </span>
+                          </div>
                         </td>
                       </tr>
                   );
