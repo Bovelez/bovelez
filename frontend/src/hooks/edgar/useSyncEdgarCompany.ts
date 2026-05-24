@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { syncEdgarCompany } from "../../api/edgar/edgar.api";
+import { syncEdgarCompany } from "../../api/edgar.api";
 import { edgarKeys } from "./queryKeys";
 
 export function useSyncEdgarCompany() {

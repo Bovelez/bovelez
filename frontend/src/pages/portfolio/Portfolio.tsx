@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Database, ShieldCheck } from "lucide-react";
+import { ActiveShares } from "../../components/portfolio/ActiveShares";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
+import { TransactionPanel } from "../../components/transactions/TransactionPanel";
+import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
@@ -12,147 +14,84 @@ function errorLabel(error: unknown): string | undefined {
 }
 
 export default function Portfolio() {
+  const portfolioQuery = usePortfolio();
   const pricesQuery = useStockPrices();
   const lastPriceRunQuery = useLastPriceRun();
   const prices = pricesQuery.data ?? [];
   const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
   const marketError = errorLabel(pricesQuery.error);
+  const portfolioError = errorLabel(portfolioQuery.error);
 
   return (
     <div
       data-testid="portfolio-page"
-      className="relative p-8 text-[var(--text)]"
-      style={{ fontFamily: "var(--font-body)" }}
+      className="relative min-h-screen p-6 md:p-8 lg:p-12 text-[var(--text)] font-sans selection:bg-[var(--primary)]/30"
     >
-      <div
-        className="pointer-events-none absolute -top-24 left-1/4 h-[420px] w-[420px] rounded-full opacity-50"
-        style={{ background: "var(--glow-orange)", filter: "blur(60px)" }}
-      />
+      {/* Ambient glows */}
+      <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-orange-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-40 top-1/4 h-[600px] w-[600px] rounded-full bg-orange-500/10 blur-[120px]" />
 
-      <div className="relative mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-widest text-[var(--text-muted)]">
-            Portfolio
-          </p>
-          <h1 className="font-mono text-[38px] font-bold leading-none">
-            Operar acciones
+      <header className="relative z-10 mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div className="max-w-3xl">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border)]/50 bg-[var(--surface-2)]/80 px-3 py-1.5 shadow-sm backdrop-blur-md">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-50"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              Live Trading Environment
+            </span>
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] drop-shadow-sm md:text-5xl lg:text-6xl">
+            Portfolio & Trading
           </h1>
-          <p className="mt-2 max-w-2xl text-[13px] text-[var(--text-muted)]">
-            Primer paso: seleccionar un ticker S&amp;P con precio cargado para
-            usarlo luego en compra o venta.
-          </p>
-        </div>
-      </div>
-
-      <div className="relative mb-5 grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4">
-          <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface-2)] text-[var(--primary)]">
-            <Database size={17} />
-          </div>
-          <p className="text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-            Universo
-          </p>
-          <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-            {pricesQuery.isLoading ? "..." : prices.length.toString()}
-          </p>
-          <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-            tickers con precio cargado
+          <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
+            Gestioná tus inversiones S&P 500 de forma inteligente. Explorá el
+            mercado, operá acciones al instante y monitoreá tus rendimientos en
+            tiempo real con una interfaz profesional.
           </p>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4 md:col-span-2">
-          <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface-2)] text-emerald-400">
-            <ShieldCheck size={17} />
-          </div>
-          <p className="text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-            Selección actual
-          </p>
-          <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-            {selectedPrice?.ticker ?? "—"}
-          </p>
-          <p className="mt-1 truncate text-[12px] text-[var(--text-muted)]">
-            {selectedPrice
-              ? `$${selectedPrice.price.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} · actualizado ${new Date(
-                  selectedPrice.updatedAt,
-                ).toLocaleDateString()}`
-              : "Elegí una empresa para operar"}
-          </p>
-        </div>
-      </div>
-
-      <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <PriceTickerSelect
-          prices={prices}
-          selectedPrice={selectedPrice}
-          isLoading={pricesQuery.isLoading}
-          errorMessage={marketError}
-          onSelectPrice={setSelectedPrice}
-          onClearSelection={() => setSelectedPrice(null)}
-        />
-
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-          <div className="border-b border-[var(--border)] px-5 py-4">
-            <h2 className="text-[17px] text-[var(--text)]">Acción lista</h2>
-            <p className="text-[12px] text-[var(--text-muted)]">
-              Este bloque después se conecta con compra y venta.
+        <div className="flex items-center gap-6 rounded-3xl border border-[var(--border)]/50 bg-[var(--surface)]/40 p-5 shadow-2xl backdrop-blur-xl">
+          <div>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-faint)]">
+              Valor de la Cuenta
+            </p>
+            <p className="font-mono text-3xl font-bold text-[var(--text)] md:text-4xl">
+              {portfolioQuery.isLoading
+                ? "..."
+                : `$${(portfolioQuery.data?.totalValue ?? 0).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
             </p>
           </div>
+        </div>
+      </header>
 
-          <div className="space-y-4 px-5 py-4">
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] p-4">
-              <p className="text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-                Ticker
-              </p>
-              <p className="mt-1 font-mono text-[24px] font-bold text-[var(--text)]">
-                {selectedPrice?.ticker ?? "—"}
-              </p>
-              <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-                {selectedPrice
-                  ? `Actualizado ${new Date(
-                      selectedPrice.updatedAt,
-                    ).toLocaleString()}`
-                  : "Sin selección"}
-              </p>
-              <p className="mt-3 text-[11px] uppercase tracking-widest text-[var(--text-faint)]">
-                Precio actual
-              </p>
-              <p className="mt-1 font-mono text-[18px] font-bold text-[var(--text)]">
-                {!selectedPrice
-                  ? "Sin precio"
-                  : `$${selectedPrice.price.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}
-              </p>
-              <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                Batch: {lastPriceRunQuery.data?.finishedAt ?? "sin actualizar"}
-              </p>
-            </div>
+      <main className="relative z-10 flex flex-col gap-8">
+        <ActiveShares
+          portfolio={portfolioQuery.data}
+          isLoading={portfolioQuery.isLoading}
+          errorMessage={portfolioError}
+        />
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                disabled={!selectedPrice}
-                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowDownLeft size={15} />
-                Comprar
-              </button>
-              <button
-                type="button"
-                disabled={!selectedPrice}
-                className="flex items-center justify-center gap-2 rounded-lg bg-rose-500 px-3 py-3 text-[13px] font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowUpRight size={15} />
-                Vender
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
+        <div className="grid gap-6 lg:grid-cols-[1fr_400px] xl:gap-8 xl:grid-cols-[1fr_440px]">
+          <PriceTickerSelect
+            prices={prices}
+            selectedPrice={selectedPrice}
+            isLoading={pricesQuery.isLoading}
+            errorMessage={marketError}
+            onSelectPrice={setSelectedPrice}
+            onClearSelection={() => setSelectedPrice(null)}
+          />
+
+          <TransactionPanel
+            selectedPrice={selectedPrice}
+            lastPriceRunFinishedAt={lastPriceRunQuery.data?.finishedAt}
+          />
+        </div>
+      </main>
     </div>
   );
 }

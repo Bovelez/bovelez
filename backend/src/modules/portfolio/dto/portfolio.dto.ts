@@ -39,14 +39,23 @@ export class PortfolioPositionDto {
 export class PortfolioDto {
   positions: PortfolioPositionDto[];
   totalValue: number;
+  totalInvested: number;
+  totalPnl: number;
+  totalPnlPercent: number;
   lastPriceUpdate: Date | null;
 
   constructor(positions: PortfolioPositionDto[], lastPriceUpdate: Date | null) {
     this.positions = positions;
-    this.totalValue = positions.reduce(
-      (sum, p) => sum + (p.currentValue ?? 0),
+    this.totalValue = positions.reduce((sum, p) => sum + (p.currentValue ?? 0), 0);
+    this.totalInvested = positions.reduce(
+      (sum, p) => sum + p.avgCost * p.quantity,
       0,
     );
+    this.totalPnl = positions.reduce((sum, p) => sum + (p.pnl ?? 0), 0);
+    this.totalPnlPercent =
+      this.totalInvested === 0
+        ? 0
+        : (this.totalPnl / this.totalInvested) * 100;
     this.lastPriceUpdate = lastPriceUpdate;
   }
 }

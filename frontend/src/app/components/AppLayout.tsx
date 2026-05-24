@@ -14,6 +14,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { useUser, useLogout } from "../../hooks/auth/useAuth";
+import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useDeleteAccount } from "../../hooks/user/useDeleteAccount";
 import { handleError } from "../../hooks/auth/utils/handlerError";
 import { BrandText } from "../../components/ui/BrandText";
@@ -32,6 +33,7 @@ export function AppLayout() {
   const { data: user } = useUser();
   const logout    = useLogout();
   const deleteAccount = useDeleteAccount();
+  const lastPriceRunQuery = useLastPriceRun();
 
   const [searchQuery,  setSearchQuery]  = useState("");
   const [sidebarOpen,  setSidebarOpen]  = useState(true);
@@ -88,7 +90,12 @@ export function AppLayout() {
     }
   };
 
-  const lastPriceUpdate = "—";
+  const lastPriceUpdate = lastPriceRunQuery.data?.finishedAt
+    ? new Date(lastPriceRunQuery.data.finishedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
   const avatar =
     (user?.name
@@ -201,12 +208,11 @@ export function AppLayout() {
           {/* Last price update */}
           <div
             data-testid="header-price-update"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)]"
-            title="Última actualización del proceso batch (Yahoo Finance)"
+            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5"
           >
             <RefreshCw size={13} className="text-emerald-400" />
             <span className="text-[11px] text-[var(--text-muted)]">Precios:</span>
-            <span className="text-[11px] text-[var(--text)] font-mono">{lastPriceUpdate}</span>
+            <span className="font-mono text-[11px] text-[var(--text)]">{lastPriceUpdate}</span>
           </div>
 
           {/* User menu */}

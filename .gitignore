@@ -3,3 +3,4 @@ context/
 claudecontext
 node_modules
 .env
+CLAUDE

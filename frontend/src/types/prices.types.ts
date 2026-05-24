@@ -1,5 +1,3 @@
-import type { EdgarCompany } from "./edgar.types";
-
 export type StockPrice = {
   ticker: string;
   price: number;
@@ -29,7 +27,12 @@ export type UpdatePricesResponse = {
   errors: Record<string, string>;
 };
 
-export type PricedEdgarCompany = EdgarCompany & {
-  price: number | null;
-  priceUpdatedAt: string | null;
+
+export type TickerSelectProps = {
+  prices: StockPrice[];
+  selectedPrice: StockPrice | null;
+  isLoading: boolean;
+  errorMessage?: string;
+  onSelectPrice: (price: StockPrice) => void;
+  onClearSelection?: () => void;
 };

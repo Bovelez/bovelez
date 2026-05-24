@@ -37,15 +37,15 @@ describe('PricesStartupSeeder', () => {
 
   it('runs a price batch for the static SPY tickers when StockPrice is empty', async () => {
     mockRepository.countPrices.mockResolvedValue(0);
-    mockPricesService.runBatch.mockResolvedValue({
-      tickerCount: SPY_TICKERS.length,
-      errorCount: 0,
-    });
+    mockPricesService.runBatch.mockResolvedValue({ tickerCount: 50, errorCount: 0 });
 
-    await seeder.onApplicationBootstrap();
+    await seeder.runSeed();
 
     expect(mockRepository.countPrices).toHaveBeenCalled();
-    expect(mockPricesService.runBatch).toHaveBeenCalledWith([...SPY_TICKERS]);
+    // tickers are sent in chunks of 50 — verify all tickers are covered across all calls
+    const allCalledTickers = mockPricesService.runBatch.mock.calls.flat(2) as string[];
+    expect(allCalledTickers).toEqual(expect.arrayContaining([...SPY_TICKERS]));
+    expect(allCalledTickers).toHaveLength(SPY_TICKERS.length);
   });
 
   it('uses configured SPY_TICKERS when provided', async () => {
@@ -53,43 +53,38 @@ describe('PricesStartupSeeder', () => {
       key === 'SPY_TICKERS' ? ' msft, AAPL, brk.b, AAPL ' : 'true',
     );
     mockRepository.countPrices.mockResolvedValue(0);
-    mockPricesService.runBatch.mockResolvedValue({
-      tickerCount: 3,
-      errorCount: 0,
-    });
+    mockPricesService.runBatch.mockResolvedValue({ tickerCount: 3, errorCount: 0 });
 
-    await seeder.onApplicationBootstrap();
+    await seeder.runSeed();
 
-    expect(mockPricesService.runBatch).toHaveBeenCalledWith([
-      'AAPL',
-      'BRK-B',
-      'MSFT',
-    ]);
+    // 3 tickers fit in one chunk
+    expect(mockPricesService.runBatch).toHaveBeenCalledTimes(1);
+    expect(mockPricesService.runBatch).toHaveBeenCalledWith(['AAPL', 'BRK-B', 'MSFT']);
   });
 
   it('skips startup seeding when StockPrice already has records', async () => {
     mockRepository.countPrices.mockResolvedValue(1);
 
-    await seeder.onApplicationBootstrap();
+    await seeder.runSeed();
 
     expect(mockPricesService.runBatch).not.toHaveBeenCalled();
   });
 
-  it('skips startup seeding during tests', async () => {
+  it('skips startup seeding during tests', () => {
     process.env.NODE_ENV = 'test';
 
-    await seeder.onApplicationBootstrap();
+    seeder.onApplicationBootstrap();
 
     expect(mockRepository.countPrices).not.toHaveBeenCalled();
     expect(mockPricesService.runBatch).not.toHaveBeenCalled();
   });
 
-  it('skips startup seeding when disabled by configuration', async () => {
+  it('skips startup seeding when disabled by configuration', () => {
     mockConfigService.get.mockImplementation((key: string) =>
       key === 'SEED_SPY_PRICES_ON_STARTUP' ? 'false' : undefined,
     );
 
-    await seeder.onApplicationBootstrap();
+    seeder.onApplicationBootstrap();
 
     expect(mockRepository.countPrices).not.toHaveBeenCalled();
     expect(mockPricesService.runBatch).not.toHaveBeenCalled();
