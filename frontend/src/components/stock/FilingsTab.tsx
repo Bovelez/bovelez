@@ -50,7 +50,7 @@ export function FilingsTab({ filings, isLoading }: Props) {
                 href={f.reportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--primary)] hover:opacity-75 transition-opacity"
+                className="cursor-pointer text-[var(--primary)] hover:opacity-75 transition-opacity"
               >
                 <ExternalLink size={13} />
               </a>

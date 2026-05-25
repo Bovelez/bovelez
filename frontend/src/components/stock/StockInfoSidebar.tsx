@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import type { EdgarCompanyRecord } from "../../types/edgar.types";
 import type { StockPrice } from "../../types/prices.types";
 
@@ -8,6 +9,9 @@ type Props = {
 };
 
 export function StockInfoSidebar({ company, price }: Props) {
+  const lastPriceRunQuery = useLastPriceRun();
+  const lastUpdate =
+    lastPriceRunQuery.data?.finishedAt ?? price?.updatedAt ?? null;
   return (
     <div className="w-56 shrink-0 space-y-4">
       <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
@@ -22,12 +26,14 @@ export function StockInfoSidebar({ company, price }: Props) {
                 ${price.price.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-xs text-[var(--text-muted)]">Actualizado</span>
-              <span className="text-xs font-bold font-mono text-[var(--text)]">
-                {new Date(price.updatedAt).toLocaleDateString("es-AR")}
-              </span>
-            </div>
+            {lastUpdate && (
+              <div className="flex justify-between py-1.5">
+                <span className="text-xs text-[var(--text-muted)]">Actualizado</span>
+                <span className="text-xs font-bold font-mono text-[var(--text)]">
+                  {new Date(lastUpdate).toLocaleDateString("es-AR")}
+                </span>
+              </div>
+            )}
           </>
         ) : (
           <p className="text-xs text-[var(--text-muted)]">Sin datos de precio</p>

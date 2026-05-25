@@ -107,7 +107,7 @@ export function TrimestresTab({ metrics, isLoading }: Props) {
           <button
             key={o.key}
             onClick={() => setView(o.key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+            className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
               view === o.key
                 ? "text-white border-transparent"
                 : "border-[var(--border-strong)] text-[var(--text-muted)] bg-[var(--bg-deep)]"

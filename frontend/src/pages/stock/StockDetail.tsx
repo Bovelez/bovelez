@@ -49,7 +49,7 @@ export default function StockDetail() {
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="rounded-xl border border-[var(--border-strong)] px-4 py-2 text-sm text-[var(--text-muted)]"
+          className="cursor-pointer rounded-xl border border-[var(--border-strong)] px-4 py-2 text-sm text-[var(--text-muted)]"
         >
           Volver
         </button>
@@ -72,7 +72,7 @@ export default function StockDetail() {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                   tab === t ? "text-white" : "text-[var(--text-muted)]"
                 }`}
                 style={tab === t ? { background: "var(--gradient-brand)" } : undefined}

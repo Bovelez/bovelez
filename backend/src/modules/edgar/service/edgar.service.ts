@@ -37,9 +37,15 @@ export class EdgarService implements IEdgarService {
   }
 
   async getCompany(ticker: string) {
-    const company = await this.repository.findByTicker(ticker);
-    if (!company) throw new NotFoundException(`Ticker ${ticker} not found`);
-    return company;
+    const normalized = ticker.trim().toUpperCase();
+    const cached = await this.repository.findByTicker(normalized);
+    if (cached) return cached;
+
+    try {
+      return await this.syncCompany(normalized);
+    } catch {
+      throw new NotFoundException(`Ticker ${ticker} not found`);
+    }
   }
 
   async getAllCompanies() {

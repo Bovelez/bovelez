@@ -27,14 +27,14 @@ export function QuickAction({ company, price }: Props) {
       <div className="flex items-center gap-2 mb-5">
         <button
           onClick={() => setQty(Math.max(1, qty - 1))}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
+          className="cursor-pointer w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
         >
           <Minus size={14} className="text-[var(--text)]" />
         </button>
         <span className="flex-1 text-center font-bold font-mono text-[var(--text)]">{qty}</span>
         <button
           onClick={() => setQty(qty + 1)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
+          className="cursor-pointer w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
         >
           <Plus size={14} className="text-[var(--text)]" />
         </button>
@@ -49,21 +49,21 @@ export function QuickAction({ company, price }: Props) {
 
       <button
         onClick={() => navigate(`/app/buy/${company.ticker}`)}
-        className="w-full py-2.5 rounded-lg font-semibold text-white text-sm flex items-center justify-center gap-1.5 mb-2"
+        className="cursor-pointer w-full py-2.5 rounded-lg font-semibold text-white text-sm flex items-center justify-center gap-1.5 mb-2"
         style={{ background: "var(--gradient-brand)", boxShadow: "0 4px 14px rgba(255,107,53,0.25)" }}
       >
         <ArrowUpRight size={14} className="text-emerald-300" /> Comprar
       </button>
       <button
         onClick={() => navigate(`/app/sell/${company.ticker}`)}
-        className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)]"
+        className="cursor-pointer w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)]"
       >
         <ArrowDownRight size={14} className="text-rose-400" /> Vender
       </button>
 
       <button
         onClick={() => setInWatchlist(!inWatchlist)}
-        className={`mt-3 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border ${
+        className={`cursor-pointer mt-3 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border ${
           inWatchlist
             ? "border-[var(--primary)] text-[var(--primary)]"
             : "border-[var(--border-strong)] text-[var(--text-muted)] bg-[var(--surface)]"

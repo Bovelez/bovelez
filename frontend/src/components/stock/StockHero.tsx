@@ -1,3 +1,4 @@
+import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import type { EdgarCompanyRecord } from "../../types/edgar.types";
 import type { StockPrice } from "../../types/prices.types";
 
@@ -7,6 +8,9 @@ type Props = {
 };
 
 export function StockHero({ company, price }: Props) {
+  const lastPriceRunQuery = useLastPriceRun();
+  const lastUpdate =
+    lastPriceRunQuery.data?.finishedAt ?? price?.updatedAt ?? null;
   return (
     <div className="px-8 py-8 relative overflow-hidden bg-[var(--surface)] border-b border-[var(--border)]">
       <div
@@ -41,9 +45,11 @@ export function StockHero({ company, price }: Props) {
               <p className="font-mono font-bold text-[var(--text)]" style={{ fontSize: 36 }}>
                 ${price.price.toFixed(2)}
               </p>
-              <p className="text-xs text-[var(--text-faint)] mt-1">
-                Actualizado: {new Date(price.updatedAt).toLocaleString("es-AR")}
-              </p>
+              {lastUpdate && (
+                <p className="text-xs text-[var(--text-faint)] mt-1">
+                  Actualizado: {new Date(lastUpdate).toLocaleString("es-AR")}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-sm text-[var(--text-muted)]">Sin precio disponible</p>

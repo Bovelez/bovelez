@@ -27,8 +27,10 @@ export class EdgarFactsClient implements IEdgarFactsClient {
   private readonly conceptMap = {
     revenue: [
       'RevenueFromContractWithCustomerExcludingAssessedTax',
+      'RevenuesNetOfInterestExpense',
       'Revenues',
       'SalesRevenueNet',
+      'InterestAndDividendIncomeOperating',
     ],
     netIncome: ['NetIncomeLoss'],
     eps: ['EarningsPerShareBasic', 'EarningsPerShareDiluted'],
@@ -81,6 +83,11 @@ export class EdgarFactsClient implements IEdgarFactsClient {
       { units?: Record<string, unknown[]> }
     >;
 
+    // Pick the concept whose latest entry is most recent — many companies
+    // (e.g. JPM) have legacy entries under one concept and current data under
+    // another, so first-non-empty would silently return stale data.
+    let best: { sorted: FactEntry[]; unitKey: string; latestEnd: string } | null = null;
+
     for (const concept of concepts) {
       const units = gaap?.[concept]?.units;
       if (!units) continue;
@@ -102,40 +109,83 @@ export class EdgarFactsClient implements IEdgarFactsClient {
         (e) => (e.form === '10-Q' || e.form === '10-K') && e.fp && e.fy && e.end,
       );
 
-      const periodFiltered = isFlow
-        ? reports.filter((e) => this.isQuarterlyPeriod(e))
-        : reports;
+      const quarterly = isFlow
+        ? this.buildFlowQuarters(reports)
+        : this.dedupByEnd(reports);
 
-      // Deduplicate by quarter key, keeping the most recently filed value (amendments win)
-      const dedup = new Map<string, FactEntry>();
-      for (const e of periodFiltered) {
-        const key = this.quarterKey(e);
-        const existing = dedup.get(key);
-        if (!existing || e.filed > existing.filed) dedup.set(key, e);
-      }
-
-      // Sort by end date ascending so the chart reads left-to-right oldest-to-newest
-      const sorted = [...dedup.values()].sort((a, b) =>
+      const sorted = quarterly.sort((a, b) =>
         (a.end ?? '').localeCompare(b.end ?? ''),
       );
+      if (sorted.length === 0) continue;
 
-      const latest = sorted.slice(-quarters);
-
-      if (latest.length > 0) {
-        return latest.map((e) => ({
-          quarter: this.quarterLabel(e),
-          value: e.val,
-          unit: unitKey,
-          filedAt: e.filed,
-        }));
+      const latestEnd = sorted[sorted.length - 1].end ?? '';
+      if (!best || latestEnd > best.latestEnd) {
+        best = { sorted, unitKey, latestEnd };
       }
     }
-    return [];
+
+    if (!best) return [];
+
+    return best.sorted.slice(-quarters).map((e) => ({
+      quarter: this.quarterLabel(e),
+      value: e.val,
+      unit: best.unitKey,
+      filedAt: e.filed,
+    }));
   }
 
-  // Flow metrics (revenue, net income, EPS) report cumulative YTD values in
-  // 10-K (full year) and 10-Q (Q1=3mo, Q2=6mo, Q3=9mo from fiscal start). We only
-  // want the quarterly slice — entries whose start/end span ~3 months.
+  // Flow metrics (revenue, net income, EPS) are reported cumulatively in 10-K
+  // filings (full fiscal year). 10-Q filings carry a ~3-month current-quarter
+  // slice (along with YTD periods we ignore). We keep the 3-month entries
+  // directly, and synthesize the missing Q4 by subtracting the three preceding
+  // 3-month quarters from the 10-K annual total. EDGAR re-tags prior quarters
+  // under later fiscal-year labels after restatements, so we match by date
+  // range (quarter ends within the annual period and at least one quarter
+  // before its end) rather than by `fy`.
+  private buildFlowQuarters(reports: FactEntry[]): FactEntry[] {
+    const quarterEntries = this.dedupByEnd(
+      reports.filter((e) => this.isQuarterlyPeriod(e)),
+    );
+    const annualEntries = this.dedupByEnd(
+      reports.filter(
+        (e) =>
+          e.form === '10-K' && e.fp === 'FY' && this.isAnnualPeriod(e),
+      ),
+    );
+
+    const synthetic: FactEntry[] = [];
+    for (const annual of annualEntries) {
+      if (!annual.start || !annual.end) continue;
+      const annualStartMs = Date.parse(annual.start);
+      const annualEndMs = Date.parse(annual.end);
+      if (Number.isNaN(annualStartMs) || Number.isNaN(annualEndMs)) continue;
+
+      const dayMs = 1000 * 60 * 60 * 24;
+      const preceding = quarterEntries.filter((q) => {
+        if (!q.end) return false;
+        const qEndMs = Date.parse(q.end);
+        if (Number.isNaN(qEndMs)) return false;
+        return (
+          qEndMs > annualStartMs && (annualEndMs - qEndMs) / dayMs >= 80
+        );
+      });
+
+      if (preceding.length !== 3) continue;
+      const sumQ123 = preceding.reduce((acc, e) => acc + e.val, 0);
+      synthetic.push({
+        form: annual.form,
+        fp: 'Q4',
+        fy: annual.fy,
+        val: annual.val - sumQ123,
+        filed: annual.filed,
+        end: annual.end,
+        start: annual.start,
+      });
+    }
+
+    return [...quarterEntries, ...synthetic];
+  }
+
   private isQuarterlyPeriod(e: FactEntry): boolean {
     if (!e.start || !e.end) return false;
     const startMs = Date.parse(e.start);
@@ -143,6 +193,25 @@ export class EdgarFactsClient implements IEdgarFactsClient {
     if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
     const days = (endMs - startMs) / (1000 * 60 * 60 * 24);
     return days >= 80 && days <= 100;
+  }
+
+  private isAnnualPeriod(e: FactEntry): boolean {
+    if (!e.start || !e.end) return false;
+    const startMs = Date.parse(e.start);
+    const endMs = Date.parse(e.end);
+    if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
+    const days = (endMs - startMs) / (1000 * 60 * 60 * 24);
+    return days >= 350 && days <= 380;
+  }
+
+  private dedupByEnd(entries: FactEntry[]): FactEntry[] {
+    const dedup = new Map<string, FactEntry>();
+    for (const e of entries) {
+      const key = this.quarterKey(e);
+      const existing = dedup.get(key);
+      if (!existing || e.filed > existing.filed) dedup.set(key, e);
+    }
+    return [...dedup.values()];
   }
 
   private quarterKey(e: FactEntry): string {
