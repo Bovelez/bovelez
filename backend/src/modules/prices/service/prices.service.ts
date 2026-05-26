@@ -107,4 +107,17 @@ export class PricesService {
       ),
     );
   }
+  async getPricesByTickersWithChange(
+    tickers: string[],
+  ): Promise<Map<string, StockPriceRecord | null>> {
+    const uniqueTickers = this.normalizeTickers(tickers);
+    if (this.hasNoTickers(uniqueTickers)) return new Map();
+
+    const records = await this.repository.findPricesByTickers(uniqueTickers);
+    const found = new Map(records.map((r) => [r.ticker, r]));
+
+    return new Map(
+      uniqueTickers.map((ticker) => [ticker, found.get(ticker) ?? null]),
+    );
+  }
 }

@@ -8,6 +8,7 @@ import Transactions from "../pages/transactions/Transactions";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
+import Watchlist from "../pages/watchlist/Watchlist";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
           { path: "dashboard", element: <Dashboard /> },
           { path: "portfolio", element: <Portfolio /> },
           { path: "transactions", element: <Transactions /> },
+            {path: "watchlist", element: <Watchlist/>}
         ],
       },
     ],

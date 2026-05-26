@@ -83,7 +83,11 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
     let totalPrices = 0;
     let totalErrors = 0;
 
-    for (let i = 0; i < tickers.length; i += PricesStartupSeeder.SEED_CHUNK_SIZE) {
+    for (
+      let i = 0;
+      i < tickers.length;
+      i += PricesStartupSeeder.SEED_CHUNK_SIZE
+    ) {
       const chunk = tickers.slice(i, i + PricesStartupSeeder.SEED_CHUNK_SIZE);
       const result = await this.pricesService.runBatch(chunk);
       totalPrices += result.tickerCount;

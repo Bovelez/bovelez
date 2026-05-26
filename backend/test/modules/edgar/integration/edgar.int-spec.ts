@@ -41,16 +41,14 @@ describe('Edgar Integration', () => {
 
   beforeEach(() => {
     mockEdgarClient.getCompanies.mockResolvedValue(edgarCompanies);
-    mockEdgarClient.getCompanyByTicker.mockImplementation(
-      async (ticker: string) => {
-        const company = edgarCompanies.find(
-          (item) => item.ticker === ticker.toUpperCase(),
-        );
+    mockEdgarClient.getCompanyByTicker.mockImplementation((ticker: string) => {
+      const company = edgarCompanies.find(
+        (item) => item.ticker === ticker.toUpperCase(),
+      );
 
-        if (!company) throw new Error(`Ticker ${ticker} not found`);
-        return company;
-      },
-    );
+      if (!company) throw new Error(`Ticker ${ticker} not found`);
+      return company;
+    });
   });
 
   afterAll(async () => {

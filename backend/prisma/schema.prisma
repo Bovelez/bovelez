@@ -19,6 +19,8 @@ model User {
   email        String        @unique
   password     String
   transactions Transaction[]
+
+  WatchlistItem WatchlistItem[]
 }
 
 model Transaction {
@@ -77,4 +79,14 @@ model PriceBatchRun {
   tickerCount Int       @default(0)
   errorCount  Int       @default(0)
   errors      Json?
+}
+model WatchlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  ticker    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ticker])
+  @@index([userId])
 }

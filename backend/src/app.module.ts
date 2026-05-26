@@ -9,6 +9,7 @@ import { PricesModule } from './modules/prices/prices.module';
 import { EdgarModule } from './modules/edgar/edgar.module';
 import { PortfolioModule } from './modules/portfolio/portfolio.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { WatchlistModule } from './modules/watchlist/watchlist.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     TransactionsModule,
     PortfolioModule,
     PricesModule,
+    WatchlistModule,
   ],
   controllers: [],
   providers: [
