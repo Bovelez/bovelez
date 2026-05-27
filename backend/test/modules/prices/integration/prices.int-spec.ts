@@ -9,6 +9,7 @@ import { YAHOO_FINANCE_CLIENT } from '../../../../src/modules/prices/interfaces/
 const mockYahooClient = {
   fetchPrices: jest.fn().mockResolvedValue({
     prices: { AAPL: 200.5, MSFT: 420.0 },
+    dailyChangePercentages: { AAPL: 1.25, MSFT: -0.5 },
     errors: {},
   }),
 };
@@ -54,6 +55,10 @@ describe('Prices Integration', () => {
       expect(body.batchId).toBeDefined();
       expect(body.tickerCount).toBe(2);
       expect(body.errorCount).toBe(0);
+      expect(body.dailyChangePercentages).toEqual({
+        AAPL: 1.25,
+        MSFT: -0.5,
+      });
 
       const aapl = await prisma.stockPrice.findUnique({
         where: { ticker: 'AAPL' },
@@ -63,8 +68,10 @@ describe('Prices Integration', () => {
       });
       expect(aapl).not.toBeNull();
       expect(aapl.price).toBe(200.5);
+      expect(aapl.dailyChangePercent).toBe(1.25);
       expect(msft).not.toBeNull();
       expect(msft.price).toBe(420.0);
+      expect(msft.dailyChangePercent).toBe(-0.5);
 
       const batchRun = await prisma.priceBatchRun.findUnique({
         where: { id: body.batchId as string },
@@ -78,6 +85,7 @@ describe('Prices Integration', () => {
     it('should update an existing price when the same ticker is submitted again', async () => {
       mockYahooClient.fetchPrices.mockResolvedValueOnce({
         prices: { AAPL: 999.99 },
+        dailyChangePercentages: { AAPL: 2.75 },
         errors: {},
       });
 
@@ -90,11 +98,13 @@ describe('Prices Integration', () => {
         where: { ticker: 'AAPL' },
       });
       expect(aapl.price).toBe(999.99);
+      expect(aapl.dailyChangePercent).toBe(2.75);
     });
 
     it('should register errors in the batch run without interrupting', async () => {
       mockYahooClient.fetchPrices.mockResolvedValueOnce({
         prices: { AAPL: 200.5 },
+        dailyChangePercentages: { AAPL: null },
         errors: { FAKE: 'No data returned' },
       });
 
@@ -140,6 +150,9 @@ describe('Prices Integration', () => {
       const tickers = body.map((p) => p.ticker);
       expect(tickers).toContain('AAPL');
       expect(tickers).toContain('MSFT');
+      expect(body.find((p) => p.ticker === 'AAPL')).toHaveProperty(
+        'dailyChangePercent',
+      );
     });
   });
 
@@ -152,10 +165,12 @@ describe('Prices Integration', () => {
       const body = response.body as {
         ticker: string;
         price: number;
+        dailyChangePercent: number | null;
         updatedAt: string;
       };
       expect(body.ticker).toBe('MSFT');
       expect(body.price).toBe(420.0);
+      expect(body.dailyChangePercent).toBeDefined();
       expect(body.updatedAt).toBeDefined();
     });
 

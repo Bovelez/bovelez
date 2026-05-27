@@ -21,6 +21,25 @@ function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
   };
 }
 
+function todayDate(): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+}
+
+function yesterdayDate(): Date {
+  const yesterday = todayDate();
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  return yesterday;
+}
+
+function tomorrowDate(): Date {
+  const tomorrow = todayDate();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return tomorrow;
+}
+
 describe('TransactionsService', () => {
   let service: TransactionsService;
   let transactionsRepository: jest.Mocked<ITransactionsRepository>;
@@ -54,7 +73,7 @@ describe('TransactionsService', () => {
     const input = {
       ticker: 'AAPL',
       quantity: 10,
-      date: new Date('2025-01-15'),
+      date: todayDate(),
     };
 
     it('creates a BUY transaction at the stored price', async () => {
@@ -105,10 +124,30 @@ describe('TransactionsService', () => {
         0,
       );
     });
+
+    it('throws BadRequestException when buying before today', async () => {
+      await expect(
+        service.buy(USER_ID, { ...input, date: yesterdayDate() }),
+      ).rejects.toThrow(BadRequestException);
+      expect(edgarService.isValidTicker.mock.calls).toHaveLength(0);
+      expect(transactionsRepository.createTransaction.mock.calls).toHaveLength(
+        0,
+      );
+    });
+
+    it('throws BadRequestException when buying after today', async () => {
+      await expect(
+        service.buy(USER_ID, { ...input, date: tomorrowDate() }),
+      ).rejects.toThrow(BadRequestException);
+      expect(edgarService.isValidTicker.mock.calls).toHaveLength(0);
+      expect(transactionsRepository.createTransaction.mock.calls).toHaveLength(
+        0,
+      );
+    });
   });
 
   describe('sell', () => {
-    const input = { ticker: 'AAPL', quantity: 5, date: new Date('2025-06-01') };
+    const input = { ticker: 'AAPL', quantity: 5, date: todayDate() };
 
     it('creates a SELL transaction at the stored price', async () => {
       transactionsRepository.getTransactionsByUserAndTicker.mockResolvedValue([
@@ -165,6 +204,30 @@ describe('TransactionsService', () => {
       await expect(
         service.sell(USER_ID, { ...input, quantity: 5 }),
       ).rejects.toThrow(BadRequestException);
+      expect(transactionsRepository.createTransaction.mock.calls).toHaveLength(
+        0,
+      );
+    });
+
+    it('throws BadRequestException when selling before today', async () => {
+      await expect(
+        service.sell(USER_ID, { ...input, date: yesterdayDate() }),
+      ).rejects.toThrow(BadRequestException);
+      expect(
+        transactionsRepository.getTransactionsByUserAndTicker.mock.calls,
+      ).toHaveLength(0);
+      expect(transactionsRepository.createTransaction.mock.calls).toHaveLength(
+        0,
+      );
+    });
+
+    it('throws BadRequestException when selling after today', async () => {
+      await expect(
+        service.sell(USER_ID, { ...input, date: tomorrowDate() }),
+      ).rejects.toThrow(BadRequestException);
+      expect(
+        transactionsRepository.getTransactionsByUserAndTicker.mock.calls,
+      ).toHaveLength(0);
       expect(transactionsRepository.createTransaction.mock.calls).toHaveLength(
         0,
       );

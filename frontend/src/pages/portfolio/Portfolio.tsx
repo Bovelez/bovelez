@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { ActiveShares } from "../../components/portfolio/ActiveShares";
 import { PriceTickerSelect } from "../../components/prices/PriceTickerSelect";
+import { StockTickerBar } from "../../components/prices/StockTickerBar";
 import { TransactionPanel } from "../../components/transactions/TransactionPanel";
 import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useStockPrices } from "../../hooks/prices/useStockPrices";
 import type { StockPrice } from "../../types/prices.types";
-
-function errorLabel(error: unknown): string | undefined {
-  if (!error) return undefined;
-  if (error instanceof Error) return error.message;
-  return "No pudimos cargar los precios.";
-}
+import { useErrorLabel } from "../../hooks/portfolio/utils/useErrorLabel.ts";
+import { TrendingUp, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 export default function Portfolio() {
   const portfolioQuery = usePortfolio();
@@ -19,79 +16,148 @@ export default function Portfolio() {
   const lastPriceRunQuery = useLastPriceRun();
   const prices = pricesQuery.data ?? [];
   const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
-  const marketError = errorLabel(pricesQuery.error);
-  const portfolioError = errorLabel(portfolioQuery.error);
+  const marketError = useErrorLabel(pricesQuery.error);
+  const portfolioError = useErrorLabel(portfolioQuery.error);
+
+  const totalValue = portfolioQuery.data?.totalValue ?? 0;
+  const totalPnl = portfolioQuery.data?.totalPnl ?? 0;
+  const totalPnlPercent = portfolioQuery.data?.totalPnlPercent ?? 0;
+  const isLoading = portfolioQuery.isLoading;
+  const isPnlPositive = totalPnl >= 0;
 
   return (
-    <div
-      data-testid="portfolio-page"
-      className="relative min-h-screen p-6 md:p-8 lg:p-12 text-[var(--text)] font-sans selection:bg-[var(--primary)]/30"
-    >
-      {/* Ambient glows */}
-      <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-orange-500/10 blur-[120px]" />
-      <div className="pointer-events-none absolute -right-40 top-1/4 h-[600px] w-[600px] rounded-full bg-orange-500/10 blur-[120px]" />
+      <div
+          data-testid="portfolio-page"
+          className="relative min-h-screen font-sans selection:bg-orange-500/20"
+          style={{ color: "var(--text, #f0ede8)" }}
+      >
+        {/* Ambient glows */}
+        <div className="pointer-events-none fixed -left-64 -top-64 h-[700px] w-[700px] rounded-full bg-orange-500/[0.06] blur-[100px]" />
+        <div className="pointer-events-none fixed bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-orange-600/[0.04] blur-[120px]" />
 
-      <header className="relative z-10 mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div className="max-w-3xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border)]/50 bg-[var(--surface-2)]/80 px-3 py-1.5 shadow-sm backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-50"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-              Live Trading Environment
-            </span>
+        <div className="relative z-10 mx-auto max-w-[1520px] px-4 py-6 md:px-8 lg:py-8">
+
+          {/* ── HEADER ── */}
+          <header className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg shadow-orange-500/25">
+                <TrendingUp size={19} strokeWidth={2.5} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-[22px] font-black tracking-tight text-[var(--text)]">
+                  Mi Portfolio
+                </h1>
+                <div className="flex items-center gap-1.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                </span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-orange-100/80">
+                  Live · S&amp;P 500
+                </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-stretch gap-3">
+              {/* Account value */}
+              <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[var(--surface)]/60 px-5 py-3.5 shadow-xl backdrop-blur-md">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10">
+                  <Wallet size={17} className="text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-100/80">
+                    Valor de Cuenta
+                  </p>
+                  <p className="font-mono text-[22px] font-black tabular-nums text-[var(--text)]">
+                    {isLoading
+                        ? "···"
+                        : `$${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* PnL */}
+              {!isLoading && (
+                  <div
+                      className="flex items-center gap-3 rounded-2xl border px-5 py-3.5 shadow-xl backdrop-blur-md"
+                      style={{
+                        background: "var(--surface, #141414)",
+                        borderColor: isPnlPositive ? "rgba(52,211,153,0.18)" : "rgba(251,113,133,0.18)",
+                      }}
+                  >
+                    <div
+                        className="flex h-9 w-9 items-center justify-center rounded-xl"
+                        style={{ background: isPnlPositive ? "rgba(52,211,153,0.1)" : "rgba(251,113,133,0.1)" }}
+                    >
+                      {isPnlPositive
+                          ? <ArrowUpRight size={17} className="text-emerald-400" />
+                          : <ArrowDownLeft size={17} className="text-rose-400" />}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-100/80">
+                        Resultado Neto
+                      </p>
+                      <div className="flex items-baseline gap-2">
+                    <span
+                        className="font-mono text-[18px] font-black tabular-nums"
+                        style={{ color: isPnlPositive ? "#34d399" : "#fb7185" }}
+                    >
+                      {isPnlPositive ? "+" : ""}${totalPnl.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                        <span
+                            className="font-mono text-xs font-bold"
+                            style={{ color: isPnlPositive ? "#6ee7b7" : "#fda4af" }}
+                        >
+                      {isPnlPositive ? "+" : ""}{totalPnlPercent.toFixed(2)}%
+                    </span>
+                      </div>
+                    </div>
+                  </div>
+              )}
+            </div>
+          </header>
+
+          {/* ── TICKER BAR ── */}
+          <div className="mb-6">
+            <StockTickerBar />
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text)] drop-shadow-sm md:text-5xl lg:text-6xl">
-            Portfolio & Trading
-          </h1>
-          <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-            Gestioná tus inversiones S&P 500 de forma inteligente. Explorá el
-            mercado, operá acciones al instante y monitoreá tus rendimientos en
-            tiempo real con una interfaz profesional.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-6 rounded-3xl border border-[var(--border)]/50 bg-[var(--surface)]/40 p-5 shadow-2xl backdrop-blur-xl">
-          <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-faint)]">
-              Valor de la Cuenta
-            </p>
-            <p className="font-mono text-3xl font-bold text-[var(--text)] md:text-4xl">
-              {portfolioQuery.isLoading
-                ? "..."
-                : `$${(portfolioQuery.data?.totalValue ?? 0).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
-            </p>
+          {/* ── ACTIVE SHARES ── */}
+          <div className="mb-6">
+            <ActiveShares
+                portfolio={portfolioQuery.data}
+                isLoading={portfolioQuery.isLoading}
+                errorMessage={portfolioError}
+            />
           </div>
+
+          {/* ── SECTION DIVIDER ── */}
+          <div className="mb-5 flex items-center gap-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-orange-500/30 via-orange-500/10 to-transparent" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-100/80">
+            Terminal de Operaciones
+          </span>
+            <div className="h-px flex-1 bg-gradient-to-l from-orange-500/30 via-orange-500/10 to-transparent" />
+          </div>
+
+          {/* ── TRADING PANEL ── */}
+          <div className="grid gap-5 lg:grid-cols-[1fr_430px] xl:grid-cols-[1fr_460px]">
+            <PriceTickerSelect
+                prices={prices}
+                selectedPrice={selectedPrice}
+                isLoading={pricesQuery.isLoading}
+                errorMessage={marketError}
+                onSelectPrice={setSelectedPrice}
+                onClearSelection={() => setSelectedPrice(null)}
+            />
+            <TransactionPanel
+                selectedPrice={selectedPrice}
+                lastPriceRunFinishedAt={lastPriceRunQuery.data?.finishedAt}
+            />
+          </div>
+
         </div>
-      </header>
-
-      <main className="relative z-10 flex flex-col gap-8">
-        <ActiveShares
-          portfolio={portfolioQuery.data}
-          isLoading={portfolioQuery.isLoading}
-          errorMessage={portfolioError}
-        />
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_400px] xl:gap-8 xl:grid-cols-[1fr_440px]">
-          <PriceTickerSelect
-            prices={prices}
-            selectedPrice={selectedPrice}
-            isLoading={pricesQuery.isLoading}
-            errorMessage={marketError}
-            onSelectPrice={setSelectedPrice}
-            onClearSelection={() => setSelectedPrice(null)}
-          />
-
-          <TransactionPanel
-            selectedPrice={selectedPrice}
-            lastPriceRunFinishedAt={lastPriceRunQuery.data?.finishedAt}
-          />
-        </div>
-      </main>
-    </div>
+      </div>
   );
 }

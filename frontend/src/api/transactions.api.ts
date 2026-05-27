@@ -23,3 +23,8 @@ export async function getTickerTransactions(
   );
   return data;
 }
+
+export async function getAllTransactions(): Promise<Transaction[]> {
+  const { data } = await apiClient.get<Transaction[]>("/transactions");
+  return data;
+}

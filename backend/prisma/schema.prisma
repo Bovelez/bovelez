@@ -64,9 +64,10 @@ model EdgarCompany {
 }
 
 model StockPrice {
-  ticker    String   @id
-  price     Float
-  updatedAt DateTime @updatedAt
+  ticker             String   @id
+  price              Float
+  dailyChangePercent Float?
+  updatedAt          DateTime @updatedAt
 }
 
 model PriceBatchRun {
