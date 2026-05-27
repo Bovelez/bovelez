@@ -5,7 +5,7 @@ import { useStockPrice } from "../../hooks/prices/useStockPrice";
 import { useEdgarCompany } from "../../hooks/edgar/useEdgarCompany";
 import { usePortfolio } from "../../hooks/portfolio/usePortfolio";
 import { useSellTransaction } from "../../hooks/transactions/useSellTransaction";
-import { buildTransactionInput, todayInputValue, transactionErrorLabel } from "../../hooks/transactions/transaction.utils";
+import { buildTransactionInput, todayInputValue, transactionErrorLabel } from "../../hooks/transactions/utils/transaction.utils";
 
 export default function SellPosition() {
   const { ticker } = useParams<{ ticker: string }>();

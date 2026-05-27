@@ -4,7 +4,7 @@ import { ArrowUpRight, Plus, Minus, CheckCircle, AlertTriangle, Loader2 } from "
 import { useStockPrice } from "../../hooks/prices/useStockPrice";
 import { useEdgarCompany } from "../../hooks/edgar/useEdgarCompany";
 import { useBuyTransaction } from "../../hooks/transactions/useBuyTransaction";
-import { buildTransactionInput, todayInputValue, transactionErrorLabel } from "../../hooks/transactions/transaction.utils";
+import { buildTransactionInput, todayInputValue, transactionErrorLabel } from "../../hooks/transactions/utils/transaction.utils";
 
 export default function BuyFlow() {
   const { ticker } = useParams<{ ticker: string }>();
