@@ -70,8 +70,6 @@ Cypress.Commands.add("shouldHaveGlobalError", () => {
     cy.getByTestId("global-error").should("be.visible");
 });
 
-// ── Watchlist commands ────────────────────────────────────────────────────────
-
 Cypress.Commands.add("loginAsUser", () => {
     cy.session("watchlist-user", () => {
         cy.fixture("usuario").then((u) => {
