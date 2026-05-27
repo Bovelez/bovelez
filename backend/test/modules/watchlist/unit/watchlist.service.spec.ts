@@ -11,6 +11,7 @@ import {
   MAX_WATCHLIST_SIZE,
 } from '../../../../src/modules/watchlist/service/watchlist.service';
 import { IWatchlistItem } from '../../../../src/modules/watchlist/interfaces/watchlist.interface';
+import { PricesService } from '../../../../src/modules/prices/service/prices.service';
 
 const USER_ID = 'user-1';
 
@@ -42,6 +43,7 @@ describe('WatchlistService', () => {
   let service: WatchlistService;
   let repository: jest.Mocked<IWatchlistRepository>;
   let edgarService: jest.Mocked<IEdgarService>;
+  let pricesService: jest.Mocked<PricesService>;
 
   beforeEach(() => {
     repository = {
@@ -60,9 +62,15 @@ describe('WatchlistService', () => {
       searchCompanies: jest.fn(),
       getFilings: jest.fn(),
       getMetrics: jest.fn(),
-    } as unknown as jest.Mocked<IEdgarService>;
+    };
 
-    service = new WatchlistService(repository, edgarService);
+    pricesService = {
+      getPricesByTickersWithChange: jest.fn(),
+    } as unknown as jest.Mocked<PricesService>;
+
+    pricesService.getPricesByTickersWithChange.mockResolvedValue(new Map());
+
+    service = new WatchlistService(repository, edgarService, pricesService);
   });
 
   // ── addItem ────────────────────────────────────────────────────────────────
@@ -178,6 +186,7 @@ describe('WatchlistService', () => {
         name: 'Apple Inc.',
         updatedAt: new Date(),
       });
+      pricesService.getPricesByTickersWithChange.mockResolvedValue(new Map());
 
       const result = await service.getItems(USER_ID);
 
@@ -189,6 +198,7 @@ describe('WatchlistService', () => {
     it('returns name as null when the company is not found', async () => {
       repository.findByUser.mockResolvedValue([buildItem({ ticker: 'AAPL' })]);
       edgarService.getCompany.mockRejectedValue(new NotFoundException());
+      pricesService.getPricesByTickersWithChange.mockResolvedValue(new Map());
 
       const result = await service.getItems(USER_ID);
 
@@ -209,12 +219,58 @@ describe('WatchlistService', () => {
           name: 'Microsoft Corporation',
           updatedAt: new Date(),
         });
+      pricesService.getPricesByTickersWithChange.mockResolvedValue(new Map());
 
       const result = await service.getItems(USER_ID);
 
       expect(result).toHaveLength(2);
       expect(result[0].name).toBeNull();
       expect(result[1].name).toBe('Microsoft Corporation');
+    });
+
+    it('enriches items with price and daily change when available', async () => {
+      const updatedAt = new Date('2025-01-15T10:30:00Z');
+      repository.findByUser.mockResolvedValue([buildItem({ ticker: 'AAPL' })]);
+      edgarService.getCompany.mockResolvedValue({
+        id: 'company-1',
+        cik: '320193',
+        ticker: 'AAPL',
+        name: 'Apple Inc.',
+        updatedAt: new Date(),
+      });
+      pricesService.getPricesByTickersWithChange.mockResolvedValue(
+        new Map([
+          [
+            'AAPL',
+            {
+              ticker: 'AAPL',
+              price: 189.5,
+              dailyChangePercent: 1.23,
+              updatedAt,
+            },
+          ],
+        ]),
+      );
+
+      const result = await service.getItems(USER_ID);
+
+      expect(result[0].price).toBe(189.5);
+      expect(result[0].dailyChangePercent).toBe(1.23);
+      expect(result[0].priceUpdatedAt).toBe(updatedAt.toISOString());
+    });
+
+    it('sets price fields to null when the ticker has no price record', async () => {
+      repository.findByUser.mockResolvedValue([buildItem({ ticker: 'AAPL' })]);
+      edgarService.getCompany.mockRejectedValue(new NotFoundException());
+      pricesService.getPricesByTickersWithChange.mockResolvedValue(
+        new Map([['AAPL', null]]),
+      );
+
+      const result = await service.getItems(USER_ID);
+
+      expect(result[0].price).toBeNull();
+      expect(result[0].dailyChangePercent).toBeNull();
+      expect(result[0].priceUpdatedAt).toBeNull();
     });
   });
 

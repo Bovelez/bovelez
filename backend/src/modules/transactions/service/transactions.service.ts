@@ -257,10 +257,12 @@ export class TransactionsService {
   }
 
   private getUniversalDateOnlyTime(date: Date): number {
-    return new Date(
+    const parsed_date = new Date(
       date.getFullYear(),
       date.getMonth(),
       date.getDate(),
     ).getTime();
+    console.log(date);
+    return parsed_date;
   }
 }
