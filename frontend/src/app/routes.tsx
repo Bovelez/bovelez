@@ -7,6 +7,7 @@ import Portfolio from "../pages/portfolio/Portfolio";
 import StockDetail from "../pages/stock/StockDetail";
 import BuyFlow from "../pages/stock/BuyFlow";
 import SellPosition from "../pages/stock/SellPosition";
+import Transactions from "../pages/transactions/Transactions";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
           { path: "stock/:ticker", element: <StockDetail /> },
           { path: "buy/:ticker", element: <BuyFlow /> },
           { path: "sell/:ticker", element: <SellPosition /> },
+          { path: "transactions", element: <Transactions /> },
         ],
       },
     ],
