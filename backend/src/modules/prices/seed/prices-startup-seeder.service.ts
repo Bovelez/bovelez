@@ -26,8 +26,6 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
     void this.runSeed();
   }
 
-  private static readonly SEED_CHUNK_SIZE = 50;
-
   async runSeed(): Promise<void> {
     try {
       const priceCount = await this.repository.countPrices();
@@ -38,7 +36,12 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
           this.logger.log(
             `Refreshing ${tickersMissingDailyChange.length} prices missing daily change percent`,
           );
-          await this.runSeedBatches(tickersMissingDailyChange);
+          const result = await this.pricesService.runBatch(
+            tickersMissingDailyChange,
+          );
+          this.logger.log(
+            `Refresh finished: ${result.tickerCount} prices, ${result.errorCount} errors`,
+          );
           return;
         }
 
@@ -50,13 +53,13 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
 
       const tickers = this.getSeedTickers();
       this.logger.log(
-        `StockPrice is empty; seeding ${tickers.length} S&P 500 tickers in chunks of ${PricesStartupSeeder.SEED_CHUNK_SIZE}`,
+        `StockPrice is empty; seeding ${tickers.length} S&P 500 tickers`,
       );
 
-      const { totalPrices, totalErrors } = await this.runSeedBatches(tickers);
+      const result = await this.pricesService.runBatch(tickers);
 
       this.logger.log(
-        `Startup price seed finished: ${totalPrices} prices, ${totalErrors} errors`,
+        `Startup price seed finished: ${result.tickerCount} prices, ${result.errorCount} errors`,
       );
     } catch (error) {
       this.logger.error(
@@ -75,25 +78,6 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
     );
 
     return !['0', 'false', 'no', 'off'].includes(value.toLowerCase());
-  }
-
-  private async runSeedBatches(
-    tickers: string[],
-  ): Promise<{ totalPrices: number; totalErrors: number }> {
-    let totalPrices = 0;
-    let totalErrors = 0;
-
-    for (let i = 0; i < tickers.length; i += PricesStartupSeeder.SEED_CHUNK_SIZE) {
-      const chunk = tickers.slice(i, i + PricesStartupSeeder.SEED_CHUNK_SIZE);
-      const result = await this.pricesService.runBatch(chunk);
-      totalPrices += result.tickerCount;
-      totalErrors += result.errorCount;
-      this.logger.log(
-        `Seed progress: ${Math.min(i + PricesStartupSeeder.SEED_CHUNK_SIZE, tickers.length)}/${tickers.length} tickers processed`,
-      );
-    }
-
-    return { totalPrices, totalErrors };
   }
 
   private getSeedTickers(): string[] {
