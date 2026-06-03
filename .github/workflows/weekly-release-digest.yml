@@ -1,0 +1,140 @@
+name: Weekly release digest
+
+on:
+  schedule:
+    # Mondays at 09:00 America/Argentina/Buenos_Aires.
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  email:
+    name: Email release updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send weekly release digest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          RELEASE_DIGEST_FROM: ${{ secrets.RELEASE_DIGEST_FROM }}
+          RELEASE_DIGEST_TO: ${{ secrets.RELEASE_DIGEST_TO }}
+        run: |
+          python3 <<'PY'
+          import html
+          import json
+          import os
+          import smtplib
+          import ssl
+          import sys
+          import urllib.request
+          from datetime import datetime, timedelta, timezone
+          from email.message import EmailMessage
+
+          required = [
+              "GITHUB_TOKEN",
+              "REPOSITORY",
+              "SMTP_USERNAME",
+              "SMTP_PASSWORD",
+              "RELEASE_DIGEST_TO",
+          ]
+          missing = [name for name in required if not os.environ.get(name)]
+          if missing:
+              raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
+
+          repository = os.environ["REPOSITORY"]
+          since = datetime.now(timezone.utc) - timedelta(days=7)
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{repository}/releases?per_page=100",
+              headers={
+                  "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+
+          with urllib.request.urlopen(request) as response:
+              releases = json.load(response)
+
+          weekly_releases = []
+          for release in releases:
+              published_at = release.get("published_at")
+              if not published_at:
+                  continue
+
+              published = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+              if published >= since:
+                  weekly_releases.append(release)
+
+          if not weekly_releases:
+              print("No GitHub releases were published in the last 7 days. Email skipped.")
+              sys.exit(0)
+
+          weekly_releases.sort(key=lambda release: release["published_at"], reverse=True)
+
+          text_sections = []
+          html_sections = []
+          for release in weekly_releases:
+              name = release.get("name") or release.get("tag_name")
+              tag = release.get("tag_name")
+              body = (release.get("body") or "No release notes were provided.").strip()
+              url = release.get("html_url")
+              published = release["published_at"][:10]
+
+              text_sections.append(
+                  f"{name} ({tag})\n"
+                  f"Published: {published}\n"
+                  f"{url}\n\n"
+                  f"{body}"
+              )
+              html_sections.append(
+                  "<section>"
+                  f"<h2>{html.escape(name)} ({html.escape(tag)})</h2>"
+                  f"<p><strong>Published:</strong> {html.escape(published)}<br>"
+                  f'<a href="{html.escape(url)}">{html.escape(url)}</a></p>'
+                  f"<pre>{html.escape(body)}</pre>"
+                  "</section>"
+              )
+
+          subject = f"Weekly release digest: {repository}"
+          text_body = (
+              f"Weekly release digest for {repository}\n"
+              f"Releases published since {since.date().isoformat()} UTC\n\n"
+              + "\n\n---\n\n".join(text_sections)
+          )
+          html_body = (
+              "<html><body>"
+              f"<h1>Weekly release digest for {html.escape(repository)}</h1>"
+              f"<p>Releases published since {html.escape(since.date().isoformat())} UTC.</p>"
+              + "".join(html_sections)
+              + "</body></html>"
+          )
+
+          message = EmailMessage()
+          message["Subject"] = subject
+          message["From"] = os.environ.get("RELEASE_DIGEST_FROM") or os.environ["SMTP_USERNAME"]
+          message["To"] = os.environ["RELEASE_DIGEST_TO"]
+          message.set_content(text_body)
+          message.add_alternative(html_body, subtype="html")
+
+          smtp_server = os.environ.get("SMTP_SERVER") or "smtp.gmail.com"
+          port = int(os.environ.get("SMTP_PORT") or "587")
+          context = ssl.create_default_context()
+
+          if port == 465:
+              with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                  server.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
+                  server.send_message(message)
+          else:
+              with smtplib.SMTP(smtp_server, port) as server:
+                  server.starttls(context=context)
+                  server.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
+                  server.send_message(message)
+
+          print(f"Sent digest with {len(weekly_releases)} release(s).")
+          PY
