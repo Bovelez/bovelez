@@ -81,6 +81,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 200,
+        dailyChangePercent: null,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(
@@ -156,6 +157,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 250,
+        dailyChangePercent: null,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(
@@ -254,6 +256,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 250,
+        dailyChangePercent: null,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(

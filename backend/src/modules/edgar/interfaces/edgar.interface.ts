@@ -19,6 +19,7 @@ export interface IEdgarFiling {
   form: string;
   primaryDocument: string;
   description: string;
+  reportUrl: string;
 }
 export interface IEdgarMetricPoint {
   quarter: string;
