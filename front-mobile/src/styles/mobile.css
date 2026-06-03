@@ -1,0 +1,22 @@
+/* ── Mobile-specific overrides ── */
+
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;   /* allow scroll on mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent iOS input zoom (inputs must be >= 16px) */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* Safe area insets for notched phones */
+.safe-top    { padding-top:    env(safe-area-inset-top);    }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Minimum touch target size */
+button, [role="button"] {
+  min-height: 44px;
+  min-width:  44px;
+}
