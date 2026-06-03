@@ -9,6 +9,10 @@ import { PricesModule } from './modules/prices/prices.module';
 import { EdgarModule } from './modules/edgar/edgar.module';
 import { PortfolioModule } from './modules/portfolio/portfolio.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { WatchlistModule } from './modules/watchlist/watchlist.module';
+import { TestingModule } from './modules/test/test.module';
+
+const testingModules = process.env.NODE_ENV === 'test' ? [TestingModule] : [];
 
 @Module({
   imports: [
@@ -20,6 +24,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     TransactionsModule,
     PortfolioModule,
     PricesModule,
+    WatchlistModule,
+    ...testingModules,
   ],
   controllers: [],
   providers: [

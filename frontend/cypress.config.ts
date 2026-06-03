@@ -9,7 +9,6 @@ export default defineConfig({
     video: false,
     screenshotOnRunFailure: true,
     setupNodeEvents(_on, _config) {
-      // Agregar plugins de Node acá si se necesitan
     },
   },
   component: {

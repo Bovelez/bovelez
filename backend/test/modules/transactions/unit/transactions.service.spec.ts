@@ -22,10 +22,7 @@ function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
 }
 
 function todayDate(): Date {
-  const now = new Date();
-  return new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  );
+  return new Date();
 }
 
 function yesterdayDate(): Date {
@@ -81,7 +78,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 200,
-        dailyChangePercent: null,
+        dailyChangePercent: 1.5,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(
@@ -157,7 +154,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 250,
-        dailyChangePercent: null,
+        dailyChangePercent: 1.5,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(
@@ -256,7 +253,7 @@ describe('TransactionsService', () => {
       pricesService.getPrice.mockResolvedValue({
         ticker: 'AAPL',
         price: 250,
-        dailyChangePercent: null,
+        dailyChangePercent: 1.5,
         updatedAt: new Date(),
       });
       transactionsRepository.createTransaction.mockResolvedValue(

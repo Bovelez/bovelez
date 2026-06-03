@@ -84,13 +84,9 @@ export class TransactionsService {
     );
   }
 
-  async getTransactionsByUserId(
-    userId: string,
-  ): Promise<TransactionDto[]> {
+  async getTransactionsByUserId(userId: string): Promise<TransactionDto[]> {
     const tickerTransactions =
-      await this.transactionsRepository.getTransactionsByUser(
-        userId,
-      );
+      await this.transactionsRepository.getTransactionsByUser(userId);
     return tickerTransactions.map(
       (transaction) => new TransactionDto(transaction),
     );
@@ -104,7 +100,10 @@ export class TransactionsService {
   }
 
   private validateTransactionDate(date: Date): void {
-    if (this.getUniversalDateOnlyTime(date) !== this.getUniversalDateOnlyTime(new Date())) {
+    if (
+      this.getUniversalDateOnlyTime(date) !==
+      this.getUniversalDateOnlyTime(new Date())
+    ) {
       throw new BadRequestException(
         'Solo podés registrar operaciones con fecha de hoy',
       );
@@ -258,10 +257,12 @@ export class TransactionsService {
   }
 
   private getUniversalDateOnlyTime(date: Date): number {
-    return Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-    );
+    const parsed_date = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+    ).getTime();
+    console.log(date);
+    return parsed_date;
   }
 }

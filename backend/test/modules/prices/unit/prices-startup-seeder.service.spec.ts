@@ -39,13 +39,18 @@ describe('PricesStartupSeeder', () => {
 
   it('runs a price batch for the static SPY tickers when StockPrice is empty', async () => {
     mockRepository.countPrices.mockResolvedValue(0);
-    mockPricesService.runBatch.mockResolvedValue({ tickerCount: 50, errorCount: 0 });
+    mockPricesService.runBatch.mockResolvedValue({
+      tickerCount: 50,
+      errorCount: 0,
+    });
 
     await seeder.runSeed();
 
     expect(mockRepository.countPrices).toHaveBeenCalled();
     // tickers are sent in chunks of 50 — verify all tickers are covered across all calls
-    const allCalledTickers = mockPricesService.runBatch.mock.calls.flat(2) as string[];
+    const allCalledTickers = mockPricesService.runBatch.mock.calls.flat(
+      2,
+    ) as string[];
     expect(allCalledTickers).toEqual(expect.arrayContaining([...SPY_TICKERS]));
     expect(allCalledTickers).toHaveLength(SPY_TICKERS.length);
   });
@@ -55,13 +60,20 @@ describe('PricesStartupSeeder', () => {
       key === 'SPY_TICKERS' ? ' msft, AAPL, brk.b, AAPL ' : 'true',
     );
     mockRepository.countPrices.mockResolvedValue(0);
-    mockPricesService.runBatch.mockResolvedValue({ tickerCount: 3, errorCount: 0 });
+    mockPricesService.runBatch.mockResolvedValue({
+      tickerCount: 3,
+      errorCount: 0,
+    });
 
     await seeder.runSeed();
 
     // 3 tickers fit in one chunk
     expect(mockPricesService.runBatch).toHaveBeenCalledTimes(1);
-    expect(mockPricesService.runBatch).toHaveBeenCalledWith(['AAPL', 'BRK-B', 'MSFT']);
+    expect(mockPricesService.runBatch).toHaveBeenCalledWith([
+      'AAPL',
+      'BRK-B',
+      'MSFT',
+    ]);
   });
 
   it('skips startup seeding when StockPrice already has records', async () => {

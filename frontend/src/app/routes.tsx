@@ -11,6 +11,7 @@ import Transactions from "../pages/transactions/Transactions";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
+import Watchlist from "../pages/watchlist/Watchlist";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
           { path: "buy/:ticker", element: <BuyFlow /> },
           { path: "sell/:ticker", element: <SellPosition /> },
           { path: "transactions", element: <Transactions /> },
+            {path: "watchlist", element: <Watchlist/>}
         ],
       },
     ],
