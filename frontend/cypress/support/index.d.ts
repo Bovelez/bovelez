@@ -2,24 +2,15 @@ declare global {
     namespace Cypress {
         interface Chainable {
             getByTestId(testId: string): Chainable<JQuery<HTMLElement>>;
-
-            fillLoginForm(
-                email: string,
-                password: string,
-                intercept?: boolean
-            ): void;
-
-            fillRegisterForm(
-                fields: {
-                    nombre: string;
-                    email: string;
-                    password: string;
-                    confirmPassword?: string;
-                    acceptTerms?: boolean;
-                },
-                intercept?: boolean
-            ): void;
-
+            resetDb(): void;
+            fillLoginForm(email: string, password: string): void;
+            fillRegisterForm(fields: {
+                nombre: string;
+                email: string;
+                password: string;
+                confirmPassword?: string;
+                acceptTerms?: boolean;
+            }): void;
             shouldHaveFieldErrors(): void;
             shouldHaveGlobalError(): void;
             loginAsUser(): void;

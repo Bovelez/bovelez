@@ -1,0 +1,73 @@
+services:
+  e2e-db:
+    image: postgres:alpine
+    container_name: e2e-db
+    environment:
+      - POSTGRES_DB=tests
+      - POSTGRES_USER=prisma
+      - POSTGRES_PASSWORD=prisma
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U prisma -d tests']
+      interval: 1s
+      timeout: 1s
+      retries: 15
+
+  price-service:
+    build:
+      context: ./price-service
+      dockerfile: Dockerfile
+    container_name: e2e-price-service
+    ports:
+      - '8000:8000'
+    healthcheck:
+      test: ['CMD', 'python', '-c', 'import urllib.request; urllib.request.urlopen("http://localhost:8000/health")']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: e2e-server
+    tty: true
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://prisma:prisma@e2e-db/tests
+      - PORT=8080
+      - JWT_SECRET=secret
+      - JWT_EXPIRES=3600s
+      - PRICE_SERVICE_URL=http://price-service:8000
+      - TZ=America/Argentina/Buenos_Aires
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./backend:/app
+    depends_on:
+      e2e-db:
+        condition: service_healthy
+      price-service:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: e2e-frontend
+    tty: true
+    environment:
+      - VITE_API_URL=/api
+      - VITE_API_PROXY_TARGET=http://backend:8080
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_started

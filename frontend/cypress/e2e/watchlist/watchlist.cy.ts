@@ -1,6 +1,5 @@
 describe("Watchlist Page", () => {
     const POST_WATCHLIST = "/api/watchlist";
-    const POST_COMPARE   = "/api/watchlist/compare";
     const DEL_WATCHLIST  = (ticker: string) => `/api/watchlist/${ticker}`;
 
     beforeEach(() => {
@@ -23,18 +22,16 @@ describe("Watchlist Page", () => {
     // ── Loading & error states ────────────────────────────────────────────────
 
     it("shows a loading indicator while the watchlist is being fetched", () => {
-        cy.fixture("watchlist").then((wl) => {
-            cy.intercept("GET", "/api/watchlist", (req) => {
-                req.reply((res) => {
-                    res.setDelay(400);
-                    res.send({ statusCode: 200, body: wl.items });
-                });
-            }).as("slowWatchlist");
+        cy.intercept("GET", "/api/watchlist", (req) => {
+            req.reply((res) => {
+                res.setDelay(400);
+                res.send(res);
+            });
+        }).as("slowWatchlist");
 
-            cy.visit("/app/watchlist");
-            cy.get("[data-cy=watchlist-loading]").should("be.visible");
-            cy.wait("@slowWatchlist");
-        });
+        cy.visit("/app/watchlist");
+        cy.get("[data-cy=watchlist-loading]").should("be.visible");
+        cy.wait("@slowWatchlist");
     });
 
     it("shows an error banner when the watchlist fetch fails", () => {
@@ -95,9 +92,6 @@ describe("Watchlist Page", () => {
     });
 
     it("fills the input and triggers add when clicking a suggestion", () => {
-        cy.fixture("watchlist").then((wl) => {
-            cy.intercept("POST", POST_WATCHLIST, { statusCode: 200, body: wl.items[0] }).as("autoAdd");
-        });
         cy.get("[data-cy=ticker-input]").type("AA");
         cy.get("[data-cy=ticker-suggestions]").should("be.visible");
         cy.get("[data-cy=ticker-suggestion-item]").first().click();
@@ -105,49 +99,31 @@ describe("Watchlist Page", () => {
     });
 
     it("adds a ticker successfully and shows the success message", () => {
-        cy.fixture("watchlist").then((wl) => {
-            cy.intercept("POST", POST_WATCHLIST, { statusCode: 200, body: wl.newItem }).as("addTicker");
-        });
         cy.get("[data-cy=ticker-input]").type("TSLA");
         cy.get("[data-cy=add-ticker-btn]").click();
-        cy.wait("@addTicker");
         cy.get("[data-cy=add-success]").should("be.visible");
     });
 
     it("shows an error when trying to add a duplicate ticker (409)", () => {
-        cy.intercept("POST", POST_WATCHLIST, {
-            statusCode: 409,
-            body: { message: "already in watchlist" },
-        }).as("addDuplicate");
-
         cy.get("[data-cy=ticker-input]").type("AAPL");
         cy.get("[data-cy=add-ticker-btn]").click();
-        cy.wait("@addDuplicate");
         cy.get("[data-cy=add-error]")
             .should("be.visible")
             .and("contain.text", "ya está en tu watchlist");
     });
 
     it("shows an error when the ticker is not found (404)", () => {
-        cy.intercept("POST", POST_WATCHLIST, {
-            statusCode: 404,
-            body: { message: "not found" },
-        }).as("addNotFound");
-
         cy.get("[data-cy=ticker-input]").type("XXXX");
         cy.get("[data-cy=add-ticker-btn]").click();
-        cy.wait("@addNotFound");
         cy.get("[data-cy=add-error]")
             .should("be.visible")
             .and("contain.text", "no encontrado");
     });
 
     it("shows an error when the watchlist is full (422)", () => {
-        cy.intercept("POST", POST_WATCHLIST, {
-            statusCode: 422,
-            body: { message: "watchlist full" },
-        }).as("addFull");
-
+        // Este test necesita que la DB tenga 20 items; el endpoint /test/reset
+        // debería exponer una variante, o se puede intercept solo este caso extremo
+        cy.intercept("POST", POST_WATCHLIST, { statusCode: 422, body: { message: "watchlist full" } }).as("addFull");
         cy.get("[data-cy=ticker-input]").type("NVDA");
         cy.get("[data-cy=add-ticker-btn]").click();
         cy.wait("@addFull");
@@ -158,10 +134,7 @@ describe("Watchlist Page", () => {
 
     it("disables the add button while the add request is pending", () => {
         cy.intercept("POST", POST_WATCHLIST, (req) => {
-            req.reply((res) => {
-                res.setDelay(500);
-                res.send({ statusCode: 200 });
-            });
+            req.reply((res) => { res.setDelay(500); res.send(res); });
         }).as("slowAdd");
 
         cy.get("[data-cy=ticker-input]").type("TSLA");
@@ -192,26 +165,15 @@ describe("Watchlist Page", () => {
     });
 
     it("removes the item after confirming in the dialog", () => {
-        cy.fixture("watchlist").then((wl) => {
-            cy.intercept("DELETE", DEL_WATCHLIST("AAPL"), { statusCode: 200 }).as("removeTicker");
-            cy.intercept("GET", "/api/watchlist", {
-                statusCode: 200,
-                body: wl.items.slice(1),
-            }).as("getWatchlistAfterRemove");
-        });
-
         cy.get("[data-cy=remove-btn]").first().click();
         cy.get("[data-cy=remove-confirm-btn]").click();
-        cy.wait("@removeTicker");
         cy.get("[data-cy=remove-confirm-dialog]").should("not.exist");
+        cy.get("[data-cy=watchlist-row]").should("have.length", 2);
     });
 
     it("disables the confirm button while the remove request is pending", () => {
         cy.intercept("DELETE", DEL_WATCHLIST("AAPL"), (req) => {
-            req.reply((res) => {
-                res.setDelay(500);
-                res.send({ statusCode: 200 });
-            });
+            req.reply((res) => { res.setDelay(500); res.send(res); });
         }).as("slowRemove");
 
         cy.get("[data-cy=remove-btn]").first().click();
@@ -244,7 +206,6 @@ describe("Watchlist Page", () => {
     it("disables the Compare button when fewer than 2 tickers are selected", () => {
         cy.contains("Comparar").click();
         cy.get("[data-cy=compare-btn]").should("be.disabled");
-
         cy.selectCompareChips("AAPL");
         cy.get("[data-cy=compare-btn]").should("be.disabled");
     });
@@ -257,13 +218,12 @@ describe("Watchlist Page", () => {
 
     it("shows the metrics table after a successful compare", () => {
         cy.fixture("watchlist").then((wl) => {
-            cy.interceptCompare("compareMetrics", wl.metrics);
+            cy.interceptCompare("compareSuccess", wl.metrics);
         });
-
         cy.contains("Comparar").click();
         cy.selectCompareChips("AAPL", "MSFT");
         cy.get("[data-cy=compare-btn]").click();
-        cy.wait("@compareMetrics");
+        cy.wait("@compareSuccess");
 
         cy.get("[data-cy=compare-table]").should("be.visible");
         cy.get("[data-cy=compare-col-header]").should("have.length", 2);
@@ -272,12 +232,10 @@ describe("Watchlist Page", () => {
 
     it("shows an error banner when the compare request fails", () => {
         cy.interceptCompare("compareError", 500);
-
         cy.contains("Comparar").click();
         cy.selectCompareChips("AAPL", "MSFT");
         cy.get("[data-cy=compare-btn]").click();
         cy.wait("@compareError");
-
         cy.get("[data-cy=compare-error]").should("be.visible");
     });
 
@@ -294,7 +252,6 @@ describe("Watchlist Page", () => {
         cy.selectCompareChips("AAPL", "MSFT");
         cy.get("[data-cy=compare-btn]").click();
         cy.wait("@compareEmpty");
-
         cy.get("[data-cy=compare-no-data]").should("be.visible");
         cy.get("[data-cy=compare-table]").should("not.exist");
     });
@@ -312,7 +269,6 @@ describe("Watchlist Page", () => {
         cy.selectCompareChips("AAPL", "MSFT");
         cy.get("[data-cy=compare-btn]").click();
         cy.wait("@comparePartial");
-
         cy.get("[data-cy=metric-nd]").should("exist");
     });
 
