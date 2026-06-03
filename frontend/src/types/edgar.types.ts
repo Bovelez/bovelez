@@ -24,6 +24,7 @@ export type EdgarFiling = {
   form: string;
   primaryDocument: string;
   description: string;
+  reportUrl: string;
 };
 
 export type EdgarMetricPoint = {

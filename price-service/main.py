@@ -126,7 +126,7 @@ def health():
     return {"status": "ok"}
 
 
-MAX_WORKERS = 20
+MAX_WORKERS = 40
 
 @app.post("/prices/fetch", response_model=FetchResponse)
 def fetch_prices(body: FetchRequest):

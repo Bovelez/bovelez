@@ -42,16 +42,24 @@ export class EdgarSubmissionsClient implements IEdgarSubmissionsClient {
 
       const results: IEdgarFiling[] = [];
       const allowedForms = ['10-K', '10-Q'];
+      const cikNumeric = String(parseInt(cik, 10));
 
       for (let i = 0; i < recent.form.length; i++) {
         if (!allowedForms.includes(recent.form[i])) continue;
 
+        const accession = recent.accessionNumber[i];
+        const primaryDocument = recent.primaryDocument[i];
+        const reportUrl = primaryDocument
+          ? `https://www.sec.gov/Archives/edgar/data/${cikNumeric}/${accession.replace(/-/g, '')}/${primaryDocument}`
+          : `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cikNumeric}&type=${recent.form[i]}`;
+
         results.push({
-          accessionNumber: recent.accessionNumber[i],
+          accessionNumber: accession,
           filingDate: recent.filingDate[i],
           form: recent.form[i],
-          primaryDocument: recent.primaryDocument[i],
+          primaryDocument,
           description: recent.primaryDocDescription[i] ?? '',
+          reportUrl,
         });
 
         if (results.length >= 10) break;

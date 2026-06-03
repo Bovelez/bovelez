@@ -4,4 +4,5 @@ export class FilingResponseDto {
   form: string;
   primaryDocument: string;
   description: string;
+  reportUrl: string;
 }

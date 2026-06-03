@@ -121,8 +121,11 @@ describe('EdgarService', () => {
       expect(result).toEqual(mockCompany);
     });
 
-    it('should throw NotFoundException when ticker not found', async () => {
+    it('should throw NotFoundException when ticker is not cached and EDGAR sync fails', async () => {
       mockRepository.findByTicker.mockResolvedValue(null);
+      mockEdgarClient.getCompanyByTicker.mockRejectedValue(
+        new Error('not found in EDGAR'),
+      );
 
       await expect(service.getCompany('FAKE')).rejects.toThrow(
         NotFoundException,
