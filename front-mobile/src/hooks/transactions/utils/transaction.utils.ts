@@ -49,7 +49,7 @@ export function buildTransactionInput({
   return {
     ticker: selectedPrice.ticker,
     quantity: parsedQuantity,
-    date,
+    date: `${date}T12:00:00`,
   };
 }
 
