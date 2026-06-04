@@ -13,7 +13,7 @@ export function StockInfoSidebar({ company, price }: Props) {
   const lastUpdate =
     lastPriceRunQuery.data?.finishedAt ?? price?.updatedAt ?? null;
   return (
-    <div className="w-56 shrink-0 space-y-4">
+    <div data-cy="stock-info-sidebar" className="w-56 shrink-0 space-y-4">
       <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
         <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-[var(--text-faint)]">
           Precio

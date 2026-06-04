@@ -48,7 +48,7 @@ export function TransactionFilters({
   onClear,
 }: Props) {
   return (
-    <div className="relative z-10 mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border)]/60 bg-[var(--surface)]/60 p-4 backdrop-blur-sm">
+    <div data-cy="transaction-filters" className="relative z-10 mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border)]/60 bg-[var(--surface)]/60 p-4 backdrop-blur-sm">
       <div className="flex items-center gap-2 self-end pb-2 text-[var(--text-muted)]">
         <Filter size={15} />
         <span className="text-[12px] font-bold uppercase tracking-widest">
@@ -58,6 +58,7 @@ export function TransactionFilters({
 
       <FilterField label="Ticker">
         <input
+          data-cy="filter-ticker"
           type="text"
           placeholder="AAPL…"
           value={tickerFilter}
@@ -68,6 +69,7 @@ export function TransactionFilters({
 
       <FilterField label="Tipo">
         <select
+          data-cy="filter-type"
           value={typeFilter}
           onChange={(e) => onTypeChange(e.target.value as TypeFilter)}
           className={inputClass}
@@ -80,6 +82,7 @@ export function TransactionFilters({
 
       <FilterField label="Desde">
         <input
+          data-cy="filter-date-from"
           type="date"
           value={dateFrom}
           onChange={(e) => onDateFromChange(e.target.value)}
@@ -89,6 +92,7 @@ export function TransactionFilters({
 
       <FilterField label="Hasta">
         <input
+          data-cy="filter-date-to"
           type="date"
           value={dateTo}
           onChange={(e) => onDateToChange(e.target.value)}
@@ -98,6 +102,7 @@ export function TransactionFilters({
 
       {hasActiveFilters && (
         <button
+          data-cy="filter-clear"
           onClick={onClear}
           className="flex items-center gap-1.5 self-end rounded-lg border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
         >
@@ -106,7 +111,7 @@ export function TransactionFilters({
         </button>
       )}
 
-      <p className="ml-auto self-end pb-2 text-[12px] text-[var(--text-muted)]">
+      <p data-cy="filter-result-count" className="ml-auto self-end pb-2 text-[12px] text-[var(--text-muted)]">
         {resultCount} resultado{resultCount !== 1 ? "s" : ""}
       </p>
     </div>

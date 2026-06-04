@@ -60,7 +60,7 @@ export function TrimestresTab({ metrics, isLoading }: Props) {
 
   if (isLoading) {
     return (
-      <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
+      <div data-cy="trimestres-loading" className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
         <div className="py-12 text-center text-[var(--text-muted)]">
           Cargando datos trimestrales...
         </div>
@@ -70,7 +70,7 @@ export function TrimestresTab({ metrics, isLoading }: Props) {
 
   if (!metrics) {
     return (
-      <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
+      <div data-cy="trimestres-no-data" className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
         <div className="py-12 text-center text-[var(--text-muted)]">
           No hay datos trimestrales disponibles.
         </div>
@@ -101,11 +101,12 @@ export function TrimestresTab({ metrics, isLoading }: Props) {
   const selectedLabel = VIEW_OPTIONS.find((o) => o.key === view)!.label;
 
   return (
-    <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
+    <div data-cy="trimestres-tab" className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
       <div className="flex gap-2 mb-5 flex-wrap">
         {VIEW_OPTIONS.map((o) => (
           <button
             key={o.key}
+            data-cy={`trimestres-view-btn-${o.key}`}
             onClick={() => setView(o.key)}
             className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
               view === o.key

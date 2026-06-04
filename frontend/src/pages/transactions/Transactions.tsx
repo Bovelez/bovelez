@@ -42,6 +42,7 @@ export default function Transactions() {
 
   return (
     <div
+      data-cy="transactions-page"
       data-testid="transactions-page"
       className="relative min-h-screen p-6 md:p-8 lg:p-12 text-[var(--text)] font-sans selection:bg-[var(--primary)]/30"
     >

@@ -75,5 +75,47 @@ export class TestingService {
         { cik: '0001318605', ticker: 'TSLA', name: 'Tesla Inc.' },
       ],
     });
+
+    await this.prisma.transaction.createMany({
+      data: [
+        {
+          id: 'tx-1',
+          userId: user.id,
+          ticker: 'AAPL',
+          type: 'BUY',
+          quantity: 10,
+          price: 150.0,
+          date: new Date('2025-01-10T10:00:00.000Z'),
+        },
+        {
+          id: 'tx-2',
+          userId: user.id,
+          ticker: 'MSFT',
+          type: 'BUY',
+          quantity: 5,
+          price: 300.0,
+          date: new Date('2025-01-08T09:00:00.000Z'),
+        },
+        {
+          id: 'tx-3',
+          userId: user.id,
+          ticker: 'AAPL',
+          type: 'SELL',
+          quantity: 2,
+          price: 180.0,
+          date: new Date('2025-01-05T11:00:00.000Z'),
+        },
+      ],
+    });
+
+    await this.prisma.priceBatchRun.create({
+      data: {
+        id: 'run-1',
+        startedAt: new Date('2025-01-15T10:29:55.000Z'),
+        finishedAt: new Date('2025-01-15T10:30:00.000Z'),
+        tickerCount: 3,
+        errorCount: 0,
+      },
+    });
   }
 }

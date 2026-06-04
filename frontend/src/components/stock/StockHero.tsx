@@ -12,7 +12,7 @@ export function StockHero({ company, price }: Props) {
   const lastUpdate =
     lastPriceRunQuery.data?.finishedAt ?? price?.updatedAt ?? null;
   return (
-    <div className="px-8 py-8 relative overflow-hidden bg-[var(--surface)] border-b border-[var(--border)]">
+    <div data-cy="stock-hero" className="px-8 py-8 relative overflow-hidden bg-[var(--surface)] border-b border-[var(--border)]">
       <div
         className="pointer-events-none absolute -top-24 right-1/4 w-[460px] h-[460px] rounded-full opacity-60"
         style={{ background: "var(--glow-orange)", filter: "blur(70px)" }}
@@ -21,6 +21,7 @@ export function StockHero({ company, price }: Props) {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span
+              data-cy="stock-ticker-badge"
               className="px-3 py-1 rounded-lg text-sm font-bold font-mono text-[var(--primary)]"
               style={{ backgroundColor: "var(--primary-soft)" }}
             >
@@ -30,19 +31,19 @@ export function StockHero({ company, price }: Props) {
               S&P 500
             </span>
           </div>
-          <h1 className="mb-1 text-[var(--text)]" style={{ fontSize: 28 }}>
+          <h1 data-cy="stock-company-name" className="mb-1 text-[var(--text)]" style={{ fontSize: 28 }}>
             {company.name}
           </h1>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-[var(--text-muted)]">{company.ticker}</span>
-            <span className="text-[11px] text-[var(--text-faint)]">· CIK {company.cik}</span>
+            <span data-cy="stock-cik" className="text-[11px] text-[var(--text-faint)]">· CIK {company.cik}</span>
           </div>
         </div>
 
         <div className="text-right">
           {price ? (
             <>
-              <p className="font-mono font-bold text-[var(--text)]" style={{ fontSize: 36 }}>
+              <p data-cy="stock-price" className="font-mono font-bold text-[var(--text)]" style={{ fontSize: 36 }}>
                 ${price.price.toFixed(2)}
               </p>
               {lastUpdate && (
@@ -52,7 +53,7 @@ export function StockHero({ company, price }: Props) {
               )}
             </>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">Sin precio disponible</p>
+            <p data-cy="stock-no-price" className="text-sm text-[var(--text-muted)]">Sin precio disponible</p>
           )}
         </div>
       </div>

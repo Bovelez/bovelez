@@ -3,6 +3,7 @@ interface PnlBadgeProps {
   format?: "currency" | "percent";
   className?: string;
   "data-testid"?: string;
+  "data-cy"?: string;
 }
 
 
@@ -11,6 +12,7 @@ export function PnlBadge({
   format = "currency",
   className = "",
   "data-testid": testId,
+  "data-cy": dataCy,
 }: PnlBadgeProps) {
   const isPos = value >= 0;
   const sign = isPos ? "+" : "";
@@ -26,6 +28,7 @@ export function PnlBadge({
   return (
     <span
       data-testid={testId}
+      data-cy={dataCy}
       className={`inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-semibold ${colorClass} ${className}`}
     >
       {display}
@@ -38,6 +41,7 @@ export function PnlText({
   format = "currency",
   className = "",
   "data-testid": testId,
+  "data-cy": dataCy,
 }: PnlBadgeProps) {
   const isPos = value >= 0;
   const sign = isPos ? "+" : "";
@@ -51,6 +55,7 @@ export function PnlText({
   return (
     <span
       data-testid={testId}
+      data-cy={dataCy}
       className={`font-mono font-semibold ${colorClass} ${className}`}
     >
       {display}

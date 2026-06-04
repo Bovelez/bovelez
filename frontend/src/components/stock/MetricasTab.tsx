@@ -37,7 +37,7 @@ function latestQuarter(points: EdgarMetricPoint[]): string {
 export function MetricasTab({ metrics, isLoading, isError, companyName }: Props) {
   if (isLoading) {
     return (
-      <div className="col-span-2 py-12 text-center text-[var(--text-muted)]">
+      <div data-cy="metricas-loading" className="col-span-2 py-12 text-center text-[var(--text-muted)]">
         Cargando métricas...
       </div>
     );
@@ -45,7 +45,7 @@ export function MetricasTab({ metrics, isLoading, isError, companyName }: Props)
 
   if (isError || !metrics) {
     return (
-      <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-sm text-[var(--text-muted)]">
+      <div data-cy="metricas-error" className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-sm text-[var(--text-muted)]">
         No hay métricas financieras disponibles.
       </div>
     );
@@ -60,10 +60,11 @@ export function MetricasTab({ metrics, isLoading, isError, companyName }: Props)
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div data-cy="metricas-tab" className="grid grid-cols-2 gap-4">
       {metricCards.map(({ label, points }) => (
         <div
           key={label}
+          data-cy="metric-card"
           className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]"
         >
           <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-[var(--text-faint)]">

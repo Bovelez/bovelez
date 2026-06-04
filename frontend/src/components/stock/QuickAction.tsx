@@ -35,24 +35,26 @@ export function QuickAction({ company, price }: Props) {
   }
 
   return (
-    <div className="p-5 rounded-2xl sticky top-4 bg-[var(--surface)] border border-[var(--border)]">
+    <div data-cy="quick-action" className="p-5 rounded-2xl sticky top-4 bg-[var(--surface)] border border-[var(--border)]">
       <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-[var(--text-faint)]">
         Acción Rápida
       </p>
-      <p className="mb-4 font-mono font-bold text-[var(--primary)]" style={{ fontSize: 28 }}>
+      <p data-cy="quick-action-price" className="mb-4 font-mono font-bold text-[var(--primary)]" style={{ fontSize: 28 }}>
         {price ? `$${price.price.toFixed(2)}` : "—"}
       </p>
 
       <p className="text-xs font-semibold mb-2 text-[var(--text)]">Cantidad</p>
       <div className="flex items-center gap-2 mb-5">
         <button
+          data-cy="qty-decrease"
           onClick={() => setQty(Math.max(1, qty - 1))}
           className="cursor-pointer w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
         >
           <Minus size={14} className="text-[var(--text)]" />
         </button>
-        <span className="flex-1 text-center font-bold font-mono text-[var(--text)]">{qty}</span>
+        <span data-cy="qty-value" className="flex-1 text-center font-bold font-mono text-[var(--text)]">{qty}</span>
         <button
+          data-cy="qty-increase"
           onClick={() => setQty(qty + 1)}
           className="cursor-pointer w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-deep)] border border-[var(--border-strong)]"
         >
@@ -61,13 +63,14 @@ export function QuickAction({ company, price }: Props) {
       </div>
 
       <p className="text-xs mb-1 text-[var(--text-faint)]">Total estimado</p>
-      <p className="font-bold mb-4 font-mono text-[var(--text)]" style={{ fontSize: 15 }}>
+      <p data-cy="quick-action-total" className="font-bold mb-4 font-mono text-[var(--text)]" style={{ fontSize: 15 }}>
         {price
           ? `$${(qty * price.price).toLocaleString("en-US", { minimumFractionDigits: 2 })}`
           : "—"}
       </p>
 
       <button
+        data-cy="buy-btn"
         onClick={() => navigate(`/app/buy/${company.ticker}`)}
         className="cursor-pointer w-full py-2.5 rounded-lg font-semibold text-white text-sm flex items-center justify-center gap-1.5 mb-2"
         style={{ background: "var(--gradient-brand)", boxShadow: "0 4px 14px rgba(255,107,53,0.25)" }}
@@ -75,6 +78,7 @@ export function QuickAction({ company, price }: Props) {
         <ArrowUpRight size={14} className="text-emerald-300" /> Comprar
       </button>
       <button
+        data-cy="sell-btn"
         onClick={() => navigate(`/app/sell/${company.ticker}`)}
         className="cursor-pointer w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)]"
       >
@@ -82,6 +86,7 @@ export function QuickAction({ company, price }: Props) {
       </button>
 
       <button
+        data-cy="watchlist-toggle"
         onClick={toggleWatchlist}
         disabled={isPending}
         className={`cursor-pointer mt-3 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border disabled:opacity-50 ${

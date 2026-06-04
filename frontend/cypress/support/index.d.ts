@@ -14,9 +14,11 @@ declare global {
             shouldHaveFieldErrors(): void;
             shouldHaveGlobalError(): void;
             loginAsUser(): void;
+            visitTransactions(): void;
+            visitStock(ticker: string): void;
+            visitDashboard(): void;
             visitWatchlist(): void;
-            interceptCompare(alias: string, response: object | number): void;
-            selectCompareChips(...tickers: string[]): void;
+selectCompareChips(...tickers: string[]): void;
         }
     }
 }

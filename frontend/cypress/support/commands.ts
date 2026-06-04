@@ -67,20 +67,32 @@ Cypress.Commands.add("loginAsUser", () => {
     });
 });
 
+// ── Transactions ──────────────────────────────────────────────────────────
+
+Cypress.Commands.add("visitTransactions", () => {
+    cy.visit("/app/transactions");
+    cy.get("[data-cy=transactions-list], [data-cy=transactions-list-empty]", { timeout: 8000 }).should("exist");
+});
+
+// ── Stock ─────────────────────────────────────────────────────────────────
+
+Cypress.Commands.add("visitStock", (ticker: string) => {
+    cy.visit(`/app/stock/${ticker}`);
+    cy.get("[data-cy=stock-detail], [data-cy=stock-not-found]", { timeout: 8000 }).should("exist");
+});
+
+// ── Dashboard ─────────────────────────────────────────────────────────────
+
+Cypress.Commands.add("visitDashboard", () => {
+    cy.visit("/app");
+    cy.get("[data-cy=portfolio-table], [data-cy=portfolio-empty]", { timeout: 8000 }).should("exist");
+});
+
 // ── Watchlist ──────────────────────────────────────────────────────────────
 
 Cypress.Commands.add("visitWatchlist", () => {
     cy.visit("/app/watchlist");
-    // Espera a que la tabla cargue antes de que el test empiece a interactuar
     cy.get("[data-cy=watchlist-table], [data-cy=watchlist-empty]", { timeout: 8000 }).should("exist");
-});
-
-Cypress.Commands.add("interceptCompare", (alias: string, response: object | number) => {
-    if (typeof response === "number") {
-        cy.intercept("POST", "/api/watchlist/compare", { statusCode: response }).as(alias);
-    } else {
-        cy.intercept("POST", "/api/watchlist/compare", { statusCode: 200, body: response }).as(alias);
-    }
 });
 
 Cypress.Commands.add("selectCompareChips", (...tickers: string[]) => {
