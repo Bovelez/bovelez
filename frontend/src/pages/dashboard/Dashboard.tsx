@@ -269,7 +269,7 @@ export default function Dashboard() {
           />
           <button
             data-testid="dashboard-add-transaction"
-            onClick={() => navigate("/app/search")}
+            onClick={() => navigate("/app/portfolio")}
             className="cursor-pointer flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-white text-xs font-semibold"
             style={{ background: "var(--gradient-brand)", boxShadow: "0 4px 14px rgba(255,107,53,0.25)" }}
           >
