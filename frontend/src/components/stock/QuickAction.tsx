@@ -3,6 +3,9 @@ import { useNavigate } from "react-router";
 import { ArrowUpRight, ArrowDownRight, Plus, Minus, Star } from "lucide-react";
 import type { StockPrice } from "../../types/prices.types";
 import type { EdgarCompanyRecord } from "../../types/edgar.types";
+import { useWatchlist } from "../../hooks/watchlist/useWatchlist";
+import { useAddWatchlistItem } from "../../hooks/watchlist/useAddWatchlist";
+import { useRemoveWatchlistItem } from "../../hooks/watchlist/useRemoveWatchlistItem";
 
 type Props = {
   company: EdgarCompanyRecord;
@@ -12,7 +15,24 @@ type Props = {
 export function QuickAction({ company, price }: Props) {
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
-  const [inWatchlist, setInWatchlist] = useState(false);
+
+  const watchlistQuery = useWatchlist();
+  const addItem = useAddWatchlistItem();
+  const removeItem = useRemoveWatchlistItem();
+
+  const inWatchlist = (watchlistQuery.data ?? []).some(
+    (item) => item.ticker === company.ticker,
+  );
+  const isPending = addItem.isPending || removeItem.isPending;
+
+  function toggleWatchlist() {
+    if (isPending) return;
+    if (inWatchlist) {
+      removeItem.mutate(company.ticker);
+    } else {
+      addItem.mutate(company.ticker);
+    }
+  }
 
   return (
     <div className="p-5 rounded-2xl sticky top-4 bg-[var(--surface)] border border-[var(--border)]">
@@ -62,8 +82,9 @@ export function QuickAction({ company, price }: Props) {
       </button>
 
       <button
-        onClick={() => setInWatchlist(!inWatchlist)}
-        className={`cursor-pointer mt-3 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border ${
+        onClick={toggleWatchlist}
+        disabled={isPending}
+        className={`cursor-pointer mt-3 w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border disabled:opacity-50 ${
           inWatchlist
             ? "border-[var(--primary)] text-[var(--primary)]"
             : "border-[var(--border-strong)] text-[var(--text-muted)] bg-[var(--surface)]"
@@ -71,7 +92,7 @@ export function QuickAction({ company, price }: Props) {
         style={inWatchlist ? { backgroundColor: "var(--primary-soft)" } : undefined}
       >
         <Star size={14} fill={inWatchlist ? "var(--primary)" : "none"} className="text-[var(--primary)]" />
-        {inWatchlist ? "En Watchlist" : "Watchlist"}
+        {isPending ? "…" : inWatchlist ? "En Watchlist" : "Watchlist"}
       </button>
     </div>
   );
