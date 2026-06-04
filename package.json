@@ -38,5 +38,9 @@
       ],
       "@semantic-release/github"
     ]
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.0",
+    "react-router": "^7.16.0"
   }
 }

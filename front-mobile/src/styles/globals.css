@@ -1,0 +1,27 @@
+@keyframes stock-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.stock-ticker-track {
+  animation-name: stock-ticker-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.stock-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stock-ticker-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
