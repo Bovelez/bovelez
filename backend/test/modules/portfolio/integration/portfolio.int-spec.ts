@@ -227,10 +227,63 @@ describe('Portfolio Integration', () => {
         .expect(200);
 
       const pos = (
-        response.body as { positions: { avgCost: number; quantity: number }[] }
+        response.body as {
+          positions: { avgCost: number; quantity: number; pnl: number }[];
+          totalInvested: number;
+          totalPnl: number;
+        }
       ).positions[0];
       expect(pos.quantity).toBe(20);
       expect(pos.avgCost).toBe(300);
+      expect(pos.pnl).toBe((AAPL_PRICE - 300) * 20);
+      expect((response.body as { totalInvested: number }).totalInvested).toBe(
+        300 * 20,
+      );
+      expect((response.body as { totalPnl: number }).totalPnl).toBe(
+        (AAPL_PRICE - 300) * 20,
+      );
+    });
+
+    it('does not include fully sold transactions in current positions or P&L', async () => {
+      await seedTransaction({
+        ticker: 'AAPL',
+        quantity: 10,
+        price: 200,
+        date: '2025-01-15',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 250,
+        date: '2025-02-01',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 275,
+        date: '2025-03-01',
+      });
+
+      const response = await request(getHttpServer(app))
+        .get('/portfolio')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const body = response.body as {
+        positions: unknown[];
+        totalValue: number;
+        totalInvested: number;
+        totalPnl: number;
+        totalPnlPercent: number;
+      };
+      expect(body.positions).toHaveLength(0);
+      expect(body.totalValue).toBe(0);
+      expect(body.totalInvested).toBe(0);
+      expect(body.totalPnl).toBe(0);
+      expect(body.totalPnlPercent).toBe(0);
+      expect(await prisma.transaction.count({ where: { userId } })).toBe(3);
     });
 
     it('does not expose positions of another user', async () => {

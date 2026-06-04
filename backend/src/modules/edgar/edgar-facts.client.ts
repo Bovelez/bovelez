@@ -57,11 +57,31 @@ export class EdgarFactsClient implements IEdgarFactsClient {
         cik,
         name: (data?.['entityName'] as string) ?? '',
         metrics: {
-          revenue: this.extractMetric(usGaap, this.conceptMap.revenue, quarters, true),
-          netIncome: this.extractMetric(usGaap, this.conceptMap.netIncome, quarters, true),
+          revenue: this.extractMetric(
+            usGaap,
+            this.conceptMap.revenue,
+            quarters,
+            true,
+          ),
+          netIncome: this.extractMetric(
+            usGaap,
+            this.conceptMap.netIncome,
+            quarters,
+            true,
+          ),
           eps: this.extractMetric(usGaap, this.conceptMap.eps, quarters, true),
-          totalAssets: this.extractMetric(usGaap, this.conceptMap.totalAssets, quarters, false),
-          totalLiabilities: this.extractMetric(usGaap, this.conceptMap.totalLiabilities, quarters, false),
+          totalAssets: this.extractMetric(
+            usGaap,
+            this.conceptMap.totalAssets,
+            quarters,
+            false,
+          ),
+          totalLiabilities: this.extractMetric(
+            usGaap,
+            this.conceptMap.totalLiabilities,
+            quarters,
+            false,
+          ),
         },
       };
     } catch {
@@ -86,7 +106,11 @@ export class EdgarFactsClient implements IEdgarFactsClient {
     // Pick the concept whose latest entry is most recent — many companies
     // (e.g. JPM) have legacy entries under one concept and current data under
     // another, so first-non-empty would silently return stale data.
-    let best: { sorted: FactEntry[]; unitKey: string; latestEnd: string } | null = null;
+    let best: {
+      sorted: FactEntry[];
+      unitKey: string;
+      latestEnd: string;
+    } | null = null;
 
     for (const concept of concepts) {
       const units = gaap?.[concept]?.units;
@@ -106,7 +130,8 @@ export class EdgarFactsClient implements IEdgarFactsClient {
       const entries = (units[unitKey] ?? []) as FactEntry[];
 
       const reports = entries.filter(
-        (e) => (e.form === '10-Q' || e.form === '10-K') && e.fp && e.fy && e.end,
+        (e) =>
+          (e.form === '10-Q' || e.form === '10-K') && e.fp && e.fy && e.end,
       );
 
       const quarterly = isFlow
@@ -148,8 +173,7 @@ export class EdgarFactsClient implements IEdgarFactsClient {
     );
     const annualEntries = this.dedupByEnd(
       reports.filter(
-        (e) =>
-          e.form === '10-K' && e.fp === 'FY' && this.isAnnualPeriod(e),
+        (e) => e.form === '10-K' && e.fp === 'FY' && this.isAnnualPeriod(e),
       ),
     );
 
@@ -165,9 +189,7 @@ export class EdgarFactsClient implements IEdgarFactsClient {
         if (!q.end) return false;
         const qEndMs = Date.parse(q.end);
         if (Number.isNaN(qEndMs)) return false;
-        return (
-          qEndMs > annualStartMs && (annualEndMs - qEndMs) / dayMs >= 80
-        );
+        return qEndMs > annualStartMs && (annualEndMs - qEndMs) / dayMs >= 80;
       });
 
       if (preceding.length !== 3) continue;

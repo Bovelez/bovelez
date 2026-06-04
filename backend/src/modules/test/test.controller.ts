@@ -1,4 +1,10 @@
-import { Controller, Get, HttpCode, Post, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
 import { TestingService } from './test.service';
 

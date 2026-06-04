@@ -71,7 +71,7 @@ export class EdgarService implements IEdgarService {
 
   async getMetrics(ticker: string, query: QueryMetricsDto) {
     const existing = await this.repository.findByTicker(ticker);
-    const company = existing ?? await this.syncCompany(ticker);
+    const company = existing ?? (await this.syncCompany(ticker));
     return this.factsClient.getMetrics(company.cik, query.quarters);
   }
 

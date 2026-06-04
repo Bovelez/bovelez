@@ -48,7 +48,6 @@ describe('TransactionsService', () => {
       createTransaction: jest.fn(),
       getTransactionsByUser: jest.fn(),
       getTransactionsByUserAndTicker: jest.fn(),
-      deleteTransactionsByUserAndTicker: jest.fn(),
     };
 
     edgarService = {
@@ -177,9 +176,6 @@ describe('TransactionsService', () => {
       ]);
       expect(result.type).toBe(TransactionType.SELL);
       expect(result.price).toBe(250);
-      expect(
-        transactionsRepository.deleteTransactionsByUserAndTicker.mock.calls,
-      ).toHaveLength(0);
     });
 
     it('throws BadRequestException when no open position exists', async () => {
@@ -246,7 +242,7 @@ describe('TransactionsService', () => {
       );
     });
 
-    it('deletes all ticker transactions when selling the full position', async () => {
+    it('persists the SELL transaction when selling the full position', async () => {
       transactionsRepository.getTransactionsByUserAndTicker.mockResolvedValue([
         buildTransaction({ quantity: 10 }),
       ]);
@@ -266,9 +262,14 @@ describe('TransactionsService', () => {
 
       await service.sell(USER_ID, { ...input, quantity: 10 });
 
-      expect(
-        transactionsRepository.deleteTransactionsByUserAndTicker.mock.calls[0],
-      ).toEqual([USER_ID, 'AAPL']);
+      expect(transactionsRepository.createTransaction.mock.calls[0]).toEqual([
+        USER_ID,
+        'AAPL',
+        TransactionType.SELL,
+        10,
+        250,
+        input.date,
+      ]);
     });
   });
 
@@ -327,6 +328,30 @@ describe('TransactionsService', () => {
         { ticker: 'AAPL', quantity: 15, avgCost: 250 },
       ]);
     });
+
+    it('does not return a position after all active shares are sold in multiple sells', async () => {
+      transactionsRepository.getTransactionsByUser.mockResolvedValue([
+        buildTransaction({ id: 'buy-1', quantity: 10, price: 200 }),
+        buildTransaction({
+          id: 'sell-1',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 250,
+          date: new Date('2025-02-01'),
+        }),
+        buildTransaction({
+          id: 'sell-2',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 275,
+          date: new Date('2025-03-01'),
+        }),
+      ]);
+
+      const positions = await service.getOpenPositions(USER_ID);
+
+      expect(positions).toEqual([]);
+    });
   });
 
   describe('getTransactionsByUserId', () => {
@@ -374,6 +399,72 @@ describe('TransactionsService', () => {
         id: 'aapl-buy',
         ticker: 'AAPL',
         type: TransactionType.BUY,
+      });
+    });
+
+    it('returns no ticker transactions after the ticker position is fully closed', async () => {
+      transactionsRepository.getTransactionsByUserAndTicker.mockResolvedValue([
+        buildTransaction({ id: 'buy-1', quantity: 10, price: 200 }),
+        buildTransaction({
+          id: 'sell-1',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 250,
+          date: new Date('2025-02-01'),
+        }),
+        buildTransaction({
+          id: 'sell-2',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 275,
+          date: new Date('2025-03-01'),
+        }),
+      ]);
+
+      const transactions = await service.getTransactionsByTicker(
+        USER_ID,
+        'AAPL',
+      );
+
+      expect(transactions).toEqual([]);
+    });
+
+    it('returns only ticker transactions from the current open cycle after a re-buy', async () => {
+      transactionsRepository.getTransactionsByUserAndTicker.mockResolvedValue([
+        buildTransaction({ id: 'old-buy', quantity: 10, price: 200 }),
+        buildTransaction({
+          id: 'old-sell-1',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 250,
+          date: new Date('2025-02-01'),
+        }),
+        buildTransaction({
+          id: 'old-sell-2',
+          type: TransactionType.SELL,
+          quantity: 5,
+          price: 275,
+          date: new Date('2025-03-01'),
+        }),
+        buildTransaction({
+          id: 'new-buy',
+          quantity: 2,
+          price: 300,
+          date: new Date('2025-04-01'),
+        }),
+      ]);
+
+      const transactions = await service.getTransactionsByTicker(
+        USER_ID,
+        'AAPL',
+      );
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0]).toMatchObject({
+        id: 'new-buy',
+        type: TransactionType.BUY,
+        quantity: 2,
+        price: 300,
       });
     });
   });

@@ -290,7 +290,7 @@ describe('Transactions Integration', () => {
       expect(await prisma.transaction.count({ where: { userId } })).toBe(1);
     });
 
-    it('deletes all ticker transactions when selling the full position', async () => {
+    it('persists all ticker transactions when selling the full position', async () => {
       await request(getHttpServer(app))
         .post('/transactions/sell')
         .set('Authorization', `Bearer ${token}`)
@@ -299,8 +299,12 @@ describe('Transactions Integration', () => {
 
       const transactions = await prisma.transaction.findMany({
         where: { userId, ticker: 'AAPL' },
+        orderBy: { createdAt: 'asc' },
       });
-      expect(transactions).toHaveLength(0);
+      expect(transactions).toHaveLength(2);
+      expect(transactions[0].type).toBe(TransactionType.BUY);
+      expect(transactions[1].type).toBe(TransactionType.SELL);
+      expect(transactions[1].quantity).toBe(10);
     });
 
     it('returns 401 without authentication', async () => {
@@ -426,6 +430,86 @@ describe('Transactions Integration', () => {
         .expect(200);
 
       expect(response.body).toEqual([]);
+    });
+
+    it('returns no ticker transactions after the position is fully closed', async () => {
+      await seedTransaction({
+        ticker: 'AAPL',
+        quantity: 10,
+        price: 200,
+        date: '2025-01-15',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 250,
+        date: '2025-02-01',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 275,
+        date: '2025-03-01',
+      });
+
+      const response = await request(getHttpServer(app))
+        .get('/transactions/AAPL')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toEqual([]);
+      expect(await prisma.transaction.count({ where: { userId } })).toBe(3);
+    });
+
+    it('returns only ticker transactions from the current open cycle after a re-buy', async () => {
+      await seedTransaction({
+        ticker: 'AAPL',
+        quantity: 10,
+        price: 200,
+        date: '2025-01-15',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 250,
+        date: '2025-02-01',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        type: TransactionType.SELL,
+        quantity: 5,
+        price: 275,
+        date: '2025-03-01',
+      });
+      await seedTransaction({
+        ticker: 'AAPL',
+        quantity: 2,
+        price: 300,
+        date: '2025-04-01',
+      });
+
+      const response = await request(getHttpServer(app))
+        .get('/transactions/AAPL')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const body = response.body as {
+        ticker: string;
+        type: TransactionType;
+        quantity: number;
+        price: number;
+      }[];
+      expect(body).toHaveLength(1);
+      expect(body[0]).toMatchObject({
+        ticker: 'AAPL',
+        type: TransactionType.BUY,
+        quantity: 2,
+        price: 300,
+      });
+      expect(await prisma.transaction.count({ where: { userId } })).toBe(4);
     });
 
     it('returns an empty array when the user has no transactions for that ticker', async () => {

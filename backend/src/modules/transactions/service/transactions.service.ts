@@ -36,18 +36,9 @@ export class TransactionsService {
     input: SellTransactionInput,
   ): Promise<TransactionDto> {
     this.validateTransactionDate(input.date);
-    const currentQuantity = await this.validatePositionAndGetQuantity(
-      userId,
-      input,
-    );
     const price = await this.getLatestPriceOrThrow(input.ticker);
+    await this.validatePosition(userId, input);
     const transaction = await this.executeSellTransaction(userId, input, price);
-    await this.cleanupEmptyPosition(
-      userId,
-      input.ticker,
-      currentQuantity,
-      input.quantity,
-    );
     return new TransactionDto(transaction);
   }
 
@@ -57,7 +48,7 @@ export class TransactionsService {
     return this.buildPositionsByTicker(transactions);
   }
 
-  async getOpenPosition(
+  private async getOpenPosition(
     userId: string,
     ticker: string,
   ): Promise<IPosition | null> {
@@ -79,7 +70,7 @@ export class TransactionsService {
         userId,
         normalizedTicker,
       );
-    return tickerTransactions.map(
+    return this.buildActiveTransactionsFromTransactions(tickerTransactions).map(
       (transaction) => new TransactionDto(transaction),
     );
   }
@@ -134,10 +125,10 @@ export class TransactionsService {
       input.date,
     );
   }
-  private async validatePositionAndGetQuantity(
+  private async validatePosition(
     userId: string,
     input: SellTransactionInput,
-  ): Promise<number> {
+  ): Promise<void> {
     const position = await this.getOpenPosition(userId, input.ticker);
 
     if (!position) {
@@ -151,8 +142,6 @@ export class TransactionsService {
         `Querés vender ${input.quantity} acciones pero solo tenés ${position.quantity}`,
       );
     }
-
-    return position.quantity;
   }
 
   private async executeSellTransaction(
@@ -168,22 +157,6 @@ export class TransactionsService {
       price,
       input.date,
     );
-  }
-
-  private async cleanupEmptyPosition(
-    userId: string,
-    ticker: string,
-    currentQuantity: number,
-    soldQuantity: number,
-  ): Promise<void> {
-    const remainingQuantity = currentQuantity - soldQuantity;
-
-    if (this.isZeroQuantity(remainingQuantity)) {
-      await this.transactionsRepository.deleteTransactionsByUserAndTicker(
-        userId,
-        ticker,
-      );
-    }
   }
 
   private buildPositionsByTicker(transactions: Transaction[]): IPosition[] {
@@ -211,11 +184,8 @@ export class TransactionsService {
     ticker: string,
     transactions: Transaction[],
   ): IPosition | null {
-    const sortedTransactions = [...transactions].sort((a, b) => {
-      const dateDiff = a.date.getTime() - b.date.getTime();
-      if (dateDiff !== 0) return dateDiff;
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    });
+    const sortedTransactions =
+      this.sortTransactionsChronologically(transactions);
     let quantity = 0;
     let totalCost = 0;
 
@@ -252,17 +222,57 @@ export class TransactionsService {
     };
   }
 
+  private buildActiveTransactionsFromTransactions(
+    transactions: Transaction[],
+  ): Transaction[] {
+    const sortedTransactions =
+      this.sortTransactionsChronologically(transactions);
+    const activeTransactions: Transaction[] = [];
+    let quantity = 0;
+
+    for (const transaction of sortedTransactions) {
+      if (transaction.type === TransactionType.BUY) {
+        quantity += transaction.quantity;
+        activeTransactions.push(transaction);
+        continue;
+      }
+
+      if (quantity === 0) {
+        continue;
+      }
+
+      const quantityToSell = Math.min(transaction.quantity, quantity);
+      quantity -= quantityToSell;
+      activeTransactions.push(transaction);
+
+      if (this.isZeroQuantity(quantity)) {
+        quantity = 0;
+        activeTransactions.length = 0;
+      }
+    }
+
+    return activeTransactions;
+  }
+
+  private sortTransactionsChronologically(
+    transactions: Transaction[],
+  ): Transaction[] {
+    return [...transactions].sort((a, b) => {
+      const dateDiff = a.date.getTime() - b.date.getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+  }
+
   private isZeroQuantity(quantity: number): boolean {
     return Math.abs(quantity) < TransactionsService.ZERO_QUANTITY_THRESHOLD;
   }
 
   private getUniversalDateOnlyTime(date: Date): number {
-    const parsed_date = new Date(
+    return new Date(
       date.getFullYear(),
       date.getMonth(),
       date.getDate(),
     ).getTime();
-    console.log(date);
-    return parsed_date;
   }
 }
