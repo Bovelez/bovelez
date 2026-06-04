@@ -15,8 +15,4 @@ export interface ITransactionsRepository {
     userId: string,
     ticker: string,
   ): Promise<Transaction[]>;
-  deleteTransactionsByUserAndTicker(
-    userId: string,
-    ticker: string,
-  ): Promise<void>;
 }
