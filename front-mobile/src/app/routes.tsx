@@ -5,6 +5,10 @@ import Landing from "../pages/landing/Landing";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Portfolio from "../pages/portfolio/Portfolio";
 import Transactions from "../pages/transactions/Transactions";
+import StockDetail from "../pages/stock/StockDetail";
+import BuyFlow from "../pages/stock/BuyFlow";
+import SellPosition from "../pages/stock/SellPosition";
+import Watchlist from "../pages/watchlist/Watchlist";
 import AuthLayout from "../layouts/AuthLayout";
 import AlreadyLoggedLayout from "../layouts/AlreadyLoggedLayout";
 import { AppLayout } from "./components/AppLayout";
@@ -25,10 +29,14 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          { index: true,           element: <Navigate to="/app/dashboard" replace /> },
-          { path: "dashboard",     element: <Dashboard />    },
-          { path: "portfolio",     element: <Portfolio />    },
-          { path: "transactions",  element: <Transactions /> },
+          { index: true,                        element: <Navigate to="/app/dashboard" replace /> },
+          { path: "dashboard",                  element: <Dashboard />    },
+          { path: "portfolio",                  element: <Portfolio />    },
+          { path: "transactions",               element: <Transactions /> },
+          { path: "watchlist",                  element: <Watchlist />    },
+          { path: "stock/:ticker",              element: <StockDetail />  },
+          { path: "stock/:ticker/buy",          element: <BuyFlow />      },
+          { path: "stock/:ticker/sell",         element: <SellPosition /> },
         ],
       },
     ],
