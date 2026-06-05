@@ -2,7 +2,7 @@
 set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-COMPOSE="docker compose -f $ROOT_DIR/docker-compose.mobile-e2e.yml"
+COMPOSE="docker compose -p bovelez-mobile-e2e -f $ROOT_DIR/docker-compose.mobile-e2e.yml"
 APPIUM_SERVER_URL="${APPIUM_SERVER_URL:-http://127.0.0.1:4723}"
 APPIUM_PID=""
 
