@@ -8,7 +8,7 @@ type Props = {
 
 export function FilingsTab({ filings, isLoading }: Props) {
   return (
-    <div className="rounded-2xl overflow-hidden bg-[var(--surface)] border border-[var(--border)]">
+    <div data-cy="filings-tab" className="rounded-2xl overflow-hidden bg-[var(--surface)] border border-[var(--border)]">
       <div className="px-5 py-3 flex items-center gap-2 border-b border-[var(--border)]">
         <FileText size={14} className="text-[var(--primary)]" />
         <p className="text-xs text-[var(--text-muted)]">
@@ -18,15 +18,16 @@ export function FilingsTab({ filings, isLoading }: Props) {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-[var(--text-muted)]">Cargando filings...</div>
+        <div data-cy="filings-loading" className="py-12 text-center text-[var(--text-muted)]">Cargando filings...</div>
       ) : filings.length === 0 ? (
-        <div className="py-12 text-center text-[var(--text-muted)]">
+        <div data-cy="filings-empty" className="py-12 text-center text-[var(--text-muted)]">
           No hay filings disponibles.
         </div>
       ) : (
         filings.map((f, i) => (
           <div
             key={f.accessionNumber}
+            data-cy="filing-row"
             className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--surface-2)] transition-colors"
             style={{ borderTop: i === 0 ? "none" : "1px solid var(--border)" }}
           >

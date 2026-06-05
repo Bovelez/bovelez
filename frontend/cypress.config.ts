@@ -7,7 +7,7 @@ export default defineConfig({
     supportFile: "cypress/support/e2e.ts",
     fixturesFolder: "cypress/fixtures",
     video: false,
-    screenshotOnRunFailure: true,
+    screenshotOnRunFailure: false,
     setupNodeEvents(_on, _config) {
     },
   },

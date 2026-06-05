@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router";
 import {
   LayoutDashboard,
-  Search as SearchIcon,
   Star,
   Briefcase,
   LogOut,
@@ -18,13 +17,13 @@ import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
 import { useDeleteAccount } from "../../hooks/user/useDeleteAccount";
 import { handleError } from "../../hooks/auth/utils/handlerError";
 import { BrandText } from "../../components/ui/BrandText";
+import { GlobalSearchBar } from "../../components/search/GlobalSearchBar";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard",   path: "/app/dashboard"    },
   { icon: Briefcase,       label: "Portfolio",   path: "/app/portfolio"    },
   { icon: Receipt,         label: "Operaciones", path: "/app/transactions" },
   { icon: Star,            label: "Watchlist",   path: "/app/watchlist"    },
-  { icon: SearchIcon,      label: "Búsqueda",    path: "/app/search"       },
 ];
 
 export function AppLayout() {
@@ -35,7 +34,6 @@ export function AppLayout() {
   const deleteAccount = useDeleteAccount();
   const lastPriceRunQuery = useLastPriceRun();
 
-  const [searchQuery,  setSearchQuery]  = useState("");
   const [sidebarOpen,  setSidebarOpen]  = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -53,14 +51,6 @@ export function AppLayout() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/app/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -186,22 +176,7 @@ export function AppLayout() {
           className="flex items-center gap-4 px-6 shrink-0 h-[60px] bg-[var(--bg-deep)] border-b border-[var(--border)]"
         >
           {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-md" role="search">
-            <div className="relative">
-              <SearchIcon
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
-              />
-              <input
-                data-testid="header-search"
-                type="text"
-                placeholder="Buscar ticker o empresa…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-lg outline-none text-[13px] text-[var(--text)] bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--primary)] transition-all"
-              />
-            </div>
-          </form>
+          <GlobalSearchBar />
 
           <div className="flex-1" />
 

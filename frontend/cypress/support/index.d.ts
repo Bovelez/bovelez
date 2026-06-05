@@ -14,8 +14,13 @@ declare global {
             shouldHaveFieldErrors(): void;
             shouldHaveGlobalError(): void;
             loginAsUser(): void;
+            ensureInWatchlist(ticker: string): void;
+            ensureNotInWatchlist(ticker: string): void;
+            visitTransactions(): void;
+            visitStock(ticker: string): void;
+            visitDashboard(): void;
+            visitPortfolio(): void;
             visitWatchlist(): void;
-            interceptCompare(alias: string, response: object | number): void;
             selectCompareChips(...tickers: string[]): void;
         }
     }

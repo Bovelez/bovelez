@@ -28,6 +28,7 @@ export default function Portfolio() {
   return (
       <div
           data-testid="portfolio-page"
+          data-cy="portfolio-page"
           className="relative min-h-screen font-sans selection:bg-orange-500/20"
           style={{ color: "var(--text, #f0ede8)" }}
       >
@@ -69,7 +70,7 @@ export default function Portfolio() {
                   <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-100/80">
                     Valor de Cuenta
                   </p>
-                  <p className="font-mono text-[22px] font-black tabular-nums text-[var(--text)]">
+                  <p data-cy="portfolio-total-value" className="font-mono text-[22px] font-black tabular-nums text-[var(--text)]">
                     {isLoading
                         ? "···"
                         : `$${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -80,6 +81,7 @@ export default function Portfolio() {
               {/* PnL */}
               {!isLoading && (
                   <div
+                      data-cy="portfolio-pnl"
                       className="flex items-center gap-3 rounded-2xl border px-5 py-3.5 shadow-xl backdrop-blur-md"
                       style={{
                         background: "var(--surface, #141414)",
@@ -106,6 +108,7 @@ export default function Portfolio() {
                       {isPnlPositive ? "+" : ""}${totalPnl.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                         <span
+                            data-cy="portfolio-pnl-percent"
                             className="font-mono text-xs font-bold"
                             style={{ color: isPnlPositive ? "#6ee7b7" : "#fda4af" }}
                         >

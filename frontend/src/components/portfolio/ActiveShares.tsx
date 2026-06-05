@@ -26,7 +26,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
   ];
 
   return (
-      <section className="overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl">
+      <section data-cy="active-shares" className="overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl">
 
         {/* Header */}
         <div className="flex flex-col gap-5 border-b border-white/[0.05] bg-[var(--surface-2)]/30 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
@@ -69,7 +69,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
 
         {/* Loading */}
         {isLoading && (
-            <div className="flex flex-col items-center gap-3 px-8 py-16 text-sm font-semibold text-[var(--text-muted)]">
+            <div data-cy="active-shares-loading" className="flex flex-col items-center gap-3 px-8 py-16 text-sm font-semibold text-[var(--text-muted)]">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
               Sincronizando posiciones…
             </div>
@@ -77,7 +77,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
 
         {/* Error */}
         {!isLoading && errorMessage && (
-            <div className="m-6 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.08] px-5 py-4 text-sm text-rose-300">
+            <div data-cy="active-shares-error" className="m-6 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.08] px-5 py-4 text-sm text-rose-300">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-xs font-black text-rose-400">!</span>
               {errorMessage}
             </div>
@@ -85,7 +85,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
 
         {/* Empty */}
         {!isLoading && !errorMessage && positions.length === 0 && (
-            <div className="flex flex-col items-center gap-4 px-8 py-20 text-center">
+            <div data-cy="active-shares-empty" className="flex flex-col items-center gap-4 px-8 py-20 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-2)] text-[var(--text-muted)]">
                 <BriefcaseBusiness size={28} opacity={0.4} />
               </div>
@@ -121,6 +121,8 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                   return (
                       <tr
                           key={position.ticker}
+                          data-cy="position-row"
+                          data-ticker={position.ticker}
                           role="button"
                           tabIndex={0}
                           onClick={() => setSelectedTicker(position.ticker)}
@@ -139,7 +141,7 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                               {position.ticker.slice(0, 3)}
                             </div>
                             <div>
-                              <p className="font-mono text-[14px] font-black text-[var(--text)] transition-colors group-hover:text-orange-400">
+                              <p data-cy="position-ticker" className="font-mono text-[14px] font-black text-[var(--text)] transition-colors group-hover:text-orange-400">
                                 {position.ticker}
                               </p>
                               <div className="mt-0.5 flex items-center gap-1">
@@ -151,26 +153,26 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
+                        <td data-cy="position-quantity" className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
                           {useFormatNumber(position.quantity)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[13px] font-semibold text-white/85">
+                        <td data-cy="position-avg-cost" className="px-5 py-4 text-center font-mono text-[13px] font-semibold text-white/85">
                           {useMoney(position.avgCost)}
                         </td>
-                        <td className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
+                        <td data-cy="position-current-price" className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
                           {useMoney(position.currentPrice)}
                         </td>
                         <td className="px-5 py-4 text-center font-mono text-[14px] font-black text-[var(--text)]">
                           {useMoney(totalCost)}
                         </td>
-                        <td className="px-5 py-4 text-center">
+                        <td data-cy="position-pnl" className="px-5 py-4 text-center">
                           {position.pnl === null ? (
                               <span className="font-mono font-semibold text-white/70">—</span>
                           ) : (
                               <PnlText value={position.pnl} format="currency" />
                           )}
                         </td>
-                        <td className="px-5 py-4 text-center">
+                        <td data-cy="position-pnl-percent" className="px-5 py-4 text-center">
                           {position.pnlPercent === null ? (
                               <span className="font-mono font-semibold text-white/70">—</span>
                           ) : (

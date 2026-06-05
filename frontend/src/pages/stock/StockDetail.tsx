@@ -42,12 +42,13 @@ export default function StockDetail() {
 
   if (companyQuery.isError || !company) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-body)" }}>
+      <div data-cy="stock-not-found" className="flex min-h-full flex-col items-center justify-center gap-4" style={{ fontFamily: "var(--font-body)" }}>
         <AlertTriangle size={32} className="text-[var(--primary)]" />
         <p className="text-[var(--text)]">
           No se encontró información para <strong>{ticker}</strong>.
         </p>
         <button
+          data-cy="stock-not-found-back"
           onClick={() => navigate(-1)}
           className="cursor-pointer rounded-xl border border-[var(--border-strong)] px-4 py-2 text-sm text-[var(--text-muted)]"
         >
@@ -58,7 +59,7 @@ export default function StockDetail() {
   }
 
   return (
-    <div className="bg-[var(--bg-deep)] min-h-full" style={{ fontFamily: "var(--font-body)" }}>
+    <div data-cy="stock-detail" className="bg-[var(--bg-deep)] min-h-full" style={{ fontFamily: "var(--font-body)" }}>
       <StockHero company={company} price={price} />
 
       <div className="flex gap-6 p-8 items-start">
@@ -67,10 +68,11 @@ export default function StockDetail() {
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit bg-[var(--surface-2)]">
+          <div data-cy="stock-tabs" className="flex gap-1 mb-6 p-1 rounded-xl w-fit bg-[var(--surface-2)]">
             {TABS.map((t) => (
               <button
                 key={t}
+                data-cy={`stock-tab-${t.toLowerCase().replace(/\s+/g, "-")}`}
                 onClick={() => setTab(t)}
                 className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                   tab === t ? "text-white" : "text-[var(--text-muted)]"

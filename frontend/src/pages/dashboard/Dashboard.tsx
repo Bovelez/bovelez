@@ -13,7 +13,6 @@ import { formatMoney, formatDate, byDateDesc } from "../transactions/transaction
 
 const ASSET_TABS = [
   { key: "todo",     label: "Todo"     },
-  { key: "acciones", label: "Acciones" },
 ] as const;
 
 type AssetTab = (typeof ASSET_TABS)[number]["key"];
@@ -66,6 +65,7 @@ export default function Dashboard() {
 
   return (
     <div
+      data-cy="dashboard"
       data-testid="dashboard"
       className="p-8 text-[var(--text)] relative"
       style={{ fontFamily: "var(--font-body)" }}
@@ -84,6 +84,7 @@ export default function Dashboard() {
           </p>
           <div className="flex items-end gap-3">
             <h1
+              data-cy="dashboard-total-value"
               data-testid="dashboard-total-value"
               className="font-mono leading-none"
               style={{ fontSize: 38, fontWeight: 700 }}
@@ -98,12 +99,14 @@ export default function Dashboard() {
                   value={totalPnl}
                   format="currency"
                   className="mb-1"
+                  data-cy="dashboard-pnl"
                   data-testid="dashboard-pnl"
                 />
                 <PnlBadge
                   value={totalPnlPercent}
                   format="percent"
                   className="mb-1"
+                  data-cy="dashboard-pnl-percent"
                   data-testid="dashboard-pnl-percent"
                 />
               </>
@@ -112,6 +115,7 @@ export default function Dashboard() {
         </div>
 
         <div
+          data-cy="dashboard-last-update"
           data-testid="dashboard-last-update"
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)]"
         >
@@ -126,6 +130,7 @@ export default function Dashboard() {
 
         {/* Últimas transacciones */}
         <div
+          data-cy="dashboard-recent-transactions"
           data-testid="dashboard-recent-transactions"
           className="col-span-2 p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)]"
         >
@@ -135,6 +140,7 @@ export default function Dashboard() {
               <p className="text-xs text-[var(--text-muted)]">Actividad reciente en tu portfolio</p>
             </div>
             <button
+              data-cy="dashboard-view-all-transactions"
               onClick={() => navigate("/app/transactions")}
               className="cursor-pointer text-[11px] text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
             >
@@ -143,11 +149,11 @@ export default function Dashboard() {
           </div>
 
           {transactionsQuery.isLoading ? (
-            <div className="flex items-center justify-center h-32">
+            <div data-cy="transactions-loading" className="flex items-center justify-center h-32">
               <p className="text-[var(--text-faint)] text-sm">Cargando…</p>
             </div>
           ) : recentTransactions.length === 0 ? (
-            <div className="flex items-center justify-center h-32">
+            <div data-cy="transactions-empty" className="flex items-center justify-center h-32">
               <p className="text-[var(--text-faint)] text-sm">Sin transacciones aún</p>
             </div>
           ) : (
@@ -157,6 +163,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={t.id}
+                    data-cy="transaction-row"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--surface-2)] transition-colors"
                   >
                     <span
@@ -174,8 +181,9 @@ export default function Dashboard() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[13px] font-bold text-[var(--text)]">{t.ticker}</span>
+                        <span data-cy="transaction-ticker" className="font-mono text-[13px] font-bold text-[var(--text)]">{t.ticker}</span>
                         <span
+                          data-cy="transaction-type"
                           className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                             isBuy
                               ? "bg-emerald-500/15 text-emerald-400"
@@ -202,6 +210,7 @@ export default function Dashboard() {
 
         {/* Asignación */}
         <div
+          data-cy="dashboard-allocation-chart"
           data-testid="dashboard-allocation-chart"
           className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)]"
         >
@@ -212,12 +221,12 @@ export default function Dashboard() {
             </button>
           </div>
           {allocationData.length === 0 ? (
-            <div className="flex items-center justify-center h-[140px]">
+            <div data-cy="allocation-empty" className="flex items-center justify-center h-[140px]">
               <p className="text-[var(--text-faint)] text-sm">Sin posiciones</p>
             </div>
           ) : (
             <div className="flex items-center gap-4 mt-2">
-              <div className="w-[140px] h-[140px] shrink-0">
+              <div data-cy="allocation-pie" className="w-[140px] h-[140px] shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -237,15 +246,15 @@ export default function Dashboard() {
               </div>
               <div className="flex-1 space-y-2">
                 {allocationData.map((s, i) => (
-                  <div key={`${s.name}-${i}`} className="flex items-center justify-between text-[11px]">
+                  <div key={`${s.name}-${i}`} data-cy="allocation-legend-item" className="flex items-center justify-between text-[11px]">
                     <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
                       />
-                      <span className="text-[var(--text-muted)] truncate font-mono">{s.name}</span>
+                      <span data-cy="allocation-ticker" className="text-[var(--text-muted)] truncate font-mono">{s.name}</span>
                     </div>
-                    <span className="font-mono text-[var(--text)] font-semibold">{s.value}%</span>
+                    <span data-cy="allocation-percent" className="font-mono text-[var(--text)] font-semibold">{s.value}%</span>
                   </div>
                 ))}
               </div>
@@ -256,6 +265,7 @@ export default function Dashboard() {
 
       {/* ── Tabla de activos ── */}
       <div
+        data-cy="portfolio-table-container"
         data-testid="portfolio-table-container"
         className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden"
       >
@@ -268,6 +278,7 @@ export default function Dashboard() {
             data-testid="dashboard-asset-tabs"
           />
           <button
+            data-cy="dashboard-add-transaction"
             data-testid="dashboard-add-transaction"
             onClick={() => navigate("/app/portfolio")}
             className="cursor-pointer flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-white text-xs font-semibold"
@@ -279,15 +290,15 @@ export default function Dashboard() {
 
         <div className="overflow-x-auto">
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
+            <div data-cy="portfolio-loading" className="flex items-center justify-center py-16">
               <p className="text-[var(--text-faint)] text-sm">Cargando portfolio…</p>
             </div>
           ) : filteredPositions.length === 0 ? (
-            <div className="flex items-center justify-center py-16">
+            <div data-cy="portfolio-empty" className="flex items-center justify-center py-16">
               <p className="text-[var(--text-faint)] text-sm">No tenés posiciones abiertas</p>
             </div>
           ) : (
-            <table data-testid="portfolio-table" className="w-full text-sm">
+            <table data-cy="portfolio-table" data-testid="portfolio-table" className="w-full text-sm">
               <thead>
                 <tr className="text-[var(--text-faint)] text-[10px] uppercase tracking-widest">
                   <th className="text-left px-5 py-3 font-semibold">Nombre</th>

@@ -52,7 +52,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
       : null;
 
   return (
-      <section className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl">
+      <section data-cy="transaction-panel" className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl">
         {/* Glow accent */}
         <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-orange-500/[0.04] blur-[80px]" />
 
@@ -78,7 +78,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[var(--text-faint)]">
                 Activo Seleccionado
               </p>
-              <p className="mt-1.5 font-mono text-[32px] font-black leading-none text-[var(--text)]">
+              <p data-cy="transaction-selected-ticker" className="mt-1.5 font-mono text-[32px] font-black leading-none text-[var(--text)]">
                 {selectedPrice?.ticker ?? "—"}
               </p>
 
@@ -120,6 +120,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
               Cantidad
             </span>
               <input
+                  data-cy="transaction-quantity"
                   type="number"
                   min="1"
                   step="1"
@@ -135,6 +136,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
               Fecha
             </span>
               <input
+                  data-cy="transaction-date"
                   type="date"
                   min={todayInputValue()}
                   max={todayInputValue()}
@@ -148,6 +150,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
           {/* Action buttons */}
           <div className="grid grid-cols-2 gap-3">
             <button
+                data-cy="transaction-buy-btn"
                 type="button"
                 disabled={!canSubmit}
                 onClick={() => void submitTransaction("BUY")}
@@ -160,6 +163,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
               COMPRAR
             </button>
             <button
+                data-cy="transaction-sell-btn"
                 type="button"
                 disabled={!canSubmit}
                 onClick={() => void submitTransaction("SELL")}
@@ -175,7 +179,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
 
           {/* Error */}
           {actionError && (
-              <div className="flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-[13px] text-rose-300">
+              <div data-cy="transaction-error" className="flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-[13px] text-rose-300">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-xs font-black text-rose-400">!</span>
                 <p className="mt-0.5">{actionError}</p>
               </div>
@@ -183,7 +187,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
 
           {/* Success */}
           {lastAction && !actionError && (
-              <div className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-[13px] font-semibold text-emerald-300">
+              <div data-cy="transaction-success" className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-[13px] font-semibold text-emerald-300">
                 <CheckCircle2 size={15} />
                 {lastAction === "BUY" ? "Compra" : "Venta"} ejecutada correctamente.
               </div>
@@ -212,6 +216,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
                       tickerTransactions.data?.map((tx) => (
                           <div
                               key={tx.id}
+                              data-cy="transaction-history-item"
                               className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.03]"
                           >
                             <div className="flex items-center gap-2.5">

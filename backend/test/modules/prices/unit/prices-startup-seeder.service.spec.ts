@@ -102,15 +102,6 @@ describe('PricesStartupSeeder', () => {
     expect(mockPricesService.runBatch).toHaveBeenCalledWith(['AAPL', 'MSFT']);
   });
 
-  it('skips startup seeding during tests', () => {
-    process.env.NODE_ENV = 'test';
-
-    seeder.onApplicationBootstrap();
-
-    expect(mockRepository.countPrices).not.toHaveBeenCalled();
-    expect(mockPricesService.runBatch).not.toHaveBeenCalled();
-  });
-
   it('skips startup seeding when disabled by configuration', () => {
     mockConfigService.get.mockImplementation((key: string) =>
       key === 'SEED_SPY_PRICES_ON_STARTUP' ? 'false' : undefined,

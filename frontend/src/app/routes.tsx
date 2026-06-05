@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
           { path: "buy/:ticker", element: <BuyFlow /> },
           { path: "sell/:ticker", element: <SellPosition /> },
           { path: "transactions", element: <Transactions /> },
-            {path: "watchlist", element: <Watchlist/>}
+          { path: "watchlist", element: <Watchlist /> },
         ],
       },
     ],
