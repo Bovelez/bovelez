@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "appium:server": "appium server --allow-insecure uiautomator2:chromedriver_autodownload",
+    "test:e2e:appium": "node --test --test-concurrency=1 appium/*/*.e2e.test.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",
