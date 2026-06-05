@@ -11,8 +11,6 @@ export class PricesSchedulerService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async updatePrices(): Promise<void> {
-    if (process.env.NODE_ENV === 'test') return;
-
     try {
       const result = await this.pricesService.runBatch([...SPY_TICKERS]);
       this.logger.log(

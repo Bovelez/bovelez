@@ -55,7 +55,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
       await sellTransaction.mutateAsync({
         ticker: position.ticker,
         quantity: parsedSellQuantity,
-        date: sellDate,
+        date: new Date(`${sellDate}T00:00:00`).toISOString(),
       });
       setSellQuantity("1");
       setSellSucceeded(true);
@@ -68,7 +68,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex max-h-[88vh] w-[calc(100vw-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[var(--surface)] shadow-2xl shadow-black/70 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95">
+          <Dialog.Content data-cy="ticker-dialog" className="fixed left-1/2 top-1/2 z-50 flex max-h-[88vh] w-[calc(100vw-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[var(--surface)] shadow-2xl shadow-black/70 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95">
 
             {/* Header */}
             <div className="relative overflow-hidden border-b border-white/[0.06] bg-[var(--surface-2)]/40 px-6 py-6">
@@ -94,6 +94,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                 <Dialog.Close asChild>
                   <button
                       type="button"
+                      data-cy="ticker-dialog-close"
                       aria-label="Cerrar historial"
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-[var(--bg-deep)]/80 text-[var(--text-muted)] transition-colors hover:border-white/20 hover:text-[var(--text)]"
                   >
@@ -143,6 +144,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                           Cantidad
                         </span>
                         <input
+                            data-cy="ticker-dialog-sell-quantity"
                             type="number"
                             min="1"
                             max={availableQuantity}
@@ -196,6 +198,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                       </button>
 
                       <button
+                          data-cy="ticker-dialog-sell-btn"
                           type="button"
                           disabled={!canSell}
                           onClick={() => void submitSell()}
@@ -221,13 +224,13 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                     )}
 
                     {sellError && (
-                        <p className="mt-3 text-xs font-semibold text-rose-200">
+                        <p data-cy="ticker-dialog-sell-error" className="mt-3 text-xs font-semibold text-rose-200">
                           {sellError}
                         </p>
                     )}
 
                     {sellSucceeded && !sellError && (
-                        <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-300">
+                        <p data-cy="ticker-dialog-sell-success" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-300">
                           <CheckCircle2 size={14} />
                           Venta ejecutada correctamente.
                         </p>
@@ -267,6 +270,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                       return (
                           <div
                               key={transaction.id}
+                              data-cy="ticker-dialog-tx-row"
                               className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.05] bg-[var(--bg-deep)]/40 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
                           >
                             <div className="flex items-center gap-3">

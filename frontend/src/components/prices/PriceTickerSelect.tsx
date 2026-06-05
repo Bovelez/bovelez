@@ -30,6 +30,7 @@ export function PriceTickerSelect({
   return (
       <section
           data-testid="edgar-ticker-select"
+          data-cy="ticker-explorer"
           className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--surface)]/60 shadow-2xl backdrop-blur-xl"
       >
         {/* Header */}
@@ -44,7 +45,7 @@ export function PriceTickerSelect({
             </div>
           </div>
           {selectedPrice && (
-              <div className="flex items-center gap-2 rounded-xl border border-orange-500/20 bg-orange-500/8 px-3 py-1.5">
+              <div data-cy="ticker-selected-badge" className="flex items-center gap-2 rounded-xl border border-orange-500/20 bg-orange-500/8 px-3 py-1.5">
                 <span className="font-mono text-[13px] font-black text-orange-400">{selectedPrice.ticker}</span>
                 <span className="font-mono text-[13px] font-bold text-[var(--text-muted)]">{useMoney(selectedPrice.price)}</span>
               </div>
@@ -60,6 +61,7 @@ export function PriceTickerSelect({
             />
             <input
                 data-testid="edgar-ticker-search"
+                data-cy="ticker-search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value.toUpperCase())}
                 placeholder="Buscar ticker · ej. AAPL, MSFT…"
@@ -69,6 +71,7 @@ export function PriceTickerSelect({
                 <button
                     type="button"
                     data-testid="edgar-ticker-clear"
+                    data-cy="ticker-clear"
                     onClick={handleClear}
                     aria-label="Limpiar selección"
                     className="absolute right-3 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-2)] text-[var(--text-muted)] transition-colors hover:bg-rose-500/15 hover:text-rose-400"
@@ -93,7 +96,7 @@ export function PriceTickerSelect({
             )}
 
             {!isLoading && !errorMessage && suggestions.length === 0 && (
-                <div className="flex flex-col items-center gap-2 px-4 py-12">
+                <div data-cy="ticker-no-results" className="flex flex-col items-center gap-2 px-4 py-12">
                   <ShieldAlert size={22} className="text-[var(--text-faint)]" />
                   <span className="text-[12px] text-[var(--text-muted)]">Ticker no disponible para operar.</span>
                 </div>
@@ -106,6 +109,8 @@ export function PriceTickerSelect({
                       key={price.ticker}
                       type="button"
                       data-testid={`edgar-company-${price.ticker}`}
+                      data-cy="ticker-row"
+                      data-ticker={price.ticker}
                       onClick={() => onSelectPrice(price)}
                       className={`group mb-1 flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all duration-150 last:mb-0 ${
                           isSelected

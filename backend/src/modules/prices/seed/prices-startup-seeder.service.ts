@@ -70,8 +70,6 @@ export class PricesStartupSeeder implements OnApplicationBootstrap {
   }
 
   private isStartupSeedEnabled(): boolean {
-    if (process.env.NODE_ENV === 'test') return false;
-
     const value = this.configService.get<string>(
       'SEED_SPY_PRICES_ON_STARTUP',
       'true',
