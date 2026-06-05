@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EdgarService } from '../../../../src/modules/edgar/service/edgar.service';
 import {
   EDGAR_CLIENT,
@@ -47,11 +48,16 @@ const mockPricesService = {
   getPrice: jest.fn(),
 };
 
+const mockCache = {
+  get: jest.fn(),
+  set: jest.fn(),
+};
+
 describe('EdgarService', () => {
   let service: EdgarService;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -62,6 +68,7 @@ describe('EdgarService', () => {
         { provide: EDGAR_FACTS_CLIENT, useValue: mockFactsClient },
         { provide: EDGAR_SUBMISSIONS_CLIENT, useValue: mockSubmissionsClient },
         { provide: PricesService, useValue: mockPricesService },
+        { provide: CACHE_MANAGER, useValue: mockCache },
       ],
     }).compile();
 
@@ -215,6 +222,38 @@ describe('EdgarService', () => {
       expect(mockFactsClient.getMetrics).toHaveBeenCalledWith('320193', 4);
       expect(result).toEqual(metrics);
     });
+
+    it('should return cached metrics without hitting EDGAR', async () => {
+      const cachedMetrics = { revenues: [{ value: 1 }] };
+      mockCache.get.mockResolvedValue(cachedMetrics);
+
+      const query: QueryMetricsDto = { quarters: 4 };
+      const result = await service.getMetrics('AAPL', query);
+
+      expect(mockCache.get).toHaveBeenCalledWith('edgar:metrics:AAPL:4');
+      expect(mockFactsClient.getMetrics).not.toHaveBeenCalled();
+      expect(mockEdgarClient.getCompanyByTicker).not.toHaveBeenCalled();
+      expect(result).toEqual(cachedMetrics);
+    });
+
+    it('should store fetched metrics in cache', async () => {
+      const metrics = { revenues: [], netIncome: [] };
+      mockEdgarClient.getCompanyByTicker.mockResolvedValue({
+        cik: '320193',
+        ticker: 'AAPL',
+        name: 'Apple Inc.',
+      });
+      mockRepository.upsertCompany.mockResolvedValue(mockCompany);
+      mockFactsClient.getMetrics.mockResolvedValue(metrics);
+
+      await service.getMetrics('AAPL', { quarters: 4 });
+
+      expect(mockCache.set).toHaveBeenCalledWith(
+        'edgar:metrics:AAPL:4',
+        metrics,
+        24 * 60 * 60 * 1000,
+      );
+    });
   });
 
   describe('getFilings', () => {
@@ -233,6 +272,18 @@ describe('EdgarService', () => {
 
       expect(mockSubmissionsClient.getFilings).toHaveBeenCalledWith('320193');
       expect(result).toEqual(filings);
+    });
+
+    it('should return cached filings without hitting EDGAR', async () => {
+      const cachedFilings = [{ type: '10-Q', date: '2024-04-01' }];
+      mockCache.get.mockResolvedValue(cachedFilings);
+
+      const result = await service.getFilings('AAPL');
+
+      expect(mockCache.get).toHaveBeenCalledWith('edgar:filings:AAPL');
+      expect(mockSubmissionsClient.getFilings).not.toHaveBeenCalled();
+      expect(mockEdgarClient.getCompanyByTicker).not.toHaveBeenCalled();
+      expect(result).toEqual(cachedFilings);
     });
   });
 });
