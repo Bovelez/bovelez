@@ -79,6 +79,26 @@ services:
       backend:
         condition: service_started
 
+  front-mobile:
+    build:
+      context: ./front-mobile
+      dockerfile: Dockerfile
+      target: dev
+    container_name: front-mobile
+    restart: always
+    tty: true
+    environment:
+      - VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET:-http://backend:8080}
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '5174:5174'
+    volumes:
+      - ./front-mobile:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_started
+
   integration-test-db:
     image: postgres:alpine
     container_name: integration-tests-prisma

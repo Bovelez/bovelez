@@ -4,3 +4,4 @@ claudecontext
 node_modules
 .env
 CLAUDE
+.appium-mobile-e2e.log

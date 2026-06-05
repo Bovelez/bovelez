@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { HttpModule } from '@nestjs/axios';
 import { EdgarController } from './controller/edgar.controller';
 import { EdgarService } from './service/edgar.service';
@@ -18,7 +19,7 @@ import {
 import { EDGAR_REPOSITORY } from './repository/edgar.repository.interface';
 
 @Module({
-  imports: [HttpModule, PricesModule],
+  imports: [HttpModule, PricesModule, CacheModule.register()],
   controllers: [EdgarController],
   providers: [
     EdgarService,

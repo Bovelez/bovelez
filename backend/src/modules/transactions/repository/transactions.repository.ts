@@ -36,11 +36,4 @@ export class TransactionsRepository implements ITransactionsRepository {
       orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
     });
   }
-
-  async deleteTransactionsByUserAndTicker(
-    userId: string,
-    ticker: string,
-  ): Promise<void> {
-    await this.prisma.transaction.deleteMany({ where: { userId, ticker } });
-  }
 }

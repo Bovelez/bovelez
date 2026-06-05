@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Briefcase,
   Receipt,
+  Star,
   LogOut,
   Trash2,
   RefreshCw,
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard",   path: "/app/dashboard",    testId: "nav-dashboard"    },
   { icon: Briefcase,       label: "Portfolio",   path: "/app/portfolio",    testId: "nav-portfolio"    },
   { icon: Receipt,         label: "Operaciones", path: "/app/transactions", testId: "nav-operaciones"  },
+  { icon: Star,            label: "Watchlist",   path: "/app/watchlist",    testId: "nav-watchlist"    },
 ];
 
 export function AppLayout() {

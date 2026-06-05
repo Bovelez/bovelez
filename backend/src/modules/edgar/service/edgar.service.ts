@@ -1,4 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { EdgarRepository } from '../repository/edgar.repository';
 import {
   EDGAR_CLIENT,
@@ -14,10 +16,19 @@ import { EDGAR_REPOSITORY } from '../repository/edgar.repository.interface';
 import { QueryMetricsDto } from '../dto/query-metrics.dto';
 import { PricesService } from '../../prices/service/prices.service';
 import type { IEdgarService } from './edgar.service.interface';
+import type { IEdgarFiling, IEdgarMetrics } from '../interfaces/edgar.interface';
+
+// EDGAR filings are reported quarterly, so the underlying data is effectively
+// static between filings. We cache metrics and filings for 24h so repeated
+// requests for the same ticker (including under stress tests) hit memory
+// instead of EDGAR, keeping us well under EDGAR's 10 req/s rate limit.
+const EDGAR_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class EdgarService implements IEdgarService {
   constructor(
+    @Inject(CACHE_MANAGER)
+    private readonly cache: Cache,
     @Inject(EDGAR_REPOSITORY)
     private readonly repository: EdgarRepository,
     @Inject(EDGAR_CLIENT)
@@ -65,14 +76,29 @@ export class EdgarService implements IEdgarService {
   }
 
   async getFilings(ticker: string) {
+    const cacheKey = `edgar:filings:${ticker.trim().toUpperCase()}`;
+    const cached = await this.cache.get<IEdgarFiling[]>(cacheKey);
+    if (cached) return cached;
+
     const company = await this.syncCompany(ticker);
-    return this.submissionsClient.getFilings(company.cik);
+    const filings = await this.submissionsClient.getFilings(company.cik);
+    await this.cache.set(cacheKey, filings, EDGAR_CACHE_TTL_MS);
+    return filings;
   }
 
   async getMetrics(ticker: string, query: QueryMetricsDto) {
+    const cacheKey = `edgar:metrics:${ticker.trim().toUpperCase()}:${query.quarters}`;
+    const cached = await this.cache.get<IEdgarMetrics>(cacheKey);
+    if (cached) return cached;
+
     const existing = await this.repository.findByTicker(ticker);
-    const company = existing ?? await this.syncCompany(ticker);
-    return this.factsClient.getMetrics(company.cik, query.quarters);
+    const company = existing ?? (await this.syncCompany(ticker));
+    const metrics = await this.factsClient.getMetrics(
+      company.cik,
+      query.quarters,
+    );
+    await this.cache.set(cacheKey, metrics, EDGAR_CACHE_TTL_MS);
+    return metrics;
   }
 
   async isValidTicker(ticker: string): Promise<boolean> {
