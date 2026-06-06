@@ -19,6 +19,7 @@ import {
   byLatestTransaction,
   formatDate,
   todayInputValue,
+  transactionDateToIso,
   transactionErrorLabel,
 } from '../../hooks/transactions/utils/transaction.utils.ts';
 
@@ -66,7 +67,7 @@ export function TickerTransactionsDialog({
       await sellTransaction.mutateAsync({
         ticker: position.ticker,
         quantity: parsedSellQuantity,
-        date: new Date(`${sellDate}T00:00:00`).toISOString(),
+        date: transactionDateToIso(sellDate),
       });
       setSellQuantity('1');
       setSellSucceeded(true);

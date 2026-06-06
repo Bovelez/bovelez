@@ -42,6 +42,7 @@ services:
       - JWT_SECRET=secret
       - JWT_EXPIRES=3600s
       - PRICE_SERVICE_URL=http://price-service:8000
+      - SPY_TICKERS=AAPL,MSFT,TSLA
       - TZ=America/Argentina/Buenos_Aires
     ports:
       - '18080:8080'

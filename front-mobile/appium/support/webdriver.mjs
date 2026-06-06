@@ -7,6 +7,10 @@ export const MOBILE_E2E_BASE_URL = process.env.MOBILE_E2E_BASE_URL;
 
 export const ELEMENT_ID = 'element-6066-11e4-a52e-4f735466cecf';
 
+function isStaleElementError(error) {
+  return error instanceof Error && error.message.includes('stale element');
+}
+
 export class AppiumBrowser {
   sessionId;
 
@@ -133,13 +137,21 @@ export class AppiumBrowser {
   }
 
   async click(selector) {
-    await this.blurActiveElement();
-    await this.scrollIntoView(selector);
-    const element = await this.waitFor(selector);
-    await this.request(
-      'POST',
-      `/session/${this.sessionId}/element/${element[ELEMENT_ID]}/click`,
-    );
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        await this.blurActiveElement();
+        await this.scrollIntoView(selector);
+        const element = await this.waitFor(selector);
+        await this.request(
+          'POST',
+          `/session/${this.sessionId}/element/${element[ELEMENT_ID]}/click`,
+        );
+        return;
+      } catch (error) {
+        if (!isStaleElementError(error) || attempt === 2) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
   }
 
   async domClick(selector) {

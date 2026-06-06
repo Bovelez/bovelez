@@ -40,6 +40,10 @@ export function isTransactionDateAllowed(date: string): boolean {
   return date === todayInputValue();
 }
 
+export function transactionDateToIso(date: string): string {
+  return new Date(`${date}T12:00:00.000Z`).toISOString();
+}
+
 export function buildTransactionInput({
   date,
   quantity,
@@ -62,7 +66,7 @@ export function buildTransactionInput({
   return {
     ticker: selectedPrice.ticker,
     quantity: parsedQuantity,
-    date: new Date(`${date}T00:00:00`).toISOString(),
+    date: transactionDateToIso(date),
   };
 }
 

@@ -123,7 +123,7 @@ export async function sellFromPositionDialog(app, ticker, quantity) {
   await app.waitForEnabled('[data-testid="ticker-dialog-sell-btn"]', 10000);
   await app.domClick('[data-testid="ticker-dialog-sell-btn"]');
   await app.waitFor('[data-testid="ticker-dialog-sell-success"]', 15000);
-  await app.click('[data-testid="ticker-dialog-close"]');
+  await app.domClick('[data-testid="ticker-dialog-close"]');
 }
 
 export async function ensureInWatchlist(token, ticker) {

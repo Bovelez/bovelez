@@ -38,6 +38,11 @@ wait_for_url() {
   done
 }
 
+wait_for_price() {
+  local ticker="$1"
+  wait_for_url "precio $ticker" "http://localhost:18080/prices/$ticker"
+}
+
 echo ">>> Levantando DB y servicios base mobile e2e..."
 $COMPOSE up -d --build e2e-db price-service
 
@@ -50,6 +55,12 @@ $COMPOSE up -d --build backend front-mobile
 echo ">>> Esperando backend mobile e2e en :18080..."
 wait_for_url "backend mobile e2e" "http://localhost:18080/prices"
 echo ">>> Backend mobile e2e listo."
+
+echo ">>> Esperando precios base mobile e2e..."
+wait_for_price "AAPL"
+wait_for_price "MSFT"
+wait_for_price "TSLA"
+echo ">>> Precios base mobile e2e listos."
 
 echo ">>> Esperando front-mobile en :15174..."
 wait_for_url "front-mobile" "http://localhost:15174"
