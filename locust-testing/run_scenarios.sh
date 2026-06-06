@@ -38,7 +38,6 @@ SCENARIOS=(
   "baseline:2.0:2g:"
   "cpu1_mem1g:1.0:1g:--max-old-space-size=768"
   "cpu05_mem512m:0.5:512m:--max-old-space-size=384"
-  "cpu025_mem256m:0.25:256m:--max-old-space-size=192"
 )
 
 # Optional CLI filter: keep only scenarios named on the command line.

@@ -17,9 +17,9 @@ How stress differs from load
   the path that actually pushes traffic toward data.sec.gov.
 - Near-zero wait_time: users hammer the API as fast as it responds.
 
-    ReadOnlyUser      weight 5   EDGAR-heavy (stock details) — cache stress
-    IntensiveTxnUser  weight 4   write path under pressure
-    ConversionUser    weight 2   mixed read+write
+    ReadOnlyUser      weight 5   ~45%   EDGAR-heavy (stock details) — cache stress
+    IntensiveTxnUser  weight 4   ~36%   write path under pressure
+    ConversionUser    weight 2   ~18%   mixed read+write
 
 EDGAR 10 req/s safeguard
 ---------------------------------------------

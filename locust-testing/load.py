@@ -11,9 +11,9 @@ Mix the four human-behaviour flows the way a real user base splits: most people
 browse (ReadOnly), a healthy share are converting (Conversion) and a smaller 
 slice are heavy traders (IntensiveTxn).
 
-    ReadOnlyUser      weight 5   ~42%   browsing + stock details (cache-friendly)
-    ConversionUser    weight 3   ~25%   look -> inspect -> add to watchlist
-    IntensiveTxnUser  weight 2   ~17%   write-heavy buy/sell
+    ReadOnlyUser      weight 5   50%   browsing + stock details (cache-friendly)
+    ConversionUser    weight 3   30%   look -> inspect -> add to watchlist
+    IntensiveTxnUser  weight 2   20%   write-heavy buy/sell
 
 All flows draw from HOT_TICKERS only, so after a brief warm-up almost every
 EDGAR read (the stock-detail company/filings/metrics calls) is a 24h-cache HIT
