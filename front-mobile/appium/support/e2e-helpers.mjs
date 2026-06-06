@@ -113,6 +113,12 @@ export async function buyInTerminal(app, ticker, quantity) {
   await app.waitFor('[data-testid="transaction-success"]', 15000);
 }
 
+export async function sellInTerminal(app, ticker, quantity) {
+  await selectTickerInTerminal(app, ticker);
+  await app.type('[data-testid="transaction-quantity"]', String(quantity));
+  await app.click('[data-testid="transaction-sell-btn"]');
+}
+
 export async function sellFromPositionDialog(app, ticker, quantity) {
   await app.click(`[data-testid="position-row-${ticker}"]`);
   await app.waitFor('[data-testid="ticker-dialog"]', 10000);

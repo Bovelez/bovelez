@@ -6,6 +6,7 @@ import {
   loginAsNewUser,
   parseMoney,
   sellFromPositionDialog,
+  sellInTerminal,
   visitDashboard,
   visitPortfolio,
   visitTransactions,
@@ -41,6 +42,25 @@ describe('Portfolio - mobile E2E flows', () => {
     await visitPortfolio(app);
 
     await app.waitForGone('[data-testid="position-row-TSLA"]', 15000);
+  });
+
+  it('selling a ticker that is not bought or selling more quantity than what I have of a ticker fails', async () => {
+    await sellInTerminal(app, 'AAPL', 2);
+    await app.waitFor('[data-testid="transaction-error"]', 15000);
+    assert.match(
+      await app.text('[data-testid="transaction-error"]'),
+      /No tenés posición abierta en AAPL/,
+    );
+
+    await buyInTerminal(app, 'AAPL', 1);
+    await app.waitFor('[data-testid="position-row-AAPL"]', 15000);
+
+    await sellInTerminal(app, 'AAPL', 2);
+    await app.waitFor('[data-testid="transaction-error"]', 15000);
+    assert.match(
+      await app.text('[data-testid="transaction-error"]'),
+      /Querés vender 2 acciones pero solo tenés 1/,
+    );
   });
 
   it('buy and sell transactions appear in the transactions page', async () => {
