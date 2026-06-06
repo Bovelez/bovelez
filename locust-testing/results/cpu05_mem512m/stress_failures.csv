@@ -1,0 +1,8 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/edgar/[ticker]/filings,HTTPError('502 Server Error: Bad Gateway for url: /edgar/[ticker]/filings'),43,2026-06-06T02:02:58Z,2026-06-06T02:04:12Z
+GET,/edgar/[ticker]/metrics,RemoteDisconnected('Remote end closed connection without response'),18,2026-06-06T02:03:10Z,2026-06-06T02:04:19Z
+GET,/prices,RemoteDisconnected('Remote end closed connection without response'),13,2026-06-06T02:02:35Z,2026-06-06T02:04:31Z
+GET,/transactions,RemoteDisconnected('Remote end closed connection without response'),6,2026-06-06T02:03:18Z,2026-06-06T02:04:25Z
+GET,/edgar/companies/[ticker],RemoteDisconnected('Remote end closed connection without response'),3,2026-06-06T02:03:18Z,2026-06-06T02:04:19Z
+POST,/auth/register,CatchResponseError('register failed: 0 '),3,2026-06-06T02:03:19Z,2026-06-06T02:03:19Z
+GET,/prices/[ticker],RemoteDisconnected('Remote end closed connection without response'),11,2026-06-06T02:03:18Z,2026-06-06T02:04:19Z
