@@ -16,12 +16,13 @@ import { EDGAR_REPOSITORY } from '../repository/edgar.repository.interface';
 import { QueryMetricsDto } from '../dto/query-metrics.dto';
 import { PricesService } from '../../prices/service/prices.service';
 import type { IEdgarService } from './edgar.service.interface';
-import type { IEdgarFiling, IEdgarMetrics } from '../interfaces/edgar.interface';
+import type {
+  IEdgarFiling,
+  IEdgarMetrics,
+  IEdgarSearchResult,
+} from '../interfaces/edgar.interface';
 
-// EDGAR filings are reported quarterly, so the underlying data is effectively
-// static between filings. We cache metrics and filings for 24h so repeated
-// requests for the same ticker (including under stress tests) hit memory
-// instead of EDGAR, keeping us well under EDGAR's 10 req/s rate limit.
+//Save for 24hs on Cache
 const EDGAR_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
@@ -72,7 +73,13 @@ export class EdgarService implements IEdgarService {
   }
 
   async searchCompanies(query: string) {
-    return this.searchClient.searchCompanies(query);
+    const cacheKey = `edgar:search:${query.trim().toLowerCase()}`;
+    const cached = await this.cache.get<IEdgarSearchResult[]>(cacheKey);
+    if (cached) return cached;
+
+    const results = await this.searchClient.searchCompanies(query);
+    await this.cache.set(cacheKey, results, EDGAR_CACHE_TTL_MS);
+    return results;
   }
 
   async getFilings(ticker: string) {

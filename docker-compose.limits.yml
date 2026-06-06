@@ -1,0 +1,33 @@
+# Resource-limit override for stress testing.
+#
+# Layer this on top of docker-compose.yml to cap the CPU/memory the backend
+# (and DB) may use, so we can observe how the API degrades under different
+# resource envelopes:
+#
+#   BACKEND_CPUS=1.0 BACKEND_MEM=512m \
+#     docker compose -f docker-compose.yml -f docker-compose.limits.yml up -d \
+#       --build database price-service backend
+#
+# The run_scenarios.sh script sets these env vars per scenario. Limits use the
+# Compose v2 `deploy.resources` form, which `docker compose up` honours on a
+# single host (no Swarm needed).
+#
+# Defaults (no env set) are generous so an accidental run isn't throttled.
+
+services:
+  backend:
+    deploy:
+      resources:
+        limits:
+          cpus: "${BACKEND_CPUS:-2.0}"
+          memory: "${BACKEND_MEM:-2g}"
+    # Help Node respect the container memory cap (heap ceiling ~ 75% of limit).
+    environment:
+      - NODE_OPTIONS=${BACKEND_NODE_OPTIONS:-}
+
+  database:
+    deploy:
+      resources:
+        limits:
+          cpus: "${DB_CPUS:-1.0}"
+          memory: "${DB_MEM:-512m}"
