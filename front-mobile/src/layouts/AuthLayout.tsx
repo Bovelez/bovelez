@@ -1,6 +1,6 @@
-import { Navigate, Outlet, useLocation } from "react-router";
-import { useUser } from "../hooks/auth/useAuth";
-import { isLoggedIn } from "../storage/auth/auth.storage";
+import { Navigate, Outlet, useLocation } from 'react-router';
+import { useUser } from '../hooks/auth/useAuth';
+import { isLoggedIn } from '../storage/auth/auth.storage';
 
 export default function AuthLayout() {
   const location = useLocation();
@@ -15,8 +15,8 @@ export default function AuthLayout() {
       <div
         style={{
           padding: 24,
-          color: "var(--text-muted)",
-          fontFamily: "var(--font-body)",
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-body)',
         }}
       >
         Cargando…

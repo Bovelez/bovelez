@@ -1,5 +1,5 @@
-import { Filter, X } from "lucide-react";
-import type { TypeFilter } from "../transactions.utils";
+import { Filter, X } from 'lucide-react';
+import type { TypeFilter } from '../transactions.utils';
 
 type Props = {
   tickerFilter: string;
@@ -16,7 +16,7 @@ type Props = {
 };
 
 const inputClass =
-  "rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2 text-[13px] text-[var(--text)] outline-none transition-colors focus:border-[var(--primary)]";
+  'rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2 text-[13px] text-[var(--text)] outline-none transition-colors focus:border-[var(--primary)]';
 
 type FilterFieldProps = {
   label: string;
@@ -58,6 +58,7 @@ export function TransactionFilters({
 
       <FilterField label="Ticker">
         <input
+          data-testid="filter-ticker"
           type="text"
           placeholder="AAPL…"
           value={tickerFilter}
@@ -68,6 +69,7 @@ export function TransactionFilters({
 
       <FilterField label="Tipo">
         <select
+          data-testid="filter-type"
           value={typeFilter}
           onChange={(e) => onTypeChange(e.target.value as TypeFilter)}
           className={inputClass}
@@ -80,6 +82,7 @@ export function TransactionFilters({
 
       <FilterField label="Desde">
         <input
+          data-testid="filter-date-from"
           type="date"
           value={dateFrom}
           onChange={(e) => onDateFromChange(e.target.value)}
@@ -89,6 +92,7 @@ export function TransactionFilters({
 
       <FilterField label="Hasta">
         <input
+          data-testid="filter-date-to"
           type="date"
           value={dateTo}
           onChange={(e) => onDateToChange(e.target.value)}
@@ -98,6 +102,7 @@ export function TransactionFilters({
 
       {hasActiveFilters && (
         <button
+          data-testid="filter-clear"
           onClick={onClear}
           className="flex items-center gap-1.5 self-end rounded-lg border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
         >
@@ -106,8 +111,11 @@ export function TransactionFilters({
         </button>
       )}
 
-      <p className="ml-auto self-end pb-2 text-[12px] text-[var(--text-muted)]">
-        {resultCount} resultado{resultCount !== 1 ? "s" : ""}
+      <p
+        data-testid="filter-result-count"
+        className="ml-auto self-end pb-2 text-[12px] text-[var(--text-muted)]"
+      >
+        {resultCount} resultado{resultCount !== 1 ? 's' : ''}
       </p>
     </div>
   );

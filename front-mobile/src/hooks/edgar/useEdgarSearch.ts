@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { searchEdgarCompanies } from "../../api/edgar.api";
-import { edgarKeys } from "./queryKeys";
+import { useQuery } from '@tanstack/react-query';
+import { searchEdgarCompanies } from '../../api/edgar.api';
+import { edgarKeys } from './queryKeys';
 
 export function useEdgarSearch(query: string) {
   const normalizedQuery = query.trim();

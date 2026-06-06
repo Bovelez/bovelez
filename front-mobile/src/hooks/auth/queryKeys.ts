@@ -1,4 +1,4 @@
 export const userKeys = {
-  all: ["user"] as const,
-  me: () => [...userKeys.all, "me"] as const,
+  all: ['user'] as const,
+  me: () => [...userKeys.all, 'me'] as const,
 } as const;

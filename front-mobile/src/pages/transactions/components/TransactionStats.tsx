@@ -13,19 +13,34 @@ type StatCardProps = {
   bgClass: string;
 };
 
-function StatCard({ label, value, colorClass, borderClass, bgClass }: StatCardProps) {
+function StatCard({
+  label,
+  value,
+  colorClass,
+  borderClass,
+  bgClass,
+}: StatCardProps) {
   return (
     <div className={`rounded-2xl border px-5 py-4 ${borderClass} ${bgClass}`}>
-      <p className={`text-[10px] font-bold uppercase tracking-widest ${colorClass}`}>
+      <p
+        className={`text-[10px] font-bold uppercase tracking-widest ${colorClass}`}
+      >
         {label}
       </p>
-      <p className={`mt-1 font-mono text-2xl font-bold ${colorClass}`}>{value}</p>
+      <p className={`mt-1 font-mono text-2xl font-bold ${colorClass}`}>
+        {value}
+      </p>
     </div>
   );
 }
 
-export function TransactionStats({ total, buyCount, sellCount, isLoading }: Props) {
-  const placeholder = "…";
+export function TransactionStats({
+  total,
+  buyCount,
+  sellCount,
+  isLoading,
+}: Props) {
+  const placeholder = '…';
 
   return (
     <div className="relative z-10 mb-8 grid grid-cols-3 gap-4">

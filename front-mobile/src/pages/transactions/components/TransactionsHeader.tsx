@@ -1,4 +1,4 @@
-import { ReceiptText } from "lucide-react";
+import { ReceiptText } from 'lucide-react';
 
 export function TransactionsHeader() {
   return (
