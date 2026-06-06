@@ -1,6 +1,6 @@
-import { Navigate, Outlet } from "react-router";
-import { useUser } from "../hooks/auth/useAuth";
-import { isLoggedIn } from "../storage/auth/auth.storage";
+import { Navigate, Outlet } from 'react-router';
+import { useUser } from '../hooks/auth/useAuth';
+import { isLoggedIn } from '../storage/auth/auth.storage';
 
 export default function AlreadyLoggedLayout() {
   const { data: user, isLoading } = useUser();

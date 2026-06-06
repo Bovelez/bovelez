@@ -1,18 +1,24 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { Eye, EyeOff } from "lucide-react";
-import { useRegisterForm } from "../../hooks/auth/forms/useRegisterForm";
-import { AuthPageShell } from "../../components/auth/AuthPageShell";
-import { FormField, inputClass } from "../../components/ui/FormField";
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { Eye, EyeOff } from 'lucide-react';
+import { useRegisterForm } from '../../hooks/auth/forms/useRegisterForm';
+import { AuthPageShell } from '../../components/auth/AuthPageShell';
+import { FormField, inputClass } from '../../components/ui/FormField';
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
 
-  const { values, errors, globalError, isSubmitting, updateField, handleSubmit } =
-    useRegisterForm(() => {
-      navigate("/app", { replace: true });
-    });
+  const {
+    values,
+    errors,
+    globalError,
+    isSubmitting,
+    updateField,
+    handleSubmit,
+  } = useRegisterForm(() => {
+    void navigate('/app', { replace: true });
+  });
 
   return (
     <AuthPageShell>
@@ -32,16 +38,21 @@ export default function Register() {
             data-testid="global-error"
             className="mb-4 px-4 py-3 rounded-xl text-sm border"
             style={{
-              background: "var(--danger-soft)",
-              borderColor: "var(--danger)",
-              color: "var(--danger)",
+              background: 'var(--danger-soft)',
+              borderColor: 'var(--danger)',
+              color: 'var(--danger)',
             }}
           >
             {globalError}
           </div>
         )}
 
-        <form data-testid="register-form" onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <form
+          data-testid="register-form"
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          noValidate
+        >
           <FormField label="Nombre completo" htmlFor="name" error={errors.name}>
             <input
               id="name"
@@ -69,12 +80,16 @@ export default function Register() {
             />
           </FormField>
 
-          <FormField label="Contraseña" htmlFor="password" error={errors.password}>
+          <FormField
+            label="Contraseña"
+            htmlFor="password"
+            error={errors.password}
+          >
             <div className="relative">
               <input
                 id="password"
                 data-testid="password-input"
-                type={showPass ? "text" : "password"}
+                type={showPass ? 'text' : 'password'}
                 placeholder="Mínimo 8 caracteres"
                 value={values.password}
                 onChange={updateField}
@@ -86,11 +101,15 @@ export default function Register() {
                 data-testid="toggle-password"
                 onClick={() => setShowPass(!showPass)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-                aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-label={
+                  showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                }
               >
-                {showPass
-                  ? <EyeOff size={18} className="text-[var(--text-faint)]" />
-                  : <Eye size={18} className="text-[var(--text-faint)]" />}
+                {showPass ? (
+                  <EyeOff size={18} className="text-[var(--text-faint)]" />
+                ) : (
+                  <Eye size={18} className="text-[var(--text-faint)]" />
+                )}
               </button>
             </div>
           </FormField>
@@ -118,20 +137,20 @@ export default function Register() {
             disabled={isSubmitting}
             className="w-full py-4 rounded-xl font-semibold text-white text-base mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
-              background: "var(--gradient-brand)",
-              boxShadow: "0 4px 20px rgba(255,107,53,0.25)",
+              background: 'var(--gradient-brand)',
+              boxShadow: '0 4px 20px rgba(255,107,53,0.25)',
             }}
           >
-            {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+            {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
           </button>
         </form>
 
         <p className="text-center mt-7 text-sm text-[var(--text-muted)]">
-          ¿Ya tenés cuenta?{" "}
+          ¿Ya tenés cuenta?{' '}
           <button
             type="button"
             data-testid="go-to-login"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate('/login')}
             className="font-bold text-[var(--primary)]"
           >
             Iniciar sesión →

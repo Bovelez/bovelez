@@ -1,34 +1,47 @@
-import type { StockPrice } from "../../../types/prices.types";
-import type {Transaction, TransactionInput} from "../../../types/transactions.types";
+import type { StockPrice } from '../../../types/prices.types';
+import type {
+  Transaction,
+  TransactionInput,
+} from '../../../types/transactions.types';
 
 export function transactionErrorLabel(error: unknown): string | undefined {
   if (!error) return undefined;
 
-  if (typeof error === "object" && error !== null && "response" in error) {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
     const response = (
       error as {
         response?: { data?: { message?: string | string[] } };
       }
     ).response;
     const message = response?.data?.message;
-    if (Array.isArray(message)) return message.join(". ");
+    if (Array.isArray(message)) return message.join('. ');
     if (message) return message;
   }
 
   if (error instanceof Error) return error.message;
-  return "No se pudo registrar la operación.";
+  return 'No se pudo registrar la operación.';
 }
 
 export function todayInputValue(): string {
-  const now = new Date();
-  const year = now.getUTCFullYear();
-  const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(now.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value;
+
+  return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
 }
 
 export function isTransactionDateAllowed(date: string): boolean {
   return date === todayInputValue();
+}
+
+export function transactionDateToIso(date: string): string {
+  return new Date(`${date}T12:00:00.000Z`).toISOString();
 }
 
 export function buildTransactionInput({
@@ -42,14 +55,18 @@ export function buildTransactionInput({
 }): TransactionInput | null {
   const parsedQuantity = Number(quantity);
 
-  if (!selectedPrice || !Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+  if (
+    !selectedPrice ||
+    !Number.isFinite(parsedQuantity) ||
+    parsedQuantity <= 0
+  ) {
     return null;
   }
 
   return {
     ticker: selectedPrice.ticker,
     quantity: parsedQuantity,
-    date: `${date}T12:00:00`,
+    date: transactionDateToIso(date),
   };
 }
 
@@ -77,9 +94,9 @@ export function canSubmitTransaction({
 
 export function formatDate(value: string): string {
   return new Date(value).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 

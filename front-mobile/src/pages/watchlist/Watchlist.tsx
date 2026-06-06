@@ -1,33 +1,35 @@
-import { useState } from "react";
-import { Trash2, AlertCircle, LoaderCircle, Star } from "lucide-react";
-import { useWatchlist } from "../../hooks/watchlist/useWatchlist";
-import { useRemoveWatchlistItem } from "../../hooks/watchlist/useRemoveWatchlistItem";
-import { useAddWatchlistItem } from "../../hooks/watchlist/useAddWatchlist";
-import { useCompareMetrics } from "../../hooks/watchlist/useCompareMetrics";
-import { useStockPrices } from "../../hooks/prices/useStockPrices";
-import { addWatchlistErrorLabel, type WatchlistTab } from "./watchlist.utils";
-import { TabGroup } from "../../components/ui/TabGroup";
-import { WatchlistAddForm } from "../../components/watchlist/WatchListAddForm";
-import { WatchlistCompare } from "../../components/watchlist/WatchlistCompare";
-import { WatchlistRemoveDialog } from "../../components/watchlist/WatchlistRemoveDialog";
-import type { WatchlistItem } from "../../types/watchlist.types";
+import { useState } from 'react';
+import { Trash2, AlertCircle, LoaderCircle, Star } from 'lucide-react';
+import { useWatchlist } from '../../hooks/watchlist/useWatchlist';
+import { useRemoveWatchlistItem } from '../../hooks/watchlist/useRemoveWatchlistItem';
+import { useAddWatchlistItem } from '../../hooks/watchlist/useAddWatchlist';
+import { useCompareMetrics } from '../../hooks/watchlist/useCompareMetrics';
+import { useStockPrices } from '../../hooks/prices/useStockPrices';
+import { addWatchlistErrorLabel, type WatchlistTab } from './watchlist.utils';
+import { TabGroup } from '../../components/ui/TabGroup';
+import { WatchlistAddForm } from '../../components/watchlist/WatchListAddForm';
+import { WatchlistCompare } from '../../components/watchlist/WatchlistCompare';
+import { WatchlistRemoveDialog } from '../../components/watchlist/WatchlistRemoveDialog';
+import type { WatchlistItem } from '../../types/watchlist.types';
 
 const TABS: { key: WatchlistTab; label: string }[] = [
-  { key: "ver",      label: "Lista"    },
-  { key: "comparar", label: "Comparar" },
+  { key: 'ver', label: 'Lista' },
+  { key: 'comparar', label: 'Comparar' },
 ];
 
 export default function Watchlist() {
-  const [tab, setTab]                         = useState<WatchlistTab>("ver");
-  const [addSuccess, setAddSuccess]           = useState(false);
-  const [pendingRemove, setPendingRemove]     = useState<WatchlistItem | null>(null);
+  const [tab, setTab] = useState<WatchlistTab>('ver');
+  const [addSuccess, setAddSuccess] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<WatchlistItem | null>(
+    null,
+  );
   const [compareSelected, setCompareSelected] = useState<string[]>([]);
 
-  const watchlist      = useWatchlist();
-  const addItem        = useAddWatchlistItem();
-  const removeItem     = useRemoveWatchlistItem();
+  const watchlist = useWatchlist();
+  const addItem = useAddWatchlistItem();
+  const removeItem = useRemoveWatchlistItem();
   const compareMetrics = useCompareMetrics();
-  const pricesQuery    = useStockPrices();
+  const pricesQuery = useStockPrices();
 
   const items = watchlist.data ?? [];
 
@@ -37,20 +39,27 @@ export default function Watchlist() {
     try {
       await addItem.mutateAsync(ticker.trim().toUpperCase());
       setAddSuccess(true);
-    } catch { setAddSuccess(false); }
+    } catch {
+      setAddSuccess(false);
+    }
   };
 
   const handleConfirmRemove = async () => {
     if (!pendingRemove) return;
-    try { await removeItem.mutateAsync(pendingRemove.ticker); }
-    finally { setPendingRemove(null); }
+    try {
+      await removeItem.mutateAsync(pendingRemove.ticker);
+    } finally {
+      setPendingRemove(null);
+    }
   };
 
   const handleToggleCompare = (ticker: string) => {
     setCompareSelected((prev) =>
       prev.includes(ticker)
         ? prev.filter((t) => t !== ticker)
-        : prev.length < 5 ? [...prev, ticker] : prev,
+        : prev.length < 5
+          ? [...prev, ticker]
+          : prev,
     );
   };
 
@@ -64,7 +73,7 @@ export default function Watchlist() {
     <div
       data-testid="watchlist-page"
       className="px-4 py-5 text-[var(--text)]"
-      style={{ fontFamily: "var(--font-body)" }}
+      style={{ fontFamily: 'var(--font-body)' }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
@@ -73,7 +82,9 @@ export default function Watchlist() {
         </div>
         <div>
           <h1 className="text-lg font-black text-[var(--text)]">Watchlist</h1>
-          <p className="text-xs text-[var(--text-muted)]">{items.length} empresa{items.length !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-[var(--text-muted)]">
+            {items.length} empresa{items.length !== 1 ? 's' : ''}
+          </p>
         </div>
       </div>
 
@@ -84,31 +95,50 @@ export default function Watchlist() {
         error={addWatchlistErrorLabel(addItem.error)}
         success={addSuccess}
         onAdd={(ticker) => void handleAdd(ticker)}
-        onReset={() => { setAddSuccess(false); addItem.reset(); }}
+        onReset={() => {
+          setAddSuccess(false);
+          addItem.reset();
+        }}
       />
 
       {/* Tabs */}
       <div className="mb-4">
-        <TabGroup tabs={TABS} active={tab} onChange={setTab} variant="pill" data-testid="watchlist-tabs" />
+        <TabGroup
+          tabs={TABS}
+          active={tab}
+          onChange={setTab}
+          variant="pill"
+          data-testid="watchlist-tabs"
+        />
       </div>
 
       {watchlist.isLoading && (
-        <div data-testid="watchlist-loading" className="flex items-center justify-center gap-2 py-16 text-sm text-[var(--text-muted)]">
-          <LoaderCircle size={17} className="animate-spin" />Cargando watchlist…
+        <div
+          data-testid="watchlist-loading"
+          className="flex items-center justify-center gap-2 py-16 text-sm text-[var(--text-muted)]"
+        >
+          <LoaderCircle size={17} className="animate-spin" />
+          Cargando watchlist…
         </div>
       )}
       {watchlist.isError && (
-        <div data-testid="watchlist-error" className="flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/8 px-4 py-4 text-sm text-rose-300">
-          <AlertCircle size={16} />No pudimos cargar tu watchlist.
+        <div
+          data-testid="watchlist-error"
+          className="flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/8 px-4 py-4 text-sm text-rose-300"
+        >
+          <AlertCircle size={16} />
+          No pudimos cargar tu watchlist.
         </div>
       )}
 
       {!watchlist.isLoading && !watchlist.isError && (
         <>
-          {tab === "ver" && (
+          {tab === 'ver' && (
             <div data-testid="watchlist-list">
               {items.length === 0 && (
-                <p className="text-center py-12 text-sm text-[var(--text-muted)]">Tu watchlist está vacía.</p>
+                <p className="text-center py-12 text-sm text-[var(--text-muted)]">
+                  Tu watchlist está vacía.
+                </p>
               )}
               {items.map((item) => (
                 <div
@@ -121,9 +151,13 @@ export default function Watchlist() {
                       {item.ticker.slice(0, 2)}
                     </div>
                     <div>
-                      <p className="font-mono font-black text-sm text-[var(--text)]">{item.ticker}</p>
+                      <p className="font-mono font-black text-sm text-[var(--text)]">
+                        {item.ticker}
+                      </p>
                       {item.companyName && (
-                        <p className="text-xs text-[var(--text-muted)] truncate max-w-[180px]">{item.companyName}</p>
+                        <p className="text-xs text-[var(--text-muted)] truncate max-w-[180px]">
+                          {item.companyName}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -140,7 +174,7 @@ export default function Watchlist() {
             </div>
           )}
 
-          {tab === "comparar" && (
+          {tab === 'comparar' && (
             <div data-testid="watchlist-compare" className="overflow-x-auto">
               <WatchlistCompare
                 items={items}

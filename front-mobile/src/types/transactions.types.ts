@@ -1,7 +1,7 @@
-import type {StockPrice} from "./prices.types.ts";
-import type {PortfolioPosition} from "./portfolio.types.ts";
+import type { StockPrice } from './prices.types.ts';
+import type { PortfolioPosition } from './portfolio.types.ts';
 
-export type TransactionType = "BUY" | "SELL";
+export type TransactionType = 'BUY' | 'SELL';
 
 export type Transaction = {
   id: string;

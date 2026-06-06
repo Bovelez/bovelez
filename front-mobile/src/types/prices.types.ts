@@ -29,7 +29,6 @@ export type UpdatePricesResponse = {
   errors: Record<string, string>;
 };
 
-
 export type TickerSelectProps = {
   prices: StockPrice[];
   selectedPrice: StockPrice | null;

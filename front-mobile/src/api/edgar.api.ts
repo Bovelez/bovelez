@@ -1,14 +1,14 @@
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 import type {
   EdgarCompany,
   EdgarCompanyRecord,
   EdgarFiling,
   EdgarMetrics,
   EdgarSearchResult,
-} from "../types/edgar.types";
+} from '../types/edgar.types';
 
 export async function getEdgarCompanies(): Promise<EdgarCompany[]> {
-  const { data } = await apiClient.get<EdgarCompany[]>("/edgar/companies");
+  const { data } = await apiClient.get<EdgarCompany[]>('/edgar/companies');
   return data;
 }
 
@@ -18,7 +18,7 @@ export async function searchEdgarCompanies(
   const normalizedQuery = query.trim();
   if (!normalizedQuery) return [];
 
-  const { data } = await apiClient.get<EdgarSearchResult[]>("/edgar/search", {
+  const { data } = await apiClient.get<EdgarSearchResult[]>('/edgar/search', {
     params: { q: normalizedQuery },
   });
   return data;

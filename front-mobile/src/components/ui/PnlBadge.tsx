@@ -1,25 +1,24 @@
 interface PnlBadgeProps {
   value: number;
-  format?: "currency" | "percent";
+  format?: 'currency' | 'percent';
   className?: string;
-  "data-testid"?: string;
+  'data-testid'?: string;
 }
-
 
 export function PnlBadge({
   value,
-  format = "currency",
-  className = "",
-  "data-testid": testId,
+  format = 'currency',
+  className = '',
+  'data-testid': testId,
 }: PnlBadgeProps) {
   const isPos = value >= 0;
-  const sign = isPos ? "+" : "";
+  const sign = isPos ? '+' : '';
   const colorClass = isPos
-    ? "bg-emerald-500/15 text-emerald-400"
-    : "bg-rose-500/15 text-rose-400";
+    ? 'bg-emerald-500/15 text-emerald-400'
+    : 'bg-rose-500/15 text-rose-400';
 
   const display =
-    format === "currency"
+    format === 'currency'
       ? `${sign}$${Math.abs(value).toFixed(2)}`
       : `${sign}${value.toFixed(2)}%`;
 
@@ -35,16 +34,16 @@ export function PnlBadge({
 
 export function PnlText({
   value,
-  format = "currency",
-  className = "",
-  "data-testid": testId,
+  format = 'currency',
+  className = '',
+  'data-testid': testId,
 }: PnlBadgeProps) {
   const isPos = value >= 0;
-  const sign = isPos ? "+" : "";
-  const colorClass = isPos ? "text-emerald-400" : "text-rose-400";
+  const sign = isPos ? '+' : '';
+  const colorClass = isPos ? 'text-emerald-400' : 'text-rose-400';
 
   const display =
-    format === "currency"
+    format === 'currency'
       ? `${sign}$${Math.abs(value).toFixed(2)}`
       : `${sign}${value.toFixed(2)}%`;
 

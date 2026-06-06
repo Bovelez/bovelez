@@ -1,17 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { login, me, register } from "../../api/auth.api";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { login, me, register } from '../../api/auth.api';
 import {
   clearToken,
   getToken,
   setToken,
-} from "../../storage/auth/auth.storage";
+} from '../../storage/auth/auth.storage';
 import type {
   AuthResponse,
   LoginCredentials,
   RegisterCredentials,
   User,
-} from "../../types/auth.types";
-import { userKeys } from "./queryKeys";
+} from '../../types/auth.types';
+import { userKeys } from './queryKeys';
 
 export function useUser() {
   return useQuery<User>({

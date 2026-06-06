@@ -1,7 +1,7 @@
-import { Calendar } from "lucide-react";
-import { useLastPriceRun } from "../../hooks/prices/useLastPriceRun";
-import type { EdgarCompanyRecord } from "../../types/edgar.types";
-import type { StockPrice } from "../../types/prices.types";
+import { Calendar } from 'lucide-react';
+import { useLastPriceRun } from '../../hooks/prices/useLastPriceRun';
+import type { EdgarCompanyRecord } from '../../types/edgar.types';
+import type { StockPrice } from '../../types/prices.types';
 
 type Props = {
   company: EdgarCompanyRecord;
@@ -21,22 +21,28 @@ export function StockInfoSidebar({ company, price }: Props) {
         {price ? (
           <>
             <div className="flex justify-between py-1.5 border-b border-[var(--border)]">
-              <span className="text-xs text-[var(--text-muted)]">Último precio</span>
+              <span className="text-xs text-[var(--text-muted)]">
+                Último precio
+              </span>
               <span className="text-xs font-bold font-mono text-[var(--text)]">
                 ${price.price.toFixed(2)}
               </span>
             </div>
             {lastUpdate && (
               <div className="flex justify-between py-1.5">
-                <span className="text-xs text-[var(--text-muted)]">Actualizado</span>
+                <span className="text-xs text-[var(--text-muted)]">
+                  Actualizado
+                </span>
                 <span className="text-xs font-bold font-mono text-[var(--text)]">
-                  {new Date(lastUpdate).toLocaleDateString("es-AR")}
+                  {new Date(lastUpdate).toLocaleDateString('es-AR')}
                 </span>
               </div>
             )}
           </>
         ) : (
-          <p className="text-xs text-[var(--text-muted)]">Sin datos de precio</p>
+          <p className="text-xs text-[var(--text-muted)]">
+            Sin datos de precio
+          </p>
         )}
       </div>
 
@@ -47,8 +53,12 @@ export function StockInfoSidebar({ company, price }: Props) {
             Empresa
           </p>
         </div>
-        <p className="text-xs text-[var(--text-muted)] leading-relaxed">{company.name}</p>
-        <p className="text-xs font-mono text-[var(--text-faint)] mt-1">{company.ticker}</p>
+        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+          {company.name}
+        </p>
+        <p className="text-xs font-mono text-[var(--text-faint)] mt-1">
+          {company.ticker}
+        </p>
       </div>
     </div>
   );

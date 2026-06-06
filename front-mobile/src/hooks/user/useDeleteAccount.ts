@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteAccount } from "../../api/user.api";
-import { clearToken } from "../../storage/auth/auth.storage";
-import type { DeleteAccountCredentials } from "../../types/user.types";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteAccount } from '../../api/user.api';
+import { clearToken } from '../../storage/auth/auth.storage';
+import type { DeleteAccountCredentials } from '../../types/user.types';
 
 export function useDeleteAccount() {
   const queryClient = useQueryClient();

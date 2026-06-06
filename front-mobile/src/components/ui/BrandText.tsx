@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEventHandler, ReactNode } from "react";
+import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 
 interface BrandTextProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface BrandTextProps {
 export function BrandText({
   children,
   fontSize,
-  className = "",
+  className = '',
   style = {},
   italic = true,
   onClick,
@@ -20,14 +20,14 @@ export function BrandText({
   return (
     <span
       onClick={onClick}
-      className={`bg-clip-text text-transparent ${italic ? "italic" : ""} ${className}`}
+      className={`bg-clip-text text-transparent ${italic ? 'italic' : ''} ${className}`}
       style={{
-        fontFamily: "var(--font-display)",
+        fontFamily: 'var(--font-display)',
         fontWeight: 800,
         fontSize,
-        backgroundImage: "var(--gradient-brand)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
+        backgroundImage: 'var(--gradient-brand)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
         ...style,
       }}
     >
