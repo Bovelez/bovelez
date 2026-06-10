@@ -18,7 +18,7 @@ import {
   todayInputValue,
   transactionErrorLabel,
 } from "../../hooks/transactions/utils/transaction.utils";
-import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
+import { formatMoney } from "../../hooks/transactions/utils/formatMoney.ts";
 
 export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: TransactionPanelProps) {
   const [quantity, setQuantity] = useState("1");
@@ -88,7 +88,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
                     Cotización
                   </p>
                   <p className="mt-1 font-mono text-[22px] font-black text-emerald-400">
-                    {selectedPrice ? useMoney(selectedPrice.price) : "—"}
+                    {selectedPrice ? formatMoney(selectedPrice.price) : "—"}
                   </p>
                 </div>
                 {totalCost !== null && totalCost > 0 && (
@@ -97,7 +97,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
                         Costo Total
                       </p>
                       <p className="mt-1 font-mono text-base font-black text-orange-400">
-                        {useMoney(totalCost)}
+                        {formatMoney(totalCost)}
                       </p>
                     </div>
                 )}
@@ -236,7 +236,7 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
                       </span>
                             </div>
                             <span className="font-mono text-[13px] font-bold text-[var(--text)]">
-                      {tx.quantity} <span className="text-[var(--text-faint)]">@</span> {useMoney(tx.price)}
+                      {tx.quantity} <span className="text-[var(--text-faint)]">@</span> {formatMoney(tx.price)}
                     </span>
                           </div>
                       ))}

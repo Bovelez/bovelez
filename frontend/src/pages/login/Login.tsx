@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router";
 import { Eye, EyeOff, TrendingUp } from "lucide-react";
 import { useLoginForm } from "../../hooks/auth/forms/useLoginForm";
 import { AuthPageShell } from "../../components/auth/AuthPageShell";
-import { FormField, inputClass } from "../../components/ui/FormField";
+import { FormField } from "../../components/ui/FormField";
+import { inputClass } from "../../components/ui/inputClass";
 
 function LoginLeftPanel() {
   return (

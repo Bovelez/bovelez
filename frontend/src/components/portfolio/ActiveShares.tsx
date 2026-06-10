@@ -3,8 +3,8 @@ import { ArrowUpRight, BarChart3, BriefcaseBusiness, Clock3, History, TrendingUp
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
 import type { ActiveSharesProps } from "../../types/portfolio.types";
-import { useFormatNumber } from "../../hooks/transactions/utils/useFormatNumber.ts";
-import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
+import { formatNumber } from "../../hooks/transactions/utils/formatNumber.ts";
+import { formatMoney } from "../../hooks/transactions/utils/formatMoney.ts";
 
 export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveSharesProps) {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
@@ -154,16 +154,16 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                           </div>
                         </td>
                         <td data-cy="position-quantity" className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
-                          {useFormatNumber(position.quantity)}
+                          {formatNumber(position.quantity)}
                         </td>
                         <td data-cy="position-avg-cost" className="px-5 py-4 text-center font-mono text-[13px] font-semibold text-white/85">
-                          {useMoney(position.avgCost)}
+                          {formatMoney(position.avgCost)}
                         </td>
                         <td data-cy="position-current-price" className="px-5 py-4 text-center font-mono text-[14px] font-semibold text-[var(--text)]">
-                          {useMoney(position.currentPrice)}
+                          {formatMoney(position.currentPrice)}
                         </td>
                         <td className="px-5 py-4 text-center font-mono text-[14px] font-black text-[var(--text)]">
-                          {useMoney(totalCost)}
+                          {formatMoney(totalCost)}
                         </td>
                         <td data-cy="position-pnl" className="px-5 py-4 text-center">
                           {position.pnl === null ? (

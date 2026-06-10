@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Search, ShieldAlert, X } from "lucide-react";
 import type { TickerSelectProps } from "../../types/prices.types";
-import { useGetTickerSuggestions } from "../../hooks/prices/useGetTickerSuggestions.ts";
-import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
+import { getTickerSuggestions } from "../../hooks/prices/getTickerSuggestions.ts";
+import { formatMoney } from "../../hooks/transactions/utils/formatMoney.ts";
 
 export function PriceTickerSelect({
                                     prices,
@@ -14,7 +14,7 @@ export function PriceTickerSelect({
                                   }: TickerSelectProps) {
   const [query, setQuery] = useState("");
   const suggestions = useMemo(
-      () => useGetTickerSuggestions(prices, query, 8, selectedPrice?.ticker),
+      () => getTickerSuggestions(prices, query, 8, selectedPrice?.ticker),
       [prices, query, selectedPrice?.ticker],
   );
 
@@ -47,7 +47,7 @@ export function PriceTickerSelect({
           {selectedPrice && (
               <div data-cy="ticker-selected-badge" className="flex items-center gap-2 rounded-xl border border-orange-500/20 bg-orange-500/8 px-3 py-1.5">
                 <span className="font-mono text-[13px] font-black text-orange-400">{selectedPrice.ticker}</span>
-                <span className="font-mono text-[13px] font-bold text-[var(--text-muted)]">{useMoney(selectedPrice.price)}</span>
+                <span className="font-mono text-[13px] font-bold text-[var(--text-muted)]">{formatMoney(selectedPrice.price)}</span>
               </div>
           )}
         </div>
@@ -139,7 +139,7 @@ export function PriceTickerSelect({
                 </span>
                     <span className="flex shrink-0 items-center gap-2.5">
                   <span className="font-mono text-[14px] font-bold text-[var(--text)]">
-                    {useMoney(price.price)}
+                    {formatMoney(price.price)}
                   </span>
                       {isSelected && (
                           <CheckCircle2 size={16} className="text-orange-400" />

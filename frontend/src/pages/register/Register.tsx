@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { Eye, EyeOff, TrendingUp, Check } from "lucide-react";
 import { useRegisterForm } from "../../hooks/auth/forms/useRegisterForm";
 import { AuthPageShell } from "../../components/auth/AuthPageShell";
-import { FormField, inputClass } from "../../components/ui/FormField";
+import { FormField } from "../../components/ui/FormField";
+import { inputClass } from "../../components/ui/inputClass";
 
 const FEATURES = [
   "Análisis de métricas SEC en tiempo real",

@@ -1,11 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-
-interface AppContextValue {
-  lastPriceUpdate: string;
-  refreshPrices: () => void;
-}
-
-const AppContext = createContext<AppContextValue | null>(null);
+import { useState, useEffect, type ReactNode } from "react";
+import { AppContext } from "./app-context";
 
 function formatUpdateTime(date: Date): string {
   return date.toLocaleTimeString("es-AR", {
@@ -36,10 +30,4 @@ export function AppProvider({ children }: { children: ReactNode }) {
       {children}
     </AppContext.Provider>
   );
-}
-
-export function useApp(): AppContextValue {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useApp must be used inside <AppProvider>");
-  return ctx;
 }

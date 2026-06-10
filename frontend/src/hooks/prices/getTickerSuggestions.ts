@@ -1,6 +1,6 @@
 import type {StockPrice} from "../../types/prices.types.ts";
 
-export function useGetTickerSuggestions(
+export function getTickerSuggestions(
     prices: StockPrice[],
     rawQuery: string,
     suggestionLimit: number = 8,

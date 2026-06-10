@@ -8,7 +8,10 @@ import { byDateDesc, type TypeFilter } from "./transactions.utils";
 
 export default function Transactions() {
   const transactionsQuery = useAllTransactions();
-  const transactions = transactionsQuery.data ?? [];
+  const transactions = useMemo(
+    () => transactionsQuery.data ?? [],
+    [transactionsQuery.data],
+  );
 
   const [tickerFilter, setTickerFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");

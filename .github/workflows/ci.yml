@@ -80,6 +80,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint:ci
+
       - name: Build frontend
         run: npm run build
 
@@ -112,6 +115,9 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint:ci
 
       - name: Start integration test DB
         run: npm run integration:docker:up

@@ -13,8 +13,8 @@ import {
 import { useTickerTransactions } from "../../hooks/transactions/useTickerTransactions";
 import { useSellTransaction } from "../../hooks/transactions/useSellTransaction";
 import type { TickerTransactionsDialogProps } from "../../types/transactions.types";
-import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
-import { useFormatNumber } from "../../hooks/transactions/utils/useFormatNumber.ts";
+import { formatMoney } from "../../hooks/transactions/utils/formatMoney.ts";
+import { formatNumber } from "../../hooks/transactions/utils/formatNumber.ts";
 import {
   byLatestTransaction,
   formatDate,
@@ -107,9 +107,9 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
               {position && (
                   <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
                     {[
-                      { label: "Cantidad", value: useFormatNumber(position.quantity), color: "text-[var(--text)]" },
-                      { label: "Costo Prom.", value: useMoney(position.avgCost), color: "text-[var(--text)]" },
-                      { label: "Total Operado", value: useMoney(totalTraded), color: "text-orange-400" },
+                      { label: "Cantidad", value: formatNumber(position.quantity), color: "text-[var(--text)]" },
+                      { label: "Costo Prom.", value: formatMoney(position.avgCost), color: "text-[var(--text)]" },
+                      { label: "Total Operado", value: formatMoney(totalTraded), color: "text-orange-400" },
                     ].map(({ label, value, color }) => (
                         <div
                             key={label}
@@ -180,7 +180,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                           Estimado
                         </p>
                         <p className="mt-1 truncate font-mono text-sm font-black text-rose-200">
-                          {useMoney(estimatedProceeds)}
+                          {formatMoney(estimatedProceeds)}
                         </p>
                       </div>
                     </div>
@@ -213,7 +213,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
 
                     {parsedSellQuantity > availableQuantity && (
                         <p className="mt-3 text-xs font-semibold text-rose-200">
-                          Solo tenés {useFormatNumber(availableQuantity)} acciones disponibles.
+                          Solo tenés {formatNumber(availableQuantity)} acciones disponibles.
                         </p>
                     )}
 
@@ -287,7 +287,7 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                         </span>
                               <div>
                                 <p className="text-[14px] font-black text-[var(--text)]">
-                                  {isBuy ? "Compra" : "Venta"} · {useFormatNumber(transaction.quantity)} acc.
+                                  {isBuy ? "Compra" : "Venta"} · {formatNumber(transaction.quantity)} acc.
                                 </p>
                                 <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
                                   <CalendarDays size={11} />
@@ -300,13 +300,13 @@ export function TickerTransactionsDialog({ open, position, onOpenChange }: Ticke
                               <div>
                                 <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[var(--text-faint)]">Precio</p>
                                 <p className="mt-1 font-mono text-[14px] font-bold text-[var(--text)]">
-                                  {useMoney(transaction.price)}
+                                  {formatMoney(transaction.price)}
                                 </p>
                               </div>
                               <div>
                                 <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[var(--text-faint)]">Total</p>
                                 <p className="mt-1 font-mono text-[14px] font-black text-orange-400">
-                                  {useMoney(total)}
+                                  {formatMoney(total)}
                                 </p>
                               </div>
                             </div>
