@@ -2,17 +2,20 @@ import { useState } from "react";
 import { ArrowUpRight, BarChart3, BriefcaseBusiness, Clock3, History, TrendingUp, TrendingDown } from "lucide-react";
 import { PnlBadge, PnlText } from "../ui/PnlBadge";
 import { TickerTransactionsDialog } from "../transactions/TickerTransactionsDialog";
-import type { ActiveSharesProps } from "../../types/portfolio.types";
+import type { ActiveSharesProps, PortfolioPosition } from "../../types/portfolio.types";
 import { useFormatNumber } from "../../hooks/transactions/utils/useFormatNumber.ts";
 import { useMoney } from "../../hooks/transactions/utils/useMoney.ts";
 
 export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveSharesProps) {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [selectedPositionSnapshot, setSelectedPositionSnapshot] =
+      useState<PortfolioPosition | null>(null);
   const positions = portfolio?.positions ?? [];
   const pnl = portfolio?.totalPnl ?? 0;
   const pnlPercent = portfolio?.totalPnlPercent ?? 0;
   const selectedPosition = selectedTicker
-      ? positions.find((p) => p.ticker === selectedTicker) ?? null
+      ? positions.find((p) => p.ticker === selectedTicker) ??
+      selectedPositionSnapshot
       : null;
   const tableHeaders = [
     { label: "Ticker", className: "text-center" },
@@ -125,11 +128,15 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
                           data-ticker={position.ticker}
                           role="button"
                           tabIndex={0}
-                          onClick={() => setSelectedTicker(position.ticker)}
+                          onClick={() => {
+                            setSelectedTicker(position.ticker);
+                            setSelectedPositionSnapshot(position);
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
                               setSelectedTicker(position.ticker);
+                              setSelectedPositionSnapshot(position);
                             }
                           }}
                           className="group cursor-pointer border-b border-white/[0.03] transition-colors duration-150 last:border-0 hover:bg-white/[0.03] focus-visible:bg-white/[0.03] focus-visible:outline-none"
@@ -210,7 +217,12 @@ export function ActiveShares({ portfolio, isLoading, errorMessage }: ActiveShare
         <TickerTransactionsDialog
             open={Boolean(selectedPosition)}
             position={selectedPosition}
-            onOpenChange={(open) => { if (!open) setSelectedTicker(null); }}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedTicker(null);
+                setSelectedPositionSnapshot(null);
+              }
+            }}
         />
       </section>
   );

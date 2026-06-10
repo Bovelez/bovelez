@@ -38,9 +38,11 @@ export function TransactionPanel({ selectedPrice, lastPriceRunFinishedAt }: Tran
     buyTransaction.reset();
     sellTransaction.reset();
     try {
-      if (type === "BUY") await buyTransaction.mutateAsync(input);
-      else await sellTransaction.mutateAsync(input);
-      setLastAction(type);
+      const transaction =
+        type === "BUY"
+          ? await buyTransaction.mutateAsync(input)
+          : await sellTransaction.mutateAsync(input);
+      setLastAction(transaction.type);
       setQuantity("1");
     } catch {
       setLastAction(null);

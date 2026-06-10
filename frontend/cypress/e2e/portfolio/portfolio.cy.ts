@@ -36,7 +36,7 @@ describe("Portfolio - E2E flows", () => {
 
         cy.get("[data-cy=ticker-dialog]").within(() => {
             cy.get("[data-cy=ticker-dialog-sell-quantity]").clear().type("3");
-            cy.get("[data-cy=ticker-dialog-sell-btn]").click();
+            cy.get("[data-cy=ticker-dialog-sell-btn]").should("not.be.disabled").click();
             cy.get("[data-cy=ticker-dialog-sell-success]", { timeout: 10000 }).should("be.visible");
         });
 
@@ -44,6 +44,25 @@ describe("Portfolio - E2E flows", () => {
         cy.visitPortfolio();
 
         cy.get("[data-cy=active-shares]").should("not.contain.text", "TSLA");
+    });
+
+    it("shows the correct success message when selling from the transaction panel", () => {
+        cy.get("[data-cy=ticker-search]").type("MSFT");
+        cy.get("[data-cy=ticker-row][data-ticker=MSFT]").click();
+        cy.get("[data-cy=transaction-quantity]").clear().type("2");
+        cy.get("[data-cy=transaction-buy-btn]").click();
+
+        cy.get("[data-cy=transaction-success]", { timeout: 10000 })
+            .should("be.visible")
+            .and("contain.text", "Compra");
+
+        cy.get("[data-cy=transaction-quantity]").clear().type("1");
+        cy.get("[data-cy=transaction-sell-btn]").click();
+
+        cy.get("[data-cy=transaction-success]", { timeout: 10000 })
+            .should("be.visible")
+            .and("contain.text", "Venta")
+            .and("not.contain.text", "Compra");
     });
 
     it("buy and sell transactions appear in the transactions page", () => {
@@ -60,7 +79,7 @@ describe("Portfolio - E2E flows", () => {
 
         cy.get("[data-cy=ticker-dialog]").within(() => {
             cy.get("[data-cy=ticker-dialog-sell-quantity]").clear().type("1");
-            cy.get("[data-cy=ticker-dialog-sell-btn]").click();
+            cy.get("[data-cy=ticker-dialog-sell-btn]").should("not.be.disabled").click();
             cy.get("[data-cy=ticker-dialog-sell-success]", { timeout: 10000 }).should("be.visible");
         });
         cy.get("[data-cy=ticker-dialog-close]").click();

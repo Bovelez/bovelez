@@ -26,6 +26,8 @@ export default function Portfolio() {
   const prices = pricesQuery.data ?? [];
   const [selectedPrice, setSelectedPrice] = useState<StockPrice | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [selectedPositionSnapshot, setSelectedPositionSnapshot] =
+    useState<PortfolioPosition | null>(null);
   const [showTerminal, setShowTerminal] = useState(false);
 
   const portfolioError = useErrorLabel(portfolioQuery.error);
@@ -37,7 +39,8 @@ export default function Portfolio() {
   const isPnlPositive = totalPnl >= 0;
 
   const selectedPosition: PortfolioPosition | null = selectedTicker
-    ? (positions.find((p) => p.ticker === selectedTicker) ?? null)
+    ? (positions.find((p) => p.ticker === selectedTicker) ??
+      selectedPositionSnapshot)
     : null;
 
   return (
@@ -174,7 +177,10 @@ export default function Portfolio() {
                 data-testid={`position-row-${position.ticker}`}
                 role="button"
                 tabIndex={0}
-                onClick={() => setSelectedTicker(position.ticker)}
+                onClick={() => {
+                  setSelectedTicker(position.ticker);
+                  setSelectedPositionSnapshot(position);
+                }}
                 className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border)] last:border-0 active:bg-[var(--surface-2)]"
               >
                 <div className="flex items-center gap-3">
@@ -264,7 +270,10 @@ export default function Portfolio() {
         open={Boolean(selectedPosition)}
         position={selectedPosition}
         onOpenChange={(open) => {
-          if (!open) setSelectedTicker(null);
+          if (!open) {
+            setSelectedTicker(null);
+            setSelectedPositionSnapshot(null);
+          }
         }}
       />
     </div>
