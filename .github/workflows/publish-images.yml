@@ -6,7 +6,6 @@ name: Publish images
 
 on:
   release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
