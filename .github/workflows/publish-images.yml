@@ -3,9 +3,11 @@ name: Publish images
 # Build and push each service image to GHCR whenever a GitHub Release is
 # published. semantic-release (release.yml) creates the release, which fires
 # this `published` event with github.ref pointing at the new vX.Y.Z tag.
+
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
