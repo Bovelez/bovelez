@@ -5,9 +5,9 @@ name: Publish images
 # this `published` event with github.ref pointing at the new vX.Y.Z tag.
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 permissions:
